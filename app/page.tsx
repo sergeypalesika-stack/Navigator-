@@ -4,47 +4,447 @@ import { useState, useMemo, useEffect } from "react"
 import * as XLSX from "xlsx"
 
 interface Voucher {
-  vId: string
-  hotel: string
-  guide: string
-  pickup: string
-  flightDate: string
-  flightTime: string
-  flightNo: string
-  tourists: string[]
-  phones: string[]
-  departureDate: string
+  vId: string; hotel: string; guide: string; pickup: string
+  flightDate: string; flightTime: string; flightNo: string
+  tourists: string[]; phones: string[]; departureDate: string
+}
+
+interface Excursion {
+  key: string; vId: string; date: string; excursionName: string
+  excursionType: ExcursionType; hotel: string; room: string
+  tourists: { name: string; phone: string }[]
+  pickup: string; adl: number; chd: number; inf: number; guide: string; cooperateStaff: string
+}
+
+type ExcursionType = "sea"|"evening"|"jetski"|"flight"|"bangkok"|"twoday"|"cheolan"|"land"|"city"|"mantra"|"dolcevita"|"waterpark"|"spa"|"vip"|"hanuman"|"fishing"|"cabaret"
+
+function classifyExcursion(name: string): ExcursionType {
+  const n = name.toLowerCase()
+  if (n.includes("andamanda")||n.includes("аквапарк")||n.includes("aqua")||n.includes("water park")) return "waterpark"
+  if (n.includes("simon")||n.includes("cabaret")||n.includes("кабаре")) return "cabaret"
+  if (n.includes("oasis")||n.includes("оазис")) return "spa"
+  if (n.includes("hanuman")||n.includes("хануман")) return "hanuman"
+  if (n.includes("fishing")||n.includes("рыбалк")) return "fishing"
+  if (n.includes("mantra")||n.includes("мантра")) return "mantra"
+  if (n.includes("dolce vita")||n.includes("дольче вита")) return "dolcevita"
+  if (n.includes("carnival")||n.includes("siam niramit")||n.includes("moonlight")) return "evening"
+  if (n.includes("jet ski")||n.includes("wave rider")||n.includes("гидроцикл")) return "jetski"
+  if (n.includes("bangkok")||n.includes("бангкок")) return "bangkok"
+  if (n.includes("singapore")||n.includes("malaysia")||n.includes("cambodia")||n.includes("сингапур")||n.includes("малайзия")||n.includes("камбоджа")) return "flight"
+  if (n.includes("cheo lan")||n.includes("cheow lan")||n.includes("чео лан")||n.includes("jungle escape")||n.includes("побег из джунглей")) return "cheolan"
+  if (n.includes("2/1")||n.includes("2.1")||n.includes("star island")||n.includes("звёздн")) return "twoday"
+  if (n.includes("vip")||n.includes("вип")) return "vip"
+  if (n.includes("city")||n.includes("сити")||n.includes("wonders")) return "city"
+  if (n.includes("safari")||n.includes("сафари")||n.includes("phang")||n.includes("пхангнга")||n.includes("пхангн")||n.includes("avatar")||n.includes("аватар")||n.includes("discovery")||n.includes("asia safari")||n.includes("удивительн")||n.includes("amazing")) return "land"
+  return "sea"
+}
+
+const TYPE_META: Record<ExcursionType,{label:string;icon:string;color:string;border:string;bg:string;noTransfer?:boolean}> = {
+  sea:       {label:"Морские",         icon:"🚢",color:"#38bdf8",border:"#1e3f6a",bg:"#0c2340"},
+  evening:   {label:"Вечерние шоу",    icon:"🌙",color:"#c084fc",border:"#6b21a8",bg:"#2d1b4e"},
+  jetski:    {label:"Гидроциклы",      icon:"🏄",color:"#4ade80",border:"#16a34a",bg:"#1a2e1a"},
+  flight:    {label:"Перелётные",      icon:"✈️",color:"#fbbf24",border:"#d97706",bg:"#2d2200"},
+  bangkok:   {label:"Бангкок",         icon:"🏙️",color:"#f97316",border:"#c2410c",bg:"#2d1500"},
+  twoday:    {label:"Двухдневные",     icon:"🏕️",color:"#fb923c",border:"#ea580c",bg:"#2d1b0e"},
+  cheolan:   {label:"Чео Лан / Jungle",icon:"🌿",color:"#86efac",border:"#16a34a",bg:"#0d2010"},
+  land:      {label:"Наземные",        icon:"🚌",color:"#2dd4bf",border:"#0d9488",bg:"#0d2422"},
+  city:      {label:"Сити-тур",        icon:"🏛️",color:"#a78bfa",border:"#7c3aed",bg:"#1e1040"},
+  mantra:    {label:"Мантра Спа",      icon:"💆",color:"#f9a8d4",border:"#db2777",bg:"#2d0f1f"},
+  dolcevita: {label:"Dolce Vita",      icon:"🌺",color:"#fb7185",border:"#e11d48",bg:"#2d0a14"},
+  waterpark: {label:"Аквапарк",        icon:"🌊",color:"#67e8f9",border:"#0891b2",bg:"#0a2030",noTransfer:true},
+  spa:       {label:"Spa Oasis",       icon:"🧖",color:"#d8b4fe",border:"#9333ea",bg:"#200d35"},
+  vip:       {label:"VIP тур",         icon:"👑",color:"#fde68a",border:"#d97706",bg:"#2d1f00"},
+  hanuman:   {label:"Мир Ханумана",    icon:"🐒",color:"#bbf7d0",border:"#15803d",bg:"#0a1f10"},
+  fishing:   {label:"Рыбалка",         icon:"🎣",color:"#7dd3fc",border:"#0369a1",bg:"#0a1f2d"},
+  cabaret:   {label:"Simon Cabaret",   icon:"💃",color:"#fca5a5",border:"#dc2626",bg:"#2d0a0a",noTransfer:true},
+}
+
+function generateExcursionMessage(e: Excursion): string {
+  const p = e.pickup && e.pickup !== "—" ? e.pickup : "уточните у гида"
+  const msgs: Record<ExcursionType,string> = {
+    sea:`Уважаемые гости!
+Напоминаю, что завтра у вас запланирована морская экскурсия.
+
+⏰ Пожалуйста, будьте готовы в ${p} — ожидайте трансфер в лобби отеля.
+
+📦 Совет: закажите Breakfast box на ресепшене сегодня — лёгкий завтрак в порту будет кстати.
+
+🎒 Что взять с собой:
+• купальник / плавки
+• полотенце
+• солнцезащитный крем 🧴
+• головной убор 🧢
+• очки от солнца 🕶️
+• немного наличных для личных расходов
+• зарядку для телефона — будет что снимать! 📸
+
+⚠️ Беременным нельзя на морские экскурсии!
+
+Если транспорт задерживается, обратитесь на горячую линию:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаю вам приятной поездки и отличного отдыха! 🌴🚤☀️`,
+
+    dolcevita:`Дорогие гости!
+
+Завтра вас ждёт увлекательная морская экскурсия по островам — живописные пейзажи, бирюзовая вода, белоснежный песок и масса впечатлений! 🏝️🌊
+
+⏰ Время выезда: ${p}
+📍 Просим быть у лобби за 10 минут до выезда.
+
+☀️ Что важно взять с собой:
+• купальник / плавки (можно надеть под одежду заранее)
+• сменная лёгкая одежда
+• полотенце
+• солнцезащитный крем и головной убор
+• удобная обувь, которую легко снять (сланцы, сандалии)
+• хорошее настроение и заряженный телефон — будет что снимать! 📸
+
+Если транспорт задерживается, обратитесь на горячую линию:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаю вам приятной поездки! 🌴`,
+
+    evening:`Добрый вечер!
+Завтра выезд на вечернее шоу в ${p}.
+
+С собой рекомендуем:
+• лёгкую кофту или рубашку (в минивэне, ресторане и зале работает кондиционер)
+• деньги на личные расходы (сувениры, коктейли, алкоголь)
+• фотоаппарат — на территории можно фотографировать (во время шоу съёмка запрещена)
+
+По прибытии:
+Покажите билеты в кассе — получите посадочные места и пропуск в ресторан.
+Далее — свободное время для прогулки и ужина.
+
+После шоу будет возможность сделать фото.
+На выходе сотрудники направят вас к минивэнам — трансфер в отель.
+
+Если трансфер задерживается более 10 минут:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаю приятного просмотра и ярких впечатлений!`,
+
+    jetski:`Добрый день!
+Напоминаем, что завтра выезд на экскурсию на гидроциклах в ${p}.
+
+✔️ Пожалуйста, возьмите с собой:
+• купальные вещи
+• полотенце
+• солнцезащиту (крем, очки)
+• воду
+• резиновую / водостойкую обувь (по желанию)
+• сухую одежду для переодевания
+• телефон в водонепроницаемом чехле (по желанию)
+
+❗ Важно:
+• Будьте готовы на ресепшн за 10 минут до выезда
+• Не берите дорогие вещи и украшения
+• Документы и деньги оставьте в сейфе / отеле
+
+Хорошей прогулки и ярких эмоций! 🌊💙
+
+Если транспорт задерживается:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаем вам приятной поездки! 🌴✨`,
+
+    flight:`Добрый вечер!
+Выезд на экскурсию состоится в ${p}.
+Прошу вас не опаздывать, время ожидания трансфера — не более 10 минут.
+
+Рекомендую взять с собой:
+• подходящую обувь
+• головные уборы
+• солнцезащитные средства
+• деньги на личные расходы
+• тёплую одежду (в автобусе / аэропорту кондиционер)
+• загранпаспорт ОРИГИНАЛ ⚠️
+• закажите накануне на ресепшене lunch box / breakfast box
+
+Если транспорт задерживается, обратитесь на горячую линию:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаю вам приятной поездки.`,
+
+    bangkok:`Добрый вечер!
+Выезд на экскурсию в Бангкок состоится в ${p}.
+Прошу вас не опаздывать, время ожидания трансфера — не более 10 минут.
+
+Рекомендую взять с собой:
+• подходящую обувь
+• головные уборы
+• солнцезащитные средства
+• деньги на личные расходы
+• тёплую одежду (в автобусе / аэропорту кондиционер)
+• загранпаспорт ОРИГИНАЛ ⚠️
+• закажите накануне на ресепшене lunch box / breakfast box
+
+Если транспорт задерживается, обратитесь на горячую линию:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаю вам приятной поездки.`,
+
+    twoday:`Добрый вечер!
+Выезд на двухдневную экскурсию состоится в ${p}.
+Прошу вас не опаздывать, время ожидания — не более 10 минут.
+
+Рекомендую взять с собой:
+• подходящую обувь
+• головные уборы
+• солнцезащитные средства
+• деньги на личные расходы
+• купальные принадлежности
+• тёплую одежду (в автобусе кондиционер)
+• сменную одежду и средства личной гигиены (overnight) 🧳
+• загранпаспорт ОРИГИНАЛ ⚠️
+• закажите накануне на ресепшене lunch box / breakfast box
+
+Если транспорт задерживается, обратитесь на горячую линию:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаю вам приятной поездки.`,
+
+    cheolan:`Добрый день!
+Завтра состоится выезд на двухдневную экскурсию на озеро Чео Лан.
+
+⏰ Время выезда: ${p}
+⛵ Продолжительность: 2 дня / 1 ночь
+
+Что важно взять с собой:
+• фото паспорта (обязательно, проверяется на входе в заповедник) ⚠️
+• купальные принадлежности
+• полотенце
+• удобную одежду и обувь (шорты, футболка, сандалии / кроссовки)
+• лёгкую кофту или накидку (вечером может быть прохладно)
+• солнцезащитные средства (крем, очки, головной убор)
+• репеллент от насекомых
+• личные средства гигиены
+• деньги на личные расходы
+• заряженный телефон, пауэрбанк, фонарик
+• фотоаппарат — пейзажи будут волшебные! 📸
+• запасной комплект одежды
+
+Рекомендации:
+• завтрак лучше заказать заранее на ресепшене (с собой)
+• не берите тяжёлые чемоданы — достаточно небольшого рюкзака
+
+Если транспорт задерживается, обратитесь на горячую линию:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаю вам приятной поездки.`,
+
+    land:`Добрый вечер!
+Завтра у вас запланирована экскурсия, выезд состоится в ${p}.
+Просим быть готовы заранее — время ожидания не более 10 минут.
+
+🔹 Что рекомендуется взять с собой:
+• удобную обувь (сланцы, сандалии, кроксы)
+• головной убор
+• солнцезащитные средства
+• купальные принадлежности
+• тёплую кофту (в дороге кондиционер)
+• наличные на личные расходы
+• заранее закажите на ресепшене завтрак / lunch box
+
+Если транспорт задерживается:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Хорошей дороги и ярких впечатлений! 🌿😊`,
+
+    city:`Добрый вечер!
+Завтра выезд на обзорную экскурсию состоится в ${p}.
+Прошу вас не опаздывать, время ожидания — не более 10 минут.
+
+Рекомендую взять с собой:
+• подходящую обувь
+• головные уборы
+• питьевую воду
+• перекус (питание не включено)
+• солнцезащитные средства
+• деньги на личные расходы
+• тёплую одежду (в автобусе кондиционер)
+• во время экскурсии вы будете посещать храм — плечи и колени должны быть прикрыты 🙏
+• носки (перед храмом необходимо разуться)
+
+Если транспорт задерживается, обратитесь на горячую линию:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаю вам приятной поездки.`,
+
+    mantra:`Добрый вечер!
+Завтра выезд на экскурсию состоится в ${p}.
+
+📌 Рекомендуем взять с собой:
+• удобную обувь (сандалии или сланцы)
+• головные уборы
+• солнцезащитные средства
+• полотенца и купальные принадлежности
+• деньги на личные расходы
+
+💆 В спа полотенца предоставляются, но при получении берётся депозит 300 бат (возвращается 200 бат).
+
+Если транспорт задерживается:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаем вам приятной поездки и отличного отдыха! 🌴✨`,
+
+    waterpark:`Уважаемые гости!
+
+Завтра у вас запланировано посещение аквапарка Andamanda Phuket.
+Входные билеты у вас уже есть.
+
+📍 Адрес: Andamanda Phuket, Kathu
+⏰ Время работы: ежедневно с 10:00 до 19:00
+🎫 Ваши билеты: предъявите на входе (электронные или бумажные).
+
+🚖 Внимание! Трансфер не предоставляется — добраться необходимо самостоятельно (рекомендуем такси / Grab / Bolt).
+
+ℹ️ Полезная информация:
+• На территории есть камеры хранения, рестораны и кафе
+• Разрешён вход только в специальной купальной одежде
+• Полотенца можно взять с собой либо арендовать на месте
+
+В случае вопросов — горячая линия:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаем вам ярких впечатлений и отличного отдыха! 🌊`,
+
+    spa:`Добрый вечер!
+Завтра состоится выезд в SPA-центр Oasis.
+
+⏰ Время отправления: ${p}
+📍 Место встречи: ресепшн отеля
+
+Всё необходимое там предоставят.
+Возьмите деньги на дополнительные услуги и чаевые.
+
+Если транспорт задерживается, звоните на горячую линию:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+✨ Желаем вам приятного отдыха и полного релакса!`,
+
+    vip:`Добрый вечер!
+Выезд на экскурсию завтра состоится в ${p}.
+
+Рекомендую взять с собой:
+• подходящую обувь
+• головные уборы
+• питьевую воду
+• солнцезащитные средства
+• деньги на личные расходы (обед и сувениры)
+• тёплую одежду (дорога в авто под кондиционером)
+
+Если транспорт задерживается, обратитесь на горячую линию:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаю вам приятной поездки.`,
+
+    hanuman:`Добрый день!
+Завтра у вас увлекательное приключение — экскурсия в «Мир Ханумана»!
+
+⏰ Время выезда из отеля: ${p}
+
+🎒 Что взять с собой:
+• удобную обувь (лучше кроссовки или сандалии, минимум — кроксы)
+• головной убор — обязательно
+• лёгкую и не новую одежду (шорты + футболка, возможно попадание масла с роликовой системы)
+• деньги на личные расходы (напитки, сувениры)
+
+🗺️ По прибытии в парк:
+1. Подходите на ресепшн, получите браслет по вашему пакету.
+2. Вас ждут яркие приключения:
+   ✧ Полёт по Zip-line
+   ✧ Прогулка по Sky Walk
+   ✧ Спуск на Roller
+   ✧ Вкусный обед
+3. После каждого этапа возвращайтесь на ресепшн — сотрудники подскажут что дальше.
+
+🚐 По окончании программы вас проводят к трансферу.
+
+Если транспорт задерживается, обратитесь на горячую линию:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+🎉 Желаем незабываемых эмоций и лёгкого полёта!`,
+
+    fishing:`Добрый вечер!
+Завтра выезд на рыбалку.
+
+⏰ Время выезда: ${p}
+📍 Место сбора: ресепшн отеля (будьте за 10 минут до выезда)
+
+Что взять с собой:
+• удобная обувь (сланцы / сандалии)
+• головной убор, солнцезащитные средства
+• полотенце, купальные принадлежности
+
+Важно: лодка оснащена спасательными жилетами, рыболовные снасти предоставляются.
+
+Если транспорт задерживается, свяжитесь с горячей линией:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Хорошей рыбалки и отличного дня! 🎣`,
+
+    cabaret:`Уважаемые гости!
+
+Завтра у вас запланировано посещение кабаре-шоу Simon Cabaret.
+Входные билеты у вас уже есть.
+
+📍 Место проведения: Simon Cabaret, Patong
+⏰ Начало шоу: 18:00 (прибудьте минимум за 20–30 минут для обмена билетов)
+🎫 Ваши билеты: предоставьте на входе.
+
+🚖 Внимание! Трансфер не предоставляется — добраться необходимо самостоятельно (рекомендуем такси / Bolt / inDrive).
+
+Для вашего удобства:
+• Длительность шоу около 1 часа
+• Фотосессия с артистами после шоу (оплачивается дополнительно)
+
+В случае вопросов — горячая линия:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаем вам приятного вечера и незабываемых впечатлений! 💃`,
+  }
+  return encodeURIComponent(msgs[e.excursionType])
 }
 
 function formatExcelValue(v: any): string {
-  if (v === undefined || v === null || String(v).trim() === "" || String(v).trim() === "0") return ""
-  if (typeof v === "number") {
-    if (v > 0 && v < 1) {
-      const totalSeconds = Math.round(v * 24 * 3600)
-      const hours = Math.floor(totalSeconds / 3600)
-      const minutes = Math.floor((totalSeconds % 3600) / 60)
-      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
-    }
-    if (v >= 1 && v < 3) {
-      const frac = v % 1
-      const totalSeconds = Math.round(frac * 24 * 3600)
-      const hours = Math.floor(totalSeconds / 3600)
-      const minutes = Math.floor((totalSeconds % 3600) / 60)
-      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
-    }
-    if (v > 40000) {
-      const date = XLSX.SSF.parse_date_code(v)
-      return `${String(date.d).padStart(2, "0")}.${String(date.m).padStart(2, "0")}.${date.y}`
-    }
+  if (v===undefined||v===null||String(v).trim()===""||String(v).trim()==="0") return ""
+  if (typeof v==="number") {
+    if (v>0&&v<1) { const s=Math.round(v*86400); return `${String(Math.floor(s/3600)).padStart(2,"0")}:${String(Math.floor((s%3600)/60)).padStart(2,"0")}` }
+    if (v>=1&&v<3) { const f=v%1,s=Math.round(f*86400); return `${String(Math.floor(s/3600)).padStart(2,"0")}:${String(Math.floor((s%3600)/60)).padStart(2,"0")}` }
+    if (v>40000) { const d=XLSX.SSF.parse_date_code(v); return `${String(d.d).padStart(2,"0")}.${String(d.m).padStart(2,"0")}.${d.y}` }
   }
-  const s = String(v).trim()
-  const timeMatch = s.match(/^(\d{1,2}):(\d{2})$/)
-  if (timeMatch) return `${String(timeMatch[1]).padStart(2, "0")}:${timeMatch[2]}`
-  return s
+  const s=String(v).trim()
+  // Strip time from date strings like "21.03.2026 5:10:00 AM"
+  const dateWithTime=s.match(/^(\d{2}\.\d{2}\.\d{4})\s+.*/)
+  if (dateWithTime) return dateWithTime[1]
+  // Strip seconds from datetime strings like "21.03.2026 5:10:00 AM" format 2
+  const isoDate=s.match(/^(\d{1,2}\.\d{1,2}\.\d{4})/)
+  if (isoDate && s.length > 10) return isoDate[1]
+  const m=s.match(/^(\d{1,2}):(\d{2})$/)
+  return m ? `${String(m[1]).padStart(2,"0")}:${m[2]}` : s
 }
 
-function generateMessage(v: Voucher): string {
-  const text = `🛫🛫 ИНФОРМАЦИЯ О ВЫЕЗДЕ В АЭРОПОРТ
+function generateTransferMessage(v: Voucher): string {
+  return encodeURIComponent(`🛫 ИНФОРМАЦИЯ О ВЫЕЗДЕ В АЭРОПОРТ
 
 🗓 ДАТА ВЫЕЗДА ИЗ ОТЕЛЯ: ${v.departureDate}
 ⏰ ВРЕМЯ СБОРА (PICK UP): ${v.pickup}
@@ -59,397 +459,380 @@ function generateMessage(v: Voucher): string {
 ---
 
 ✅ УВАЖАЕМЫЕ ГОСТИ!
+Пожалуйста, подготовьтесь к выезду заранее.
 
-Пожалуйста, подготовьтесь к выезду заранее:
-
-1. Подойдите на ресепшн заблаговременно (за 15-20 минут), чтобы:
-• сдать номер;
-• оплатить все счета за услуги отеля.
-
+🕒 На ресепшн:
+Сдайте номер (стандартный выезд до 12:00. При позднем вылете уточните возможность продления заранее).
+Оплатите счета, если пользовались дополнительными услугами отеля.
 Сделайте это до прибытия транспорта, чтобы не задерживать трансфер.
 
----
+📑 Перед выходом проверьте наличие:
+Паспортов и авиабилетов;
+Всех личных вещей и багажа.
 
-☎️ ГОРЯЧАЯ ЛИНИЯ:
-📞 +66 92 249 49 49
+☎️ В случае задержки транспорта (более 10 минут):
+Свяжитесь с нашей горячей линией:
+📞 Звонки: +66 92 249 49 49
 💬 WhatsApp / Telegram: +66 92 279 09 90
 
-✨ Желаем вам приятного полёта!`
-  return encodeURIComponent(text)
+✨ Желаем вам приятного полёта и надеемся вновь увидеть вас в Таиланде!`)
 }
 
 export default function Page() {
-  const [data, setData] = useState<Voucher[]>([])
-  const [notifiedVouchers, setNotifiedVouchers] = useState<Record<string, boolean>>({})
-  const [touristSearch, setTouristSearch] = useState("")
-  const [selectedGuide, setSelectedGuide] = useState("")
-  const [dark, setDark] = useState(true)
-  const [collapsedDates, setCollapsedDates] = useState<Record<string, boolean>>({})
-  const [fileName, setFileName] = useState("")
+  const [tab,setTab]=useState<"transfers"|"excursions">("transfers")
+  const [transferData,setTransferData]=useState<Voucher[]>([])
+  const [notifiedVouchers,setNotifiedVouchers]=useState<Record<string,boolean>>({})
+  const [touristSearch,setTouristSearch]=useState("")
+  const [selectedGuide,setSelectedGuide]=useState("")
+  const [collapsedDates,setCollapsedDates]=useState<Record<string,boolean>>({})
+  const [transferFileName,setTransferFileName]=useState("")
+  const [excursionData,setExcursionData]=useState<Excursion[]>([])
+  const [notifiedExcursions,setNotifiedExcursions]=useState<Record<string,boolean>>({})
+  const [excSearch,setExcSearch]=useState("")
+  const [excGuide,setExcGuide]=useState("")
+  const [excFileName,setExcFileName]=useState("")
+  const [collapsedTypes,setCollapsedTypes]=useState<Record<string,boolean>>({})
+  const [dark,setDark]=useState(true)
 
-  useEffect(() => {
-    const savedData = localStorage.getItem("transferData")
-    const savedNotified = localStorage.getItem("notifiedVouchers")
-    const savedDark = localStorage.getItem("navDark")
-    if (savedData) setData(JSON.parse(savedData))
-    if (savedNotified) setNotifiedVouchers(JSON.parse(savedNotified))
-    if (savedDark !== null) setDark(savedDark === "1")
-  }, [])
+  useEffect(()=>{
+    const d=localStorage.getItem("transferData"),n=localStorage.getItem("notifiedVouchers")
+    const e=localStorage.getItem("excursionData"),ne=localStorage.getItem("notifiedExcursions")
+    const dk=localStorage.getItem("navDark")
+    if(d)setTransferData(JSON.parse(d));if(n)setNotifiedVouchers(JSON.parse(n))
+    if(e)setExcursionData(JSON.parse(e));if(ne)setNotifiedExcursions(JSON.parse(ne))
+    if(dk!==null)setDark(dk==="1")
+  },[])
 
-  useEffect(() => { localStorage.setItem("notifiedVouchers", JSON.stringify(notifiedVouchers)) }, [notifiedVouchers])
-  useEffect(() => { localStorage.setItem("navDark", dark ? "1" : "0") }, [dark])
+  useEffect(()=>{localStorage.setItem("notifiedVouchers",JSON.stringify(notifiedVouchers))},[notifiedVouchers])
+  useEffect(()=>{localStorage.setItem("notifiedExcursions",JSON.stringify(notifiedExcursions))},[notifiedExcursions])
+  useEffect(()=>{localStorage.setItem("navDark",dark?"1":"0")},[dark])
 
-  const guideOptions = useMemo(() => {
-    const set = new Set(data.map(v => v.guide).filter(Boolean))
-    return Array.from(set).sort()
-  }, [data])
+  const t={
+    bg:dark?"#0b1120":"#f0f4f8",card:dark?"#131d2e":"#ffffff",
+    cardBorder:dark?"#1e2f45":"#d1dce8",text:dark?"#e2eaf4":"#1a2636",
+    muted:dark?"#5b7a9a":"#6e8aa8",accent:dark?"#38bdf8":"#0369a1",
+    header:dark?"#0d1929":"#e2ecf7",inputBg:dark?"#101c2d":"#ffffff",
+    inputBdr:dark?"#1e3450":"#c5d5e5",
+  }
 
-  function handleFile(e: any) {
-    const file = e.target.files[0]
-    if (!file) return
-    setFileName(file.name)
-    const reader = new FileReader()
-    reader.onload = (evt: any) => {
-      try {
-        const bytes = new Uint8Array(evt.target.result)
-        const workbook = XLSX.read(bytes, { type: "array" })
-        const sheet = workbook.Sheets[workbook.SheetNames[0]]
-        const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" })
-
-        let pickupIdx = 24
-        for (const row of rows) {
-          let found = false
-          row.forEach((cell, idx) => {
-            if (String(cell).toLowerCase().replace(/\s+/g, " ").trim() === "dep. time") {
-              pickupIdx = idx
-              found = true
-            }
-          })
-          if (found) break
-        }
-
-        const vouchers: Record<string, Voucher> = {}
-        let currentHotel = "Отель не определен"
-        let currentGuide = "Гид не указан"
-
-        rows.forEach((row) => {
-          if (!row || row.length < 5) return
-          const firstCell = String(row[0] || "").trim()
-
-          if (firstCell.includes("Hotel:") || firstCell.includes("Check-out:")) {
-            const rowStr = row.join(" ")
-            const hMatch = rowStr.match(/Hotel:\s*(.*?)\s*GUIDE:/i)
-            const gMatch = rowStr.match(/GUIDE:\s*(.*)/i)
-            if (hMatch) currentHotel = hMatch[1].trim()
-            if (gMatch) currentGuide = gMatch[1].trim()
-            return
+  function handleTransferFile(e:any) {
+    const file=e.target.files[0];if(!file)return
+    setTransferFileName(file.name)
+    const reader=new FileReader()
+    reader.onload=(evt:any)=>{
+      try{
+        const bytes=new Uint8Array(evt.target.result)
+        const wb=XLSX.read(bytes,{type:"array"})
+        const sheet=wb.Sheets[wb.SheetNames[0]]
+        const rows:any[][]=XLSX.utils.sheet_to_json(sheet,{header:1,defval:""})
+        let pickupIdx=24
+        for(const row of rows){let found=false;row.forEach((cell,idx)=>{if(String(cell).toLowerCase().replace(/\s+/g," ").trim()==="dep. time"){pickupIdx=idx;found=true}});if(found)break}
+        const vouchers:Record<string,Voucher>={};let currentHotel="Отель не определен",currentGuide="Гид не указан"
+        rows.forEach(row=>{
+          if(!row||row.length<5)return
+          const fc=String(row[0]||"").trim()
+          if(fc.includes("Hotel:")||fc.includes("Check-out:")){
+            const rs=row.join(" ")
+            const hm=rs.match(/Hotel:\s*(.*?)\s*GUIDE:/i),gm=rs.match(/GUIDE:\s*(.*)/i)
+            if(hm)currentHotel=hm[1].trim();if(gm)currentGuide=gm[1].trim();return
           }
-
-          const vId = String(row[2] || "").trim()
-          if (!vId || vId.length < 5 || isNaN(Number(vId))) return
-
-          const pickupVal = formatExcelValue(row[pickupIdx])
-          const flightDateVal = formatExcelValue(row[29])
-          const departureDateVal = formatExcelValue(row[21])
-
-          if (!vouchers[vId]) {
-            vouchers[vId] = {
-              vId,
-              hotel: currentHotel,
-              guide: currentGuide,
-              pickup: pickupVal || "—",
-              flightDate: flightDateVal || "—",
-              flightTime: formatExcelValue(row[27]) || "—",
-              flightNo: String(row[28] || "").trim() || "—",
-              departureDate: departureDateVal || "—",
-              tourists: [],
-              phones: [],
-            }
-          }
-
-          if (pickupVal && vouchers[vId].pickup === "—") vouchers[vId].pickup = pickupVal
-          if (flightDateVal && vouchers[vId].flightDate === "—") vouchers[vId].flightDate = flightDateVal
-          if (departureDateVal && vouchers[vId].departureDate === "—") vouchers[vId].departureDate = departureDateVal
-
-          const fullName = `${row[4]} ${row[5]}`.trim()
-          if (fullName && !fullName.toLowerCase().includes("tourist") && !vouchers[vId].tourists.includes(fullName)) {
-            vouchers[vId].tourists.push(fullName)
-          }
-
-          const ph = String(row[8] || row[25] || "").replace(/[^\d+]/g, "")
-          if (ph && !vouchers[vId].phones.includes(ph)) vouchers[vId].phones.push(ph)
+          const vId=String(row[2]||"").trim()
+          if(!vId||vId.length<5||isNaN(Number(vId)))return
+          const pv=formatExcelValue(row[pickupIdx]),fdv=formatExcelValue(row[29]),ddv=formatExcelValue(row[21])
+          if(!vouchers[vId])vouchers[vId]={vId,hotel:currentHotel,guide:currentGuide,pickup:pv||"—",flightDate:fdv||"—",flightTime:formatExcelValue(row[27])||"—",flightNo:String(row[28]||"").trim()||"—",departureDate:ddv||"—",tourists:[],phones:[]}
+          if(pv&&vouchers[vId].pickup==="—")vouchers[vId].pickup=pv
+          if(fdv&&vouchers[vId].flightDate==="—")vouchers[vId].flightDate=fdv
+          if(ddv&&vouchers[vId].departureDate==="—")vouchers[vId].departureDate=ddv
+          const fn=`${row[4]} ${row[5]}`.trim()
+          if(fn&&!fn.toLowerCase().includes("tourist")&&!vouchers[vId].tourists.includes(fn))vouchers[vId].tourists.push(fn)
+          const ph=String(row[8]||row[25]||"").replace(/[^\d+]/g,"")
+          if(ph&&!vouchers[vId].phones.includes(ph))vouchers[vId].phones.push(ph)
         })
-
-        const result = Object.values(vouchers).sort((a, b) => {
-          if (a.pickup === "—" && b.pickup !== "—") return 1
-          if (a.pickup !== "—" && b.pickup === "—") return -1
-          return a.pickup.localeCompare(b.pickup)
-        })
-
-        setData(result)
-        setNotifiedVouchers({})
-        setCollapsedDates({})
-        setSelectedGuide("")
-        localStorage.setItem("transferData", JSON.stringify(result))
-      } catch {
-        alert("Ошибка чтения файла")
-      }
+        const result=Object.values(vouchers).sort((a,b)=>{if(a.pickup==="—"&&b.pickup!=="—")return 1;if(a.pickup!=="—"&&b.pickup==="—")return -1;return a.pickup.localeCompare(b.pickup)})
+        setTransferData(result);setNotifiedVouchers({});setCollapsedDates({});setSelectedGuide("")
+        localStorage.setItem("transferData",JSON.stringify(result))
+      }catch{alert("Ошибка чтения файла трансферов")}
     }
     reader.readAsArrayBuffer(file)
   }
 
-  function toggleNotify(vId: string) {
-    setNotifiedVouchers(prev => ({ ...prev, [vId]: !prev[vId] }))
+  function handleExcursionFile(e:any) {
+    const file=e.target.files[0];if(!file)return
+    setExcFileName(file.name)
+    const reader=new FileReader()
+    reader.onload=(evt:any)=>{
+      try{
+        const bytes=new Uint8Array(evt.target.result)
+        const wb=XLSX.read(bytes,{type:"array"})
+        const sheet=wb.Sheets[wb.SheetNames[0]]
+        const rows:any[][]=XLSX.utils.sheet_to_json(sheet,{header:1,defval:""})
+        let headerIdx=-1
+        for(let i=0;i<rows.length;i++){const r=rows[i].map((c:any)=>String(c).toLowerCase());if(r.includes("voucher")||r.includes("excursion")){headerIdx=i;break}}
+        if(headerIdx<0){alert("Не найдена строка заголовков");return}
+        const headers=rows[headerIdx].map((c:any)=>String(c).toLowerCase().trim())
+        const col=(name:string)=>headers.findIndex(h=>h.includes(name))
+        const cV=col("voucher"),cD=col("date"),cE=col("excursion"),cR=col("room")
+        const cN=col("name"),cP=col("phone"),cPu=col("pickup"),cA=col("adl"),cC=col("chd"),cI=col("inf")
+        const cH=headers.findIndex(h=>h.includes("hotel")&&!h.includes("guide"))
+        const cG=headers.findIndex(h=>h.includes("guide")&&!h.includes("hotel"))
+        const cCS=headers.findIndex(h=>h.includes("cooperate")||h.includes("staff"))
+        const map:Record<string,Excursion>={}
+        for(let i=headerIdx+1;i<rows.length;i++){
+          const row=rows[i]
+          const vId=String(row[cV]||"").trim();if(!vId||vId.length<5)continue
+          const excName=String(row[cE]||"").trim();if(!excName)continue
+          const key=`${vId}_${excName}`
+          const phone=String(row[cP]||"").replace(/[^\d+]/g,"")
+          const name=String(row[cN]||"").trim()
+          const pickup=String(row[cPu]||"").trim()
+          if(!map[key])map[key]={key,vId,date:String(row[cD]||"").trim(),excursionName:excName,excursionType:classifyExcursion(excName),hotel:String(row[cH]||"").trim(),room:String(row[cR]||"").trim(),tourists:[],pickup:pickup||"—",adl:Number(row[cA]||0),chd:Number(row[cC]||0),inf:Number(row[cI]||0),guide:String(row[cG]||"").trim(),cooperateStaff:cCS>=0?String(row[cCS]||"").trim():""}
+          if(pickup&&map[key].pickup==="—")map[key].pickup=pickup
+          if(name&&!map[key].tourists.find(t=>t.name===name)){if(phone)map[key].tourists.push({name,phone});else map[key].tourists.push({name,phone:""})}
+          else if(name&&phone&&map[key].tourists.find(t=>t.name===name&&!t.phone)){const idx=map[key].tourists.findIndex(t=>t.name===name);map[key].tourists[idx].phone=phone}
+        }
+        const result=Object.values(map).sort((a,b)=>a.pickup.localeCompare(b.pickup))
+        setExcursionData(result);setNotifiedExcursions({});setCollapsedTypes({});setExcGuide("")
+        localStorage.setItem("excursionData",JSON.stringify(result))
+      }catch{alert("Ошибка чтения файла экскурсий")}
+    }
+    reader.readAsArrayBuffer(file)
   }
 
-  const filtered = useMemo(() => {
-    const q = touristSearch.toLowerCase().trim()
-    return data.filter(v => {
-      const matchesGuide = selectedGuide === "" || v.guide === selectedGuide
-      if (!matchesGuide) return false
-      if (!q) return true
-      // Search by voucher ID
-      if (v.vId.toLowerCase().includes(q)) return true
-      // Search by tourist full name or last name
-      if (v.tourists.some(t => t.toLowerCase().includes(q))) return true
-      return false
+  const guideOptions=useMemo(()=>Array.from(new Set(transferData.map(v=>v.guide).filter(Boolean))).sort(),[transferData])
+  const filteredTransfers=useMemo(()=>{
+    const q=touristSearch.toLowerCase().trim()
+    return transferData.filter(v=>{
+      if(selectedGuide&&v.guide!==selectedGuide)return false
+      if(!q)return true
+      return v.vId.toLowerCase().includes(q)||v.tourists.some(t=>t.toLowerCase().includes(q))
     })
-  }, [data, touristSearch, selectedGuide])
+  },[transferData,touristSearch,selectedGuide])
 
-  const grouped = useMemo(() => {
-    const map: Record<string, Voucher[]> = {}
-    filtered.forEach(v => {
-      const key = v.flightDate === "—" ? "📅 Дата не указана" : `✈️ ${v.flightDate}`
-      if (!map[key]) map[key] = []
-      map[key].push(v)
+  const groupedTransfers=useMemo(()=>{
+    const map:Record<string,Voucher[]>={}
+    filteredTransfers.forEach(v=>{const key=v.flightDate==="—"?"📅 Дата не указана":`✈️ ${v.flightDate}`;if(!map[key])map[key]=[];map[key].push(v)})
+    return Object.entries(map).sort(([a],[b])=>{
+      if(a.includes("не указана"))return 1;if(b.includes("не указана"))return -1
+      const pd=(s:string)=>{const m=s.replace("✈️ ","").match(/(\d{2})\.(\d{2})\.(\d{4})/);return m?`${m[3]}${m[2]}${m[1]}`:""}
+      return pd(a).localeCompare(pd(b))
     })
-    return Object.entries(map).sort(([a], [b]) => {
-      if (a.includes("не указана")) return 1
-      if (b.includes("не указана")) return -1
-      const parseDate = (s: string) => {
-        const m = s.replace("✈️ ", "").match(/(\d{2})\.(\d{2})\.(\d{4})/)
-        if (!m) return ""
-        return `${m[3]}${m[2]}${m[1]}`
-      }
-      return parseDate(a).localeCompare(parseDate(b))
+  },[filteredTransfers])
+
+  const excGuideOptions=useMemo(()=>Array.from(new Set(excursionData.map(e=>e.guide).filter(Boolean))).sort(),[excursionData])
+  const filteredExcursions=useMemo(()=>{
+    const q=excSearch.toLowerCase().trim()
+    return excursionData.filter(e=>{
+      if(excGuide&&e.guide!==excGuide)return false
+      if(!q)return true
+      return e.vId.toLowerCase().includes(q)||e.tourists.some(t=>t.name.toLowerCase().includes(q))||e.excursionName.toLowerCase().includes(q)
     })
-  }, [filtered])
+  },[excursionData,excSearch,excGuide])
 
-  function exportXLSX() {
-    const rows = [
-      ["Ваучер", "Отель", "Гид", "Дата выезда", "Pick Up", "Дата рейса", "Время рейса", "Рейс", "Туристы", "Телефоны", "Статус"],
-      ...filtered.map(v => [
-        v.vId, v.hotel, v.guide, v.departureDate, v.pickup,
-        v.flightDate, v.flightTime, v.flightNo,
-        v.tourists.join("; "), v.phones.join("; "),
-        notifiedVouchers[v.vId] ? "✅ Уведомлён" : "⏳ Ожидает",
-      ])
-    ]
-    const ws = XLSX.utils.aoa_to_sheet(rows)
-    ws["!cols"] = [10, 30, 20, 14, 10, 14, 12, 12, 40, 20, 14].map(w => ({ wch: w }))
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, "Трансферы")
-    XLSX.writeFile(wb, `navigator_export_${new Date().toISOString().slice(0, 10)}.xlsx`)
+  const groupedExcursions=useMemo(()=>{
+    const map:Partial<Record<ExcursionType,Excursion[]>>={}
+    filteredExcursions.forEach(e=>{if(!map[e.excursionType])map[e.excursionType]=[];map[e.excursionType]!.push(e)})
+    const order:ExcursionType[]=["sea","dolcevita","evening","jetski","flight","bangkok","twoday","cheolan","land","city","mantra","waterpark","spa","vip","hanuman","fishing","cabaret"]
+    return order.filter(k=>map[k]).map(k=>[k,map[k]!] as [ExcursionType,Excursion[]])
+  },[filteredExcursions])
+
+  function transferBadge(v:Voucher){
+    if(v.pickup==="—")return{label:"⚠ УТОЧНИТЬ",bg:"#7f1d1d",color:"#fecaca",border:"#ef4444"}
+    if(notifiedVouchers[v.vId])return{label:"✅ Отправлено",bg:dark?"#14532d":"#dcfce7",color:dark?"#4ade80":"#15803d",border:"#16a34a"}
+    return{label:"⏳ Ожидает",bg:dark?"#0c2340":"#e0f0ff",color:dark?"#38bdf8":"#0369a1",border:dark?"#1e3f6a":"#93c5fd"}
   }
 
-  const t = {
-    bg:         dark ? "#0b1120" : "#f0f4f8",
-    card:       dark ? "#131d2e" : "#ffffff",
-    cardBorder: dark ? "#1e2f45" : "#d1dce8",
-    text:       dark ? "#e2eaf4" : "#1a2636",
-    muted:      dark ? "#5b7a9a" : "#6e8aa8",
-    accent:     dark ? "#38bdf8" : "#0369a1",
-    header:     dark ? "#0d1929" : "#e2ecf7",
-    inputBg:    dark ? "#101c2d" : "#ffffff",
-    inputBdr:   dark ? "#1e3450" : "#c5d5e5",
-  }
+  const tDone=filteredTransfers.filter(v=>notifiedVouchers[v.vId]).length
+  const tPct=filteredTransfers.length?Math.round(tDone/filteredTransfers.length*100):0
+  const eDone=filteredExcursions.filter(e=>notifiedExcursions[e.key]).length
+  const ePct=filteredExcursions.length?Math.round(eDone/filteredExcursions.length*100):0
 
-  const done = filtered.filter(v => notifiedVouchers[v.vId]).length
-  const pct = filtered.length ? Math.round((done / filtered.length) * 100) : 0
-
-  function badge(v: Voucher) {
-    if (v.pickup === "—") return { label: "⚠ УТОЧНИТЬ", bg: "#7f1d1d", color: "#fecaca", border: "#ef4444" }
-    if (notifiedVouchers[v.vId]) return { label: "✅ Отправлено", bg: dark ? "#14532d" : "#dcfce7", color: dark ? "#4ade80" : "#15803d", border: "#16a34a" }
-    return { label: "⏳ Ожидает", bg: dark ? "#0c2340" : "#e0f0ff", color: dark ? "#38bdf8" : "#0369a1", border: dark ? "#1e3f6a" : "#93c5fd" }
-  }
-
-  const selectStyle: React.CSSProperties = {
-    flex: 1, padding: "9px 12px", fontSize: "13px", borderRadius: "8px",
-    background: t.inputBg, border: `1px solid ${t.inputBdr}`,
-    color: selectedGuide ? t.text : t.muted, outline: "none", cursor: "pointer",
-    appearance: "none", WebkitAppearance: "none",
-  }
+  const selStyle:React.CSSProperties={flex:1,padding:"9px 12px",fontSize:"13px",borderRadius:"8px",background:t.inputBg,border:`1px solid ${t.inputBdr}`,color:t.text,outline:"none",cursor:"pointer",appearance:"none",WebkitAppearance:"none"}
+  const inp:React.CSSProperties={flex:1,padding:"9px 12px",fontSize:"13px",borderRadius:"8px",background:t.inputBg,border:`1px solid ${t.inputBdr}`,color:t.text,outline:"none"}
 
   return (
-    <div style={{ minHeight: "100vh", background: t.bg, color: t.text, fontFamily: "'IBM Plex Sans', 'Segoe UI', sans-serif", transition: "background 0.3s, color 0.3s" }}>
+    <div style={{minHeight:"100vh",background:t.bg,color:t.text,fontFamily:"'IBM Plex Sans','Segoe UI',sans-serif",transition:"background 0.3s,color 0.3s"}}>
 
-      {/* Header */}
-      <header style={{ background: t.header, borderBottom: `1px solid ${t.cardBorder}`, padding: "12px 16px", position: "sticky", top: 0, zIndex: 50, backdropFilter: "blur(8px)" }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <span style={{ fontSize: "22px", fontWeight: 800, letterSpacing: "-0.5px" }}>🚐 Navigator</span>
-              {fileName && <span style={{ fontSize: "11px", color: t.muted, maxWidth: "160px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fileName}</span>}
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-              <label style={{ fontSize: "12px", background: t.accent, color: "#fff", padding: "7px 14px", borderRadius: "8px", cursor: "pointer", fontWeight: 600 }}>
-                📂 Загрузить
-                <input type="file" onChange={handleFile} accept=".xlsx,.xls" style={{ display: "none" }} />
-              </label>
-              {data.length > 0 && (
-                <button onClick={exportXLSX} style={{ fontSize: "12px", background: "#16a34a", color: "#fff", padding: "7px 14px", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: 600 }}>
-                  ⬇ Экспорт XLSX
-                </button>
-              )}
-              <button onClick={() => setDark(d => !d)} style={{ fontSize: "18px", background: "transparent", border: `1px solid ${t.cardBorder}`, borderRadius: "8px", padding: "5px 10px", cursor: "pointer" }}>
-                {dark ? "☀️" : "🌙"}
-              </button>
+      <header style={{background:t.header,borderBottom:`1px solid ${t.cardBorder}`,padding:"12px 16px",position:"sticky",top:0,zIndex:50,backdropFilter:"blur(8px)"}}>
+        <div style={{maxWidth:"1200px",margin:"0 auto"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"8px"}}>
+            <span style={{fontSize:"22px",fontWeight:800,letterSpacing:"-0.5px"}}>🚐 Navigator</span>
+            <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+              {tab==="transfers"&&<label style={{fontSize:"12px",background:t.accent,color:"#fff",padding:"7px 14px",borderRadius:"8px",cursor:"pointer",fontWeight:600}}>📂 {transferFileName?transferFileName.slice(0,14)+"…":"Загрузить"}<input type="file" onChange={handleTransferFile} accept=".xlsx,.xls" style={{display:"none"}}/></label>}
+              {tab==="excursions"&&<label style={{fontSize:"12px",background:"#7c3aed",color:"#fff",padding:"7px 14px",borderRadius:"8px",cursor:"pointer",fontWeight:600}}>📂 {excFileName?excFileName.slice(0,14)+"…":"Загрузить"}<input type="file" onChange={handleExcursionFile} accept=".xlsx,.xls" style={{display:"none"}}/></label>}
+              <button onClick={()=>setDark(d=>!d)} style={{fontSize:"18px",background:"transparent",border:`1px solid ${t.cardBorder}`,borderRadius:"8px",padding:"5px 10px",cursor:"pointer"}}>{dark?"☀️":"🌙"}</button>
             </div>
           </div>
-          {filtered.length > 0 && (
-            <div style={{ marginTop: "10px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: t.muted, marginBottom: "4px" }}>
-                <span>Уведомлено: {done} из {filtered.length}</span>
-                <span>{pct}%</span>
-              </div>
-              <div style={{ height: "6px", borderRadius: "99px", background: t.cardBorder, overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${pct}%`, background: "linear-gradient(90deg, #22c55e, #16a34a)", borderRadius: "99px", transition: "width 0.4s ease" }} />
-              </div>
+          <div style={{display:"flex",gap:"4px",marginTop:"10px"}}>
+            {[{key:"transfers",label:"✈️ Трансферы"},{key:"excursions",label:"🗺️ Экскурсии"}].map(({key,label})=>(
+              <button key={key} onClick={()=>setTab(key as any)} style={{padding:"7px 16px",fontSize:"13px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:tab===key?(key==="excursions"?"#7c3aed":t.accent):t.cardBorder,color:tab===key?"#fff":t.muted,transition:"all 0.2s"}}>{label}</button>
+            ))}
+          </div>
+          {tab==="transfers"&&filteredTransfers.length>0&&(
+            <div style={{marginTop:"10px"}}>
+              <div style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:t.muted,marginBottom:"4px"}}><span>Уведомлено: {tDone} из {filteredTransfers.length}</span><span>{tPct}%</span></div>
+              <div style={{height:"5px",borderRadius:"99px",background:t.cardBorder,overflow:"hidden"}}><div style={{height:"100%",width:`${tPct}%`,background:"linear-gradient(90deg,#22c55e,#16a34a)",borderRadius:"99px",transition:"width 0.4s ease"}}/></div>
+            </div>
+          )}
+          {tab==="excursions"&&filteredExcursions.length>0&&(
+            <div style={{marginTop:"10px"}}>
+              <div style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:t.muted,marginBottom:"4px"}}><span>Уведомлено: {eDone} из {filteredExcursions.length}</span><span>{ePct}%</span></div>
+              <div style={{height:"5px",borderRadius:"99px",background:t.cardBorder,overflow:"hidden"}}><div style={{height:"100%",width:`${ePct}%`,background:"linear-gradient(90deg,#a855f7,#7c3aed)",borderRadius:"99px",transition:"width 0.4s ease"}}/></div>
             </div>
           )}
         </div>
       </header>
 
-      {/* Filters */}
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "12px 16px 0" }}>
-        <div style={{ display: "flex", gap: "8px" }}>
-          <input
-            placeholder="🔍 Поиск по туристу, фамилии или ваучеру..."
-            value={touristSearch}
-            onChange={e => setTouristSearch(e.target.value)}
-            style={{ flex: 1, padding: "9px 12px", fontSize: "13px", borderRadius: "8px", background: t.inputBg, border: `1px solid ${t.inputBdr}`, color: t.text, outline: "none" }}
-          />
-          <div style={{ flex: 1, position: "relative" }}>
-            <select value={selectedGuide} onChange={e => setSelectedGuide(e.target.value)} style={selectStyle}>
-              <option value="">👤 Все гиды</option>
-              {guideOptions.map(g => (
-                <option key={g} value={g}>{g}</option>
-              ))}
-            </select>
-            <span style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: t.muted, fontSize: "11px" }}>▼</span>
-            {selectedGuide && (
-              <button onClick={() => setSelectedGuide("")} style={{ position: "absolute", right: "28px", top: "50%", transform: "translateY(-50%)", background: "transparent", border: "none", color: t.muted, cursor: "pointer", fontSize: "14px", lineHeight: 1 }}>✕</button>
-            )}
+      {tab==="transfers"&&(
+        <>
+          <div style={{maxWidth:"1200px",margin:"0 auto",padding:"12px 16px 0"}}>
+            <div style={{display:"flex",gap:"8px"}}>
+              <input placeholder="🔍 Поиск по туристу, фамилии или ваучеру..." value={touristSearch} onChange={e=>setTouristSearch(e.target.value)} style={inp}/>
+              <div style={{flex:1,position:"relative"}}>
+                <select value={selectedGuide} onChange={e=>setSelectedGuide(e.target.value)} style={selStyle}>
+                  <option value="">👤 Все гиды</option>
+                  {guideOptions.map(g=><option key={g} value={g}>{g}</option>)}
+                </select>
+                <span style={{position:"absolute",right:"10px",top:"50%",transform:"translateY(-50%)",pointerEvents:"none",color:t.muted,fontSize:"11px"}}>▼</span>
+                {selectedGuide&&<button onClick={()=>setSelectedGuide("")} style={{position:"absolute",right:"28px",top:"50%",transform:"translateY(-50%)",background:"transparent",border:"none",color:t.muted,cursor:"pointer",fontSize:"14px"}}>✕</button>}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-
-      {/* Empty state */}
-      {data.length === 0 && (
-        <div style={{ textAlign: "center", padding: "80px 20px", color: t.muted }}>
-          <div style={{ fontSize: "48px", marginBottom: "12px" }}>📋</div>
-          <div style={{ fontSize: "16px", fontWeight: 600, marginBottom: "4px" }}>Файл не загружен</div>
-          <div style={{ fontSize: "13px" }}>Нажмите «Загрузить» и выберите Excel-файл с трансферами</div>
-        </div>
-      )}
-
-      {/* Cards */}
-      <main style={{ maxWidth: "1200px", margin: "0 auto", padding: "16px" }}>
-        {grouped.map(([dateLabel, vouchers]) => {
-          const isCollapsed = collapsedDates[dateLabel]
-          const groupDone = vouchers.filter(v => notifiedVouchers[v.vId]).length
-          return (
-            <div key={dateLabel} style={{ marginBottom: "24px" }}>
-              <button
-                onClick={() => setCollapsedDates(prev => ({ ...prev, [dateLabel]: !prev[dateLabel] }))}
-                style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", background: "transparent", border: "none", cursor: "pointer", marginBottom: "10px", padding: "4px 0", color: t.text }}
-              >
-                <span style={{ fontSize: "15px", fontWeight: 700 }}>{dateLabel}</span>
-                <span style={{ fontSize: "12px", color: t.muted, background: t.cardBorder, borderRadius: "99px", padding: "2px 8px" }}>{groupDone}/{vouchers.length} уведомлено</span>
-                <span style={{ marginLeft: "auto", fontSize: "12px", color: t.muted, transform: isCollapsed ? "rotate(-90deg)" : "rotate(0)", transition: "transform 0.2s" }}>▼</span>
-              </button>
-
-              {!isCollapsed && (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "10px" }}>
-                  {vouchers.map((v, i) => {
-                    const isDone = !!notifiedVouchers[v.vId]
-                    const isProblem = v.pickup === "—"
-                    const b = badge(v)
-                    return (
-                      <div key={i} style={{ background: t.card, borderRadius: "14px", border: `1.5px solid ${b.border}`, overflow: "hidden", opacity: isDone ? 0.72 : 1, transition: "opacity 0.3s", display: "flex", flexDirection: "column" }}>
-
-                        {/* Strip */}
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 12px", background: b.bg, borderBottom: `1px solid ${b.border}` }}>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: "11px", color: b.color, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.8px" }}>
-                              {isProblem ? "⚠ УТОЧНИТЬ ВРЕМЯ" : "PICK UP"}
+          {transferData.length===0&&<div style={{textAlign:"center",padding:"80px 20px",color:t.muted}}><div style={{fontSize:"48px",marginBottom:"12px"}}>📋</div><div style={{fontSize:"16px",fontWeight:600,marginBottom:"4px"}}>Файл не загружен</div><div style={{fontSize:"13px"}}>Нажмите «Загрузить» и выберите Excel-файл с трансферами</div></div>}
+          <main style={{maxWidth:"1200px",margin:"0 auto",padding:"16px"}}>
+            {groupedTransfers.map(([dateLabel,vouchers])=>{
+              const isCollapsed=collapsedDates[dateLabel]
+              const groupDone=vouchers.filter(v=>notifiedVouchers[v.vId]).length
+              return(
+                <div key={dateLabel} style={{marginBottom:"24px"}}>
+                  <button onClick={()=>setCollapsedDates(prev=>({...prev,[dateLabel]:!prev[dateLabel]}))} style={{display:"flex",alignItems:"center",gap:"10px",width:"100%",background:"transparent",border:"none",cursor:"pointer",marginBottom:"10px",padding:"4px 0",color:t.text}}>
+                    <span style={{fontSize:"15px",fontWeight:700}}>{dateLabel}</span>
+                    <span style={{fontSize:"12px",color:t.muted,background:t.cardBorder,borderRadius:"99px",padding:"2px 8px"}}>{groupDone}/{vouchers.length} уведомлено</span>
+                    <span style={{marginLeft:"auto",fontSize:"12px",color:t.muted,transform:isCollapsed?"rotate(-90deg)":"rotate(0)",transition:"transform 0.2s"}}>▼</span>
+                  </button>
+                  {!isCollapsed&&(
+                    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:"10px"}}>
+                      {vouchers.map((v,i)=>{
+                        const isDone=!!notifiedVouchers[v.vId],isProblem=v.pickup==="—",b=transferBadge(v)
+                        return(
+                          <div key={i} style={{background:t.card,borderRadius:"14px",border:`1.5px solid ${b.border}`,overflow:"hidden",opacity:isDone?0.72:1,transition:"opacity 0.3s",display:"flex",flexDirection:"column"}}>
+                            <div style={{display:"flex",alignItems:"center",gap:"8px",padding:"10px 12px",background:b.bg,borderBottom:`1px solid ${b.border}`}}>
+                              <div style={{flex:1}}>
+                                <div style={{fontSize:"11px",color:b.color,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.8px"}}>{isProblem?"⚠ УТОЧНИТЬ ВРЕМЯ":"PICK UP"}</div>
+                                {!isProblem&&<div style={{fontSize:"22px",fontWeight:900,color:b.color,lineHeight:1.1}}>{v.pickup}</div>}
+                                <div style={{fontSize:"11px",color:b.color,opacity:0.75,marginTop:"3px",fontWeight:600}}>🎫 {v.vId}</div>
+                              </div>
+                              <span style={{fontSize:"11px",background:"rgba(0,0,0,0.2)",color:b.color,borderRadius:"6px",padding:"3px 8px",fontWeight:700,whiteSpace:"nowrap"}}>{b.label}</span>
+                              {!isProblem&&<input type="checkbox" checked={isDone} onChange={()=>setNotifiedVouchers(prev=>({...prev,[v.vId]:!prev[v.vId]}))} style={{width:"20px",height:"20px",cursor:"pointer",flexShrink:0}}/>}
                             </div>
-                            {!isProblem && (
-                              <div style={{ fontSize: "22px", fontWeight: 900, color: b.color, lineHeight: 1.1 }}>{v.pickup}</div>
-                            )}
-                            {/* ← Номер ваучера */}
-                            <div style={{ fontSize: "11px", color: b.color, opacity: 0.75, marginTop: "3px", fontWeight: 600, letterSpacing: "0.3px" }}>
-                              🎫 {v.vId}
+                            <div style={{padding:"12px",flex:1}}>
+                              <div style={{color:t.accent,fontWeight:700,fontSize:"15px",marginBottom:"2px"}}>🏨 {v.hotel}</div>
+                              <div style={{color:"#fbbf24",fontSize:"12px",fontWeight:600,marginBottom:"4px"}}>👤 {v.guide}</div>
+                              <div style={{color:t.muted,fontSize:"12px",marginBottom:"8px"}}>🗓 Выезд из отеля: <span style={{color:t.text,fontWeight:600}}>{v.departureDate}</span></div>
+                              <ul style={{margin:"0 0 10px 0",paddingLeft:"16px",fontSize:"13px",color:t.text}}>{v.tourists.map((tt,idx)=><li key={idx} style={{marginBottom:"2px"}}>{tt}</li>)}</ul>
+                            </div>
+                            <div style={{padding:"0 12px 12px",borderTop:`1px solid ${t.cardBorder}`,paddingTop:"10px"}}>
+                              {v.phones.length===0&&<div style={{fontSize:"12px",color:t.muted}}>📵 Телефон не указан</div>}
+                              {v.phones.map((ph,idx)=>(
+                                <div key={idx} style={{marginBottom:"8px"}}>
+                                  <div style={{fontSize:"12px",color:t.muted,marginBottom:"4px"}}>📱 {ph}</div>
+                                  <div style={{display:"flex",gap:"6px"}}>
+                                    <a href={isProblem?undefined:`https://wa.me/${ph.replace(/\D/g,"")}?text=${generateTransferMessage(v)}`} target="_blank" rel="noreferrer" onClick={()=>!isDone&&!isProblem&&setNotifiedVouchers(prev=>({...prev,[v.vId]:true}))} style={{flex:1,background:isProblem?t.cardBorder:"#15803d",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700,pointerEvents:isProblem?"none":"auto"}}>WhatsApp</a>
+                                    <a href={`tel:${ph}`} style={{flex:1,background:t.cardBorder,color:t.text,textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700}}>Позвонить</a>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",fontWeight:600,borderTop:`1px solid ${t.cardBorder}`}}>
+                              <span style={{color:dark?"#7dd3fc":"#1d4ed8"}}>✈️ {v.flightNo}</span>
+                              <span style={{color:t.muted}}>📅 {v.flightDate} · {v.flightTime}</span>
                             </div>
                           </div>
-                          <span style={{ fontSize: "11px", background: "rgba(0,0,0,0.2)", color: b.color, borderRadius: "6px", padding: "3px 8px", fontWeight: 700, whiteSpace: "nowrap" }}>{b.label}</span>
-                          {!isProblem && (
-                            <input type="checkbox" checked={isDone} onChange={() => toggleNotify(v.vId)} style={{ width: "20px", height: "20px", cursor: "pointer", flexShrink: 0 }} />
-                          )}
-                        </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </main>
+        </>
+      )}
 
-                        {/* Body */}
-                        <div style={{ padding: "12px", flex: 1 }}>
-                          <div style={{ color: t.accent, fontWeight: 700, fontSize: "15px", marginBottom: "2px" }}>🏨 {v.hotel}</div>
-                          <div style={{ color: "#fbbf24", fontSize: "12px", fontWeight: 600, marginBottom: "4px" }}>👤 {v.guide}</div>
-                          <div style={{ color: t.muted, fontSize: "12px", marginBottom: "8px" }}>🗓 Выезд из отеля: <span style={{ color: t.text, fontWeight: 600 }}>{v.departureDate}</span></div>
-                          <ul style={{ margin: "0 0 10px 0", paddingLeft: "16px", fontSize: "13px", color: t.text }}>
-                            {v.tourists.map((tt, idx) => <li key={idx} style={{ marginBottom: "2px" }}>{tt}</li>)}
-                          </ul>
-                        </div>
-
-                        {/* Phones + buttons — always at bottom */}
-                        <div style={{ padding: "0 12px 12px", borderTop: `1px solid ${t.cardBorder}`, paddingTop: "10px" }}>
-                          {v.phones.length === 0 && <div style={{ fontSize: "12px", color: t.muted }}>📵 Телефон не указан</div>}
-                          {v.phones.map((ph, idx) => (
-                            <div key={idx} style={{ marginBottom: "8px" }}>
-                              <div style={{ fontSize: "12px", color: t.muted, marginBottom: "4px" }}>📱 {ph}</div>
-                              <div style={{ display: "flex", gap: "6px" }}>
-                                <a
-                                  href={isProblem ? undefined : `https://wa.me/${ph.replace(/\D/g, "")}?text=${generateMessage(v)}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  onClick={() => !isDone && !isProblem && toggleNotify(v.vId)}
-                                  style={{ flex: 1, background: isProblem ? t.cardBorder : "#15803d", color: isProblem ? t.muted : "#fff", textAlign: "center", padding: "9px 4px", borderRadius: "8px", textDecoration: "none", fontSize: "12px", fontWeight: 700, pointerEvents: isProblem ? "none" : "auto" }}
-                                >
-                                  WhatsApp
-                                </a>
-                                <a
-                                  href={`tel:${ph}`}
-                                  style={{ flex: 1, background: t.cardBorder, color: t.text, textAlign: "center", padding: "9px 4px", borderRadius: "8px", textDecoration: "none", fontSize: "12px", fontWeight: 700 }}
-                                >
-                                  Позвонить
-                                </a>
+      {tab==="excursions"&&(
+        <>
+          <div style={{maxWidth:"1200px",margin:"0 auto",padding:"12px 16px 0"}}>
+            <div style={{display:"flex",gap:"8px"}}>
+              <input placeholder="🔍 Поиск по туристу, ваучеру или экскурсии..." value={excSearch} onChange={e=>setExcSearch(e.target.value)} style={inp}/>
+              <div style={{flex:1,position:"relative"}}>
+                <select value={excGuide} onChange={e=>setExcGuide(e.target.value)} style={selStyle}>
+                  <option value="">👤 Все гиды</option>
+                  {excGuideOptions.map(g=><option key={g} value={g}>{g}</option>)}
+                </select>
+                <span style={{position:"absolute",right:"10px",top:"50%",transform:"translateY(-50%)",pointerEvents:"none",color:t.muted,fontSize:"11px"}}>▼</span>
+                {excGuide&&<button onClick={()=>setExcGuide("")} style={{position:"absolute",right:"28px",top:"50%",transform:"translateY(-50%)",background:"transparent",border:"none",color:t.muted,cursor:"pointer",fontSize:"14px"}}>✕</button>}
+              </div>
+            </div>
+          </div>
+          {excursionData.length===0&&<div style={{textAlign:"center",padding:"80px 20px",color:t.muted}}><div style={{fontSize:"48px",marginBottom:"12px"}}>🗺️</div><div style={{fontSize:"16px",fontWeight:600,marginBottom:"4px"}}>Файл не загружен</div><div style={{fontSize:"13px"}}>Нажмите «Загрузить» и выберите Excel-файл с экскурсиями</div></div>}
+          <main style={{maxWidth:"1200px",margin:"0 auto",padding:"16px"}}>
+            {groupedExcursions.map(([type,excursions])=>{
+              const meta=TYPE_META[type],isCollapsed=collapsedTypes[type]
+              const groupDone=excursions.filter(e=>notifiedExcursions[e.key]).length
+              return(
+                <div key={type} style={{marginBottom:"24px"}}>
+                  <button onClick={()=>setCollapsedTypes(prev=>({...prev,[type]:!prev[type]}))} style={{display:"flex",alignItems:"center",gap:"10px",width:"100%",background:"transparent",border:"none",cursor:"pointer",marginBottom:"10px",padding:"4px 0",color:t.text}}>
+                    <span style={{fontSize:"15px",fontWeight:700}}>{meta.icon} {meta.label}</span>
+                    <span style={{fontSize:"12px",color:t.muted,background:t.cardBorder,borderRadius:"99px",padding:"2px 8px"}}>{groupDone}/{excursions.length} уведомлено</span>
+                    <span style={{marginLeft:"auto",fontSize:"12px",color:t.muted,transform:isCollapsed?"rotate(-90deg)":"rotate(0)",transition:"transform 0.2s"}}>▼</span>
+                  </button>
+                  {!isCollapsed&&(
+                    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:"10px"}}>
+                      {excursions.map(e=>{
+                        const isDone=!!notifiedExcursions[e.key],hasPhones=e.tourists.some(tt=>tt.phone)
+                        return(
+                          <div key={e.key} style={{background:t.card,borderRadius:"14px",border:`1.5px solid ${meta.border}`,overflow:"hidden",opacity:isDone?0.72:1,transition:"opacity 0.3s",display:"flex",flexDirection:"column"}}>
+                            <div style={{display:"flex",alignItems:"center",gap:"8px",padding:"10px 12px",background:meta.bg,borderBottom:`1px solid ${meta.border}`}}>
+                              <div style={{flex:1}}>
+                                {!meta.noTransfer&&<><div style={{fontSize:"11px",color:meta.color,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.8px"}}>PICK UP</div><div style={{fontSize:"22px",fontWeight:900,color:meta.color,lineHeight:1.1}}>{e.pickup}</div></>}
+                                {meta.noTransfer&&<div style={{fontSize:"12px",color:meta.color,fontWeight:700}}>🚖 Самостоятельный выезд</div>}
+                                <div style={{fontSize:"11px",color:meta.color,opacity:0.75,marginTop:"3px",fontWeight:600}}>🎫 {e.vId}</div>
+                              </div>
+                              <div style={{textAlign:"right"}}>
+                                <span style={{fontSize:"11px",background:"rgba(0,0,0,0.2)",color:meta.color,borderRadius:"6px",padding:"3px 8px",fontWeight:700,whiteSpace:"nowrap",display:"block",marginBottom:"4px"}}>{isDone?"✅ Отправлено":"⏳ Ожидает"}</span>
+                                <input type="checkbox" checked={isDone} onChange={()=>setNotifiedExcursions(prev=>({...prev,[e.key]:!prev[e.key]}))} style={{width:"20px",height:"20px",cursor:"pointer"}}/>
                               </div>
                             </div>
-                          ))}
-                        </div>
-
-                        {/* Footer */}
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", fontWeight: 600, borderTop: `1px solid ${t.cardBorder}` }}>
-                          <span style={{ color: dark ? "#7dd3fc" : "#1d4ed8" }}>✈️ {v.flightNo}</span>
-                          <span style={{ color: t.muted }}>📅 {v.flightDate} · {v.flightTime}</span>
-                        </div>
-
-                      </div>
-                    )
-                  })}
+                            <div style={{padding:"12px",flex:1}}>
+                              <div style={{color:meta.color,fontWeight:700,fontSize:"13px",marginBottom:"4px"}}>{meta.icon} {e.excursionName}</div>
+                              <div style={{color:t.accent,fontWeight:700,fontSize:"14px",marginBottom:"2px"}}>🏨 {e.hotel}{e.room?` · №${e.room}`:""}</div>
+                              <div style={{color:"#fbbf24",fontSize:"12px",fontWeight:600,marginBottom:"2px"}}>👤 {e.guide}</div>
+                              {e.cooperateStaff&&<div style={{color:"#a3e635",fontSize:"12px",marginBottom:"4px"}}>🤝 {e.cooperateStaff}</div>}
+                              <div style={{color:t.muted,fontSize:"12px",marginBottom:"8px"}}>📅 {e.date} · 👥 {e.adl} взр{e.chd>0?` · ${e.chd} дет`:""}{e.inf>0?` · ${e.inf} мл`:""}</div>
+                              <ul style={{margin:"0 0 6px 0",paddingLeft:"16px",fontSize:"13px",color:t.text}}>{e.tourists.map((tt,idx)=><li key={idx} style={{marginBottom:"2px"}}>{tt.name}</li>)}</ul>
+                            </div>
+                            <div style={{padding:"0 12px 12px",borderTop:`1px solid ${t.cardBorder}`,paddingTop:"10px"}}>
+                              {!hasPhones&&<div style={{fontSize:"12px",color:t.muted}}>📵 Телефон не указан</div>}
+                              {e.tourists.filter(tt=>tt.phone).map((tt,idx)=>(
+                                <div key={idx} style={{marginBottom:"8px"}}>
+                                  <div style={{fontSize:"12px",color:t.muted,marginBottom:"4px"}}>📱 {tt.phone}</div>
+                                  <div style={{display:"flex",gap:"6px"}}>
+                                    <a href={`https://wa.me/${tt.phone.replace(/\D/g,"")}?text=${generateExcursionMessage(e)}`} target="_blank" rel="noreferrer" onClick={()=>!isDone&&setNotifiedExcursions(prev=>({...prev,[e.key]:true}))} style={{flex:1,background:"#15803d",color:"#fff",textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700}}>WhatsApp</a>
+                                    <a href={`tel:${tt.phone}`} style={{flex:1,background:t.cardBorder,color:t.text,textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700}}>Позвонить</a>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          )
-        })}
-      </main>
+              )
+            })}
+          </main>
+        </>
+      )}
     </div>
   )
 }
