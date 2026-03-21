@@ -756,10 +756,10 @@ export default function Page() {
       {tab==="transfers"&&(
         <>
           <div style={{maxWidth:"1200px",margin:"0 auto",padding:"12px 16px 0"}}>
-            <div style={{display:"flex",gap:"8px"}}>
+            <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
               <input placeholder="🔍 Поиск по туристу, фамилии или ваучеру..." value={touristSearch} onChange={e=>setTouristSearch(e.target.value)} style={inp}/>
-              <div style={{flex:1,position:"relative"}}>
-                <select value={selectedGuide} onChange={e=>setSelectedGuide(e.target.value)} style={selStyle}>
+              <div style={{position:"relative",width:"100%"}}>
+                <select value={selectedGuide} onChange={e=>setSelectedGuide(e.target.value)} style={{...selStyle,width:"100%"}}>
                   <option value="">👤 Все гиды</option>
                   {guideOptions.map(g=><option key={g} value={g}>{g}</option>)}
                 </select>
@@ -832,10 +832,10 @@ export default function Page() {
       {tab==="excursions"&&(
         <>
           <div style={{maxWidth:"1200px",margin:"0 auto",padding:"12px 16px 0"}}>
-            <div style={{display:"flex",gap:"8px"}}>
+            <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
               <input placeholder="🔍 Поиск по туристу, ваучеру или экскурсии..." value={excSearch} onChange={e=>setExcSearch(e.target.value)} style={inp}/>
-              <div style={{flex:1,position:"relative"}}>
-                <select value={excGuide} onChange={e=>setExcGuide(e.target.value)} style={selStyle}>
+              <div style={{position:"relative",width:"100%"}}>
+                <select value={excGuide} onChange={e=>setExcGuide(e.target.value)} style={{...selStyle,width:"100%"}}>
                   <option value="">👤 Все гиды</option>
                   {excGuideOptions.map(g=><option key={g} value={g}>{g}</option>)}
                 </select>
