@@ -430,6 +430,296 @@ function formatExcelValue(v: any): string {
   if (typeof v==="number") {
     if (v>0&&v<1) { const s=Math.round(v*86400); return `${String(Math.floor(s/3600)).padStart(2,"0")}:${String(Math.floor((s%3600)/60)).padStart(2,"0")}` }
     if (v>=1&&v<3) { const f=v%1,s=Math.round(f*86400); return `${String(Math.floor(s/3600)).padStart(2,"0")}:${String(Math.floor((s%3600)/60)).padStart(2,"0")}` }
+    if (v>40000) {
+      // Date-only: integer part only, ignore fractional (time) part
+      const d=XLSX.SSF.parse_date_code(Math.floor(v))
+      return `${String(d.d).padStart(2,"0")}.${String(d.m).padStart(2,"0")}.${d.y}`
+    }
+  }
+  const s=String(v).trim()
+  // Strip time from strings like "22.03.2026 05:50:00" or "22.03.2026 5:10:00 AM"
+  const dateWithTime=s.match(/^(\d{1,2}\.\d{1,2}\.\d{2,4})\s+.*/)
+  if (dateWithTime) return dateWithTime[1].replace(/^(\d)\./, "0$1.").replace(/\.(\d)\./, ".0$1.")
+  const m=s.match(/^(\d{1,2}):(\d{2})$/)
+  return m ? `${String(m[1]).padStart(2,"0")}:${m[2]}` : s
+}
+
+function generateTransferMessage(v: Voucher): string {
+  return encodeURIComponent(`🛫 ИНФОРМАЦИЯ О ВЫЕЗДЕ В АЭРОПОРТ
+
+🗓 ДАТА ВЫЕЗДА ИЗ ОТЕЛЯ: ${v.departureDate}
+⏰ *_ВРЕМЯ СБОРА (PICK UP): ${v.pickup}_*
+
+---
+
+✈️ ИНФОРМАЦИЯ О РЕЙСЕ:
+🔹 Номер рейса: ${v.flightNo}
+🔹 Дата вылета: ${v.flightDate}
+🔹 Время вылета: ${v.flightTime}
+
+---
+
+✅ УВАЖАЕМЫЕ ГОСТИ!
+Пожалуйста, подготовьтесь к выезду заранее.
+
+🕒 На ресепшн:
+Сдайте номер (стандартный выезд до 12:00. При позднем вылете уточните возможность продления заранее).
+Оплатите счета, если пользовались дополнительными услугами отеля.
+Сделайте это до прибытия транспорта, чтобы не задерживать трансфер.
+
+📑 Перед выходом проверьте наличие:
+Паспортов и авиабилетов;
+Всех личных вещей и багажа.
+
+☎️ В случае задержки транспорта (более 10 минут):
+Свяжитесь с нашей горячей линией:
+📞 Звонки: +66 92 249 49 49
+💬 WhatsApp / Telegram: +66 92 279 09 90
+
+✨ Желаем вам приятного полёта и надеемся вновь увидеть вас в Таиланде!`)
+}
+
+const APP_PASSWORD = "8888"
+
+export default function Page() {
+  const [unlocked, setUnlocked] = useState(false)
+  const [pwInput, setPwInput] = useState("")
+  const [pwError, setPwError] = useState(false)
+
+  useEffect(() => {
+    if (localStorage.getItem("navAuth") === APP_PASSWORD) setUnlocked(true)
+  }, [])
+
+  function handleLogin() {
+    if (pwInput === APP_PASSWORD) {
+      localStorage.setItem("navAuth", APP_PASSWORD)
+      setUnlocked(true)
+      setPwError(false)
+    } else {
+      setPwError(true)
+      setPwInput("")
+    }
+  }
+
+  const [tab,setTab]=useState<"transfers"|"excursions">("transfers")
+  const [transferData,setTransferData]=useState<Voucher[]>([])
+  const [notifiedVouchers,setNotifiedVouchers]=useState<Record<string,boolean>>({})
+  const [touristSearch,setTouristSearch]=useState("")
+  const [selectedGuide,setSelectedGuide]=useState("")
+  const [collapsedDates,setCollapsedDates]=useState<Record<string,boolean>>({})
+  const [transferFileName,setTransferFileName]=useState("")
+  const [excursionData,setExcursionData]=useState<Excursion[]>([])
+  const [notifiedExcursions,setNotifiedExcursions]=useState<Record<string,boolean>>({})
+  const [excSearch,setExcSearch]=useState("")
+  const [excGuide,setExcGuide]=useState("")
+  const [excFileName,setExcFileName]=useState("")
+  const [collapsedTypes,setCollapsedTypes]=useState<Record<string,boolean>>({})
+  const [dark,setDark]=useState(true)
+
+  useEffect(()=>{
+    const d=localStorage.getItem("transferData"),n=localStorage.getItem("notifiedVouchers")
+    const e=localStorage.getItem("excursionData"),ne=localStorage.getItem("notifiedExcursions")
+    const dk=localStorage.getItem("navDark")
+    if(d)setTransferData(JSON.parse(d));if(n)setNotifiedVouchers(JSON.parse(n))
+    if(e)setExcursionData(JSON.parse(e));if(ne)setNotifiedExcursions(JSON.parse(ne))
+    if(dk!==null)setDark(dk==="1")
+  },[])
+
+  useEffect(()=>{localStorage.setItem("notifiedVouchers",JSON.stringify(notifiedVouchers))},[notifiedVouchers])
+  useEffect(()=>{localStorage.setItem("notifiedExcursions",порт задерживается, обратитесь на горячую линию:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаю вам приятной поездки.`,
+
+    land:`Добрый вечер!
+Завтра у вас запланирована экскурсия, выезд состоится в ${p}.
+Просим быть готовы заранее — время ожидания не более 10 минут.
+
+🔹 Что рекомендуется взять с собой:
+• удобную обувь (сланцы, сандалии, кроксы)
+• головной убор
+• солнцезащитные средства
+• купальные принадлежности
+• тёплую кофту (в дороге кондиционер)
+• наличные на личные расходы
+• заранее закажите на ресепшене завтрак / lunch box
+
+Если транспорт задерживается:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Хорошей дороги и ярких впечатлений! 🌿😊`,
+
+    city:`Добрый вечер!
+Завтра выезд на обзорную экскурсию состоится в ${p}.
+Прошу вас не опаздывать, время ожидания — не более 10 минут.
+
+Рекомендую взять с собой:
+• подходящую обувь
+• головные уборы
+• питьевую воду
+• перекус (питание не включено)
+• солнцезащитные средства
+• деньги на личные расходы
+• тёплую одежду (в автобусе кондиционер)
+• во время экскурсии вы будете посещать храм — плечи и колени должны быть прикрыты 🙏
+• носки (перед храмом необходимо разуться)
+
+Если транспорт задерживается, обратитесь на горячую линию:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаю вам приятной поездки.`,
+
+    mantra:`Добрый вечер!
+Завтра выезд на экскурсию состоится в ${p}.
+
+📌 Рекомендуем взять с собой:
+• удобную обувь (сандалии или сланцы)
+• головные уборы
+• солнцезащитные средства
+• полотенца и купальные принадлежности
+• деньги на личные расходы
+
+💆 В спа полотенца предоставляются, но при получении берётся депозит 300 бат (возвращается 200 бат).
+
+Если транспорт задерживается:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаем вам приятной поездки и отличного отдыха! 🌴✨`,
+
+    waterpark:`Уважаемые гости!
+
+Завтра у вас запланировано посещение аквапарка Andamanda Phuket.
+Входные билеты у вас уже есть.
+
+📍 Адрес: Andamanda Phuket, Kathu
+⏰ Время работы: ежедневно с 10:00 до 19:00
+🎫 Ваши билеты: предъявите на входе (электронные или бумажные).
+
+🚖 Внимание! Трансфер не предоставляется — добраться необходимо самостоятельно (рекомендуем такси / Grab / Bolt).
+
+ℹ️ Полезная информация:
+• На территории есть камеры хранения, рестораны и кафе
+• Разрешён вход только в специальной купальной одежде
+• Полотенца можно взять с собой либо арендовать на месте
+
+В случае вопросов — горячая линия:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаем вам ярких впечатлений и отличного отдыха! 🌊`,
+
+    spa:`Добрый вечер!
+Завтра состоится выезд в SPA-центр Oasis.
+
+⏰ Время отправления: ${p}
+📍 Место встречи: ресепшн отеля
+
+Всё необходимое там предоставят.
+Возьмите деньги на дополнительные услуги и чаевые.
+
+Если транспорт задерживается, звоните на горячую линию:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+✨ Желаем вам приятного отдыха и полного релакса!`,
+
+    vip:`Добрый вечер!
+Выезд на экскурсию завтра состоится в ${p}.
+
+Рекомендую взять с собой:
+• подходящую обувь
+• головные уборы
+• питьевую воду
+• солнцезащитные средства
+• деньги на личные расходы (обед и сувениры)
+• тёплую одежду (дорога в авто под кондиционером)
+
+Если транспорт задерживается, обратитесь на горячую линию:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаю вам приятной поездки.`,
+
+    hanuman:`Добрый день!
+Завтра у вас увлекательное приключение — экскурсия в «Мир Ханумана»!
+
+⏰ Время выезда из отеля: ${p}
+
+🎒 Что взять с собой:
+• удобную обувь (лучше кроссовки или сандалии, минимум — кроксы)
+• головной убор — обязательно
+• лёгкую и не новую одежду (шорты + футболка, возможно попадание масла с роликовой системы)
+• деньги на личные расходы (напитки, сувениры)
+
+🗺️ По прибытии в парк:
+1. Подходите на ресепшн, получите браслет по вашему пакету.
+2. Вас ждут яркие приключения:
+   ✧ Полёт по Zip-line
+   ✧ Прогулка по Sky Walk
+   ✧ Спуск на Roller
+   ✧ Вкусный обед
+3. После каждого этапа возвращайтесь на ресепшн — сотрудники подскажут что дальше.
+
+🚐 По окончании программы вас проводят к трансферу.
+
+Если транспорт задерживается, обратитесь на горячую линию:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+🎉 Желаем незабываемых эмоций и лёгкого полёта!`,
+
+    fishing:`Добрый вечер!
+Завтра выезд на рыбалку.
+
+⏰ Время выезда: ${p}
+📍 Место сбора: ресепшн отеля (будьте за 10 минут до выезда)
+
+Что взять с собой:
+• удобная обувь (сланцы / сандалии)
+• головной убор, солнцезащитные средства
+• полотенце, купальные принадлежности
+
+Важно: лодка оснащена спасательными жилетами, рыболовные снасти предоставляются.
+
+Если транспорт задерживается, свяжитесь с горячей линией:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Хорошей рыбалки и отличного дня! 🎣`,
+
+    cabaret:`Уважаемые гости!
+
+Завтра у вас запланировано посещение кабаре-шоу Simon Cabaret.
+Входные билеты у вас уже есть.
+
+📍 Место проведения: Simon Cabaret, Patong
+⏰ Начало шоу: 18:00 (прибудьте минимум за 20–30 минут для обмена билетов)
+🎫 Ваши билеты: предоставьте на входе.
+
+🚖 Внимание! Трансфер не предоставляется — добраться необходимо самостоятельно (рекомендуем такси / Bolt / inDrive).
+
+Для вашего удобства:
+• Длительность шоу около 1 часа
+• Фотосессия с артистами после шоу (оплачивается дополнительно)
+
+В случае вопросов — горячая линия:
+📞 +66922790990 (WhatsApp, Telegram)
+📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)
+
+Желаем вам приятного вечера и незабываемых впечатлений! 💃`,
+  }
+  return encodeURIComponent(msgs[e.excursionType])
+}
+
+function formatExcelValue(v: any): string {
+  if (v===undefined||v===null||String(v).trim()===""||String(v).trim()==="0") return ""
+  if (typeof v==="number") {
+    if (v>0&&v<1) { const s=Math.round(v*86400); return `${String(Math.floor(s/3600)).padStart(2,"0")}:${String(Math.floor((s%3600)/60)).padStart(2,"0")}` }
+    if (v>=1&&v<3) { const f=v%1,s=Math.round(f*86400); return `${String(Math.floor(s/3600)).padStart(2,"0")}:${String(Math.floor((s%3600)/60)).padStart(2,"0")}` }
     if (v>40000) { const d=XLSX.SSF.parse_date_code(v); return `${String(d.d).padStart(2,"0")}.${String(d.m).padStart(2,"0")}.${d.y}` }
   }
   const s=String(v).trim()
