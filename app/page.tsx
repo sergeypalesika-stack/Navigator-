@@ -16,7 +16,18 @@ interface Excursion {
   pickup: string; adl: number; chd: number; inf: number; guide: string; cooperateStaff: string
 }
 
-type ExcursionType = "sea"|"evening"|"jetski"|"flight"|"bangkok"|"twoday"|"cheolan"|"land"|"city"|"mantra"|"dolcevita"|"waterpark"|"spa"|"vip"|"hanuman"|"fishing"|"cabaret"
+interface LogEntry {
+  id: string
+  time: string
+  date: string
+  type: "transfer" | "excursion"
+  name: string
+  phone: string
+  hotel: string
+  voucherId: string
+}
+
+type ExcursionType = "sea"|"evening"|"jetski"|"flight"|"bangkok"|"twoday"|"cheolan"|"land"|"city"|"mantra"|"dolcevita"|"waterpark"|"spa"|"vip"|"hanuman"|"fishing"|"cabaret"|"elephant"|"shopping"
 
 function classifyExcursion(name: string): ExcursionType {
   const n = name.toLowerCase()
@@ -35,6 +46,8 @@ function classifyExcursion(name: string): ExcursionType {
   if (n.includes("2/1")||n.includes("2.1")||n.includes("star island")||n.includes("звёздн")) return "twoday"
   if (n.includes("vip")||n.includes("вип")) return "vip"
   if (n.includes("city")||n.includes("сити")||n.includes("wonders")) return "city"
+  if (n.includes("elephant")||n.includes("слон")) return "elephant"
+  if (n.includes("shopping")||n.includes("шоппинг")||n.includes("shop tour")) return "shopping"
   if (n.includes("safari")||n.includes("сафари")||n.includes("phang")||n.includes("пхангнга")||n.includes("пхангн")||n.includes("avatar")||n.includes("аватар")||n.includes("discovery")||n.includes("asia safari")||n.includes("удивительн")||n.includes("amazing")) return "land"
   return "sea"
 }
@@ -57,6 +70,8 @@ const TYPE_META: Record<ExcursionType,{label:string;icon:string;color:string;bor
   hanuman:   {label:"Мир Ханумана",    icon:"🐒",color:"#bbf7d0",border:"#15803d",bg:"#0a1f10"},
   fishing:   {label:"Рыбалка",         icon:"🎣",color:"#7dd3fc",border:"#0369a1",bg:"#0a1f2d"},
   cabaret:   {label:"Simon Cabaret",   icon:"💃",color:"#fca5a5",border:"#dc2626",bg:"#2d0a0a",noTransfer:true},
+  elephant:  {label:"Слоновий заповедник", icon:"🐘",color:"#86efac",border:"#15803d",bg:"#0a1f10"},
+  shopping:  {label:"Шоппинг-тур",     icon:"🛍️",color:"#fde68a",border:"#ca8a04",bg:"#2d2200"},
 }
 
 function generateExcursionMessage(e: Excursion): string {
@@ -439,6 +454,60 @@ function generateExcursionMessage(e: Excursion): string {
       "",
       "Желаем вам приятного вечера и незабываемых впечатлений! 💃",
     ],
+    elephant: [
+      "Дорогие гости!",
+      "",
+      "Завтра состоится ваша экскурсия в заповедник слонов — уникальное место, где вы сможете пообщаться с этими удивительными животными в условиях, максимально приближённых к естественным. 🐘",
+      "",
+      "⏰ Время выезда: " + p,
+      "📍 Просьба быть готовыми у лобби за 10 минут до выезда.",
+      "",
+      "Рекомендуем взять с собой:",
+      "• удобную одежду, которую не жалко испачкать (возможно взаимодействие с грязью или водой)",
+      "• обувь на твёрдой подошве (сандалии, кроссовки)",
+      "• купальник / плавки и полотенце (если программа включает купание со слонами)",
+      "• сменную одежду",
+      "• репеллент от комаров",
+      "• солнцезащитный крем и головной убор",
+      "• деньги на личные расходы (напитки, сувениры и чаевые)",
+      "",
+      "❗ По возможности не используйте парфюмы — сильные запахи могут раздражать животных.",
+      "",
+      "Желаем вам незабываемых впечатлений и душевного общения с этими добрыми великанами!",
+      "",
+      "Если транспорт задерживается, обратитесь на горячую линию:",
+      "📞 +66922790990 (WhatsApp, Telegram)",
+      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      "",
+      "Желаю вам приятной поездки.",
+    ],
+    shopping: [
+      "Дорогие гости!",
+      "",
+      "Завтра у вас запланировано посещение наших партнёров — специализированных центров Пхукета. 🛍️",
+      "",
+      "⏰ Время выезда: " + p,
+      "📍 Просьба быть готовыми у лобби за 10 минут до выезда.",
+      "",
+      "Вас ждут:",
+      "• 💎 Галерея самоцветов и ювелирных украшений",
+      "• 🌿 Центр традиционной тайской медицины",
+      "• 🧴 Центр натуральной косметики",
+      "• 🦈 И другие интересные места",
+      "",
+      "ℹ️ Посещение бесплатное — покупки по желанию.",
+      "В каждом центре вас встретят русскоговорящие сотрудники.",
+      "",
+      "Возьмите с собой:",
+      "• деньги наличными и карту",
+      "• тёплую кофту (в центрах работает кондиционер)",
+      "",
+      "Если транспорт задерживается, обратитесь на горячую линию:",
+      "📞 +66922790990 (WhatsApp, Telegram)",
+      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      "",
+      "Желаем приятной поездки и интересных открытий! ✨",
+    ],
   }
   return encodeURIComponent(msgs[e.excursionType].join("\n"))
 }
@@ -509,19 +578,22 @@ export default function Page() {
   const [unlocked, setUnlocked] = useState(false)
   const [pwInput, setPwInput] = useState("")
   const [pwError, setPwError] = useState(false)
-  const [tab,setTab]=useState<"transfers"|"excursions">("transfers")
+  const [tab,setTab]=useState<"transfers"|"excursions"|"log">("transfers")
+  const [log,setLog]=useState<LogEntry[]>([])
   const [transferData,setTransferData]=useState<Voucher[]>([])
   const [notifiedVouchers,setNotifiedVouchers]=useState<Record<string,boolean>>({})
   const [touristSearch,setTouristSearch]=useState("")
   const [selectedGuide,setSelectedGuide]=useState("")
   const [collapsedDates,setCollapsedDates]=useState<Record<string,boolean>>({})
   const [transferFileName,setTransferFileName]=useState("")
+
   const [excursionData,setExcursionData]=useState<Excursion[]>([])
   const [notifiedExcursions,setNotifiedExcursions]=useState<Record<string,boolean>>({})
   const [excSearch,setExcSearch]=useState("")
   const [excGuide,setExcGuide]=useState("")
   const [excFileName,setExcFileName]=useState("")
   const [collapsedTypes,setCollapsedTypes]=useState<Record<string,boolean>>({})
+
   const [dark,setDark]=useState(true)
 
   useEffect(() => {
@@ -539,6 +611,21 @@ export default function Page() {
     }
   }
 
+  function addLog(type:"transfer"|"excursion", name:string, phone:string, hotel:string, voucherId:string) {
+    const now = new Date()
+    const entry: LogEntry = {
+      id: now.getTime().toString(),
+      time: now.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"}),
+      date: now.toLocaleDateString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric"}),
+      type, name, phone, hotel, voucherId
+    }
+    setLog(prev => {
+      const updated = [entry, ...prev]
+      localStorage.setItem("navLog", JSON.stringify(updated))
+      return updated
+    })
+  }
+
   useEffect(()=>{
     const d=localStorage.getItem("transferData"),n=localStorage.getItem("notifiedVouchers")
     const e=localStorage.getItem("excursionData"),ne=localStorage.getItem("notifiedExcursions")
@@ -546,6 +633,7 @@ export default function Page() {
     if(d)setTransferData(JSON.parse(d));if(n)setNotifiedVouchers(JSON.parse(n))
     if(e)setExcursionData(JSON.parse(e));if(ne)setNotifiedExcursions(JSON.parse(ne))
     if(dk!==null)setDark(dk==="1")
+    const lg=localStorage.getItem("navLog");if(lg)setLog(JSON.parse(lg))
   },[])
 
   useEffect(()=>{localStorage.setItem("notifiedVouchers",JSON.stringify(notifiedVouchers))},[notifiedVouchers])
@@ -676,7 +764,7 @@ export default function Page() {
   const groupedExcursions=useMemo(()=>{
     const map:Partial<Record<ExcursionType,Excursion[]>>={}
     filteredExcursions.forEach(e=>{if(!map[e.excursionType])map[e.excursionType]=[];map[e.excursionType]!.push(e)})
-    const order:ExcursionType[]=["sea","dolcevita","evening","jetski","flight","bangkok","twoday","cheolan","land","city","mantra","waterpark","spa","vip","hanuman","fishing","cabaret"]
+    const order:ExcursionType[]=["sea","dolcevita","evening","jetski","flight","bangkok","twoday","cheolan","land","city","mantra","waterpark","spa","vip","hanuman","fishing","cabaret","elephant","shopping"]
     return order.filter(k=>map[k]).map(k=>[k,map[k]!] as [ExcursionType,Excursion[]])
   },[filteredExcursions])
 
@@ -720,6 +808,19 @@ export default function Page() {
   const selStyle:React.CSSProperties={flex:1,padding:"9px 12px",fontSize:"13px",borderRadius:"8px",background:t.inputBg,border:`1px solid ${t.inputBdr}`,color:t.text,outline:"none",cursor:"pointer",appearance:"none",WebkitAppearance:"none"}
   const inp:React.CSSProperties={flex:1,padding:"9px 12px",fontSize:"13px",borderRadius:"8px",background:t.inputBg,border:`1px solid ${t.inputBdr}`,color:t.text,outline:"none"}
 
+  function exportReport() {
+    if (log.length === 0) { alert("Журнал пуст"); return }
+    const rows = [
+      ["Дата", "Время", "Тип", "Турист", "Телефон", "Отель", "Ваучер"],
+      ...log.map(e => [e.date, e.time, e.type==="transfer"?"Трансфер":"Экскурсия", e.name, e.phone, e.hotel, e.voucherId])
+    ]
+    const ws = XLSX.utils.aoa_to_sheet(rows)
+    ws["!cols"] = [12,8,12,25,16,30,12].map(w=>({wch:w}))
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, "Журнал")
+    XLSX.writeFile(wb, `navigator_log_${new Date().toISOString().slice(0,10)}.xlsx`)
+  }
+
   return (
     <div style={{minHeight:"100vh",background:t.bg,color:t.text,fontFamily:"'IBM Plex Sans','Segoe UI',sans-serif",transition:"background 0.3s,color 0.3s"}}>
 
@@ -734,7 +835,7 @@ export default function Page() {
             </div>
           </div>
           <div style={{display:"flex",gap:"4px",marginTop:"10px"}}>
-            {[{key:"transfers",label:"✈️ Трансферы"},{key:"excursions",label:"🗺️ Экскурсии"}].map(({key,label})=>(
+            {[{key:"transfers",label:"✈️ Трансферы"},{key:"excursions",label:"🗺️ Экскурсии"},{key:"log",label:"📋 Журнал"}].map(({key,label})=>(
               <button key={key} onClick={()=>setTab(key as any)} style={{padding:"7px 16px",fontSize:"13px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:tab===key?(key==="excursions"?"#7c3aed":t.accent):t.cardBorder,color:tab===key?"#fff":t.muted,transition:"all 0.2s"}}>{label}</button>
             ))}
           </div>
@@ -807,7 +908,7 @@ export default function Page() {
                                 <div key={idx} style={{marginBottom:"8px"}}>
                                   <div style={{fontSize:"12px",color:t.muted,marginBottom:"4px"}}>📱 {ph}</div>
                                   <div style={{display:"flex",gap:"6px"}}>
-                                    <a href={isProblem?undefined:`https://wa.me/${ph.replace(/\D/g,"")}?text=${generateTransferMessage(v)}`} target="_blank" rel="noreferrer" onClick={()=>!isDone&&!isProblem&&setNotifiedVouchers(prev=>({...prev,[v.vId]:true}))} style={{flex:1,background:isProblem?t.cardBorder:"#15803d",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700,pointerEvents:isProblem?"none":"auto"}}>WhatsApp</a>
+                                    <a href={isProblem?undefined:`https://wa.me/${ph.replace(/\D/g,"")}?text=${generateTransferMessage(v)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isProblem){if(!isDone)setNotifiedVouchers(prev=>({...prev,[v.vId]:true}));addLog("transfer",v.tourists[0]||"",ph,v.hotel,v.vId)}}} style={{flex:1,background:isProblem?t.cardBorder:"#15803d",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700,pointerEvents:isProblem?"none":"auto"}}>WhatsApp</a>
                                     <a href={`tel:${ph}`} style={{flex:1,background:t.cardBorder,color:t.text,textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700}}>Позвонить</a>
                                   </div>
                                 </div>
@@ -887,7 +988,7 @@ export default function Page() {
                                 <div key={idx} style={{marginBottom:"8px"}}>
                                   <div style={{fontSize:"12px",color:t.muted,marginBottom:"4px"}}>📱 {tt.phone}</div>
                                   <div style={{display:"flex",gap:"6px"}}>
-                                    <a href={`https://wa.me/${tt.phone.replace(/\D/g,"")}?text=${generateExcursionMessage(e)}`} target="_blank" rel="noreferrer" onClick={()=>!isDone&&setNotifiedExcursions(prev=>({...prev,[e.key]:true}))} style={{flex:1,background:"#15803d",color:"#fff",textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700}}>WhatsApp</a>
+                                    <a href={`https://wa.me/${tt.phone.replace(/\D/g,"")}?text=${generateExcursionMessage(e)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isDone)setNotifiedExcursions(prev=>({...prev,[e.key]:true}));addLog("excursion",tt.name,tt.phone,e.hotel,e.vId)}} style={{flex:1,background:"#15803d",color:"#fff",textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700}}>WhatsApp</a>
                                     <a href={`tel:${tt.phone}`} style={{flex:1,background:t.cardBorder,color:t.text,textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700}}>Позвонить</a>
                                   </div>
                                 </div>
@@ -904,6 +1005,58 @@ export default function Page() {
           </main>
         </>
       )}
+
+
+
+      {/* ── LOG TAB ──────────────────────────────────────────────────────────── */}
+      {tab==="log" && (
+        <>
+          <div style={{maxWidth:"1200px",margin:"0 auto",padding:"12px 16px 0",display:"flex",justifyContent:"space-between",alignItems:"center",gap:"8px"}}>
+            <div style={{fontSize:"14px",color:t.muted}}>{log.length > 0 ? `Записей: ${log.length}` : "Журнал пуст"}</div>
+            <div style={{display:"flex",gap:"8px"}}>
+              {log.length > 0 && (
+                <button onClick={exportReport} style={{fontSize:"12px",background:"#16a34a",color:"#fff",padding:"7px 14px",border:"none",borderRadius:"8px",cursor:"pointer",fontWeight:600}}>
+                  ⬇ Экспорт
+                </button>
+              )}
+              {log.length > 0 && (
+                <button onClick={()=>{if(confirm("Очистить журнал?")){setLog([]);localStorage.removeItem("navLog")}}} style={{fontSize:"12px",background:t.cardBorder,color:t.muted,padding:"7px 14px",border:"none",borderRadius:"8px",cursor:"pointer",fontWeight:600}}>
+                  🗑 Очистить
+                </button>
+              )}
+            </div>
+          </div>
+
+          {log.length === 0 && (
+            <div style={{textAlign:"center",padding:"80px 20px",color:t.muted}}>
+              <div style={{fontSize:"48px",marginBottom:"12px"}}>📋</div>
+              <div style={{fontSize:"16px",fontWeight:600,marginBottom:"4px"}}>Журнал пуст</div>
+              <div style={{fontSize:"13px"}}>Записи появятся после отправки сообщений через WhatsApp</div>
+            </div>
+          )}
+
+          <main style={{maxWidth:"1200px",margin:"0 auto",padding:"16px"}}>
+            {log.map((entry) => (
+              <div key={entry.id} style={{background:t.card,borderRadius:"12px",border:`1px solid ${t.cardBorder}`,padding:"12px",marginBottom:"8px",display:"flex",alignItems:"center",gap:"12px"}}>
+                <div style={{background:entry.type==="transfer"?"#0c2340":"#1e1040",borderRadius:"8px",padding:"8px 10px",textAlign:"center",flexShrink:0}}>
+                  <div style={{fontSize:"18px"}}>{entry.type==="transfer"?"✈️":"🗺️"}</div>
+                  <div style={{fontSize:"10px",color:t.muted,marginTop:"2px"}}>{entry.time}</div>
+                </div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:"13px",fontWeight:700,color:t.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{entry.name||"—"}</div>
+                  <div style={{fontSize:"12px",color:t.accent,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>🏨 {entry.hotel}</div>
+                  <div style={{fontSize:"11px",color:t.muted}}>📱 {entry.phone} · 🎫 {entry.voucherId}</div>
+                </div>
+                <div style={{textAlign:"right",flexShrink:0}}>
+                  <div style={{fontSize:"11px",color:t.muted}}>{entry.date}</div>
+                  <div style={{fontSize:"11px",background:entry.type==="transfer"?t.accent:"#a855f7",color:"#fff",borderRadius:"4px",padding:"2px 6px",marginTop:"4px"}}>{entry.type==="transfer"?"Трансфер":"Экскурсия"}</div>
+                </div>
+              </div>
+            ))}
+          </main>
+        </>
+      )}
+
     </div>
   )
 }
