@@ -7,6 +7,7 @@ interface Voucher {
   vId: string; hotel: string; guide: string; pickup: string
   flightDate: string; flightTime: string; flightNo: string
   tourists: string[]; phones: string[]; departureDate: string
+  touroperator: string
 }
 
 interface Excursion {
@@ -38,7 +39,7 @@ function classifyExcursion(name: string): ExcursionType {
   if (n.includes("fishing")||n.includes("рыбалк")) return "fishing"
   if (n.includes("mantra")||n.includes("мантра")) return "mantra"
   if (n.includes("dolce vita")||n.includes("дольче вита")) return "dolcevita"
-  if (n.includes("carnival")||n.includes("siam niramit")||n.includes("moonlight")) return "evening"
+  if (n.includes("carnival")||n.includes("siam niramit")||n.includes("moonlight")||n.includes("fantasea")||n.includes("фантасеа")) return "evening"
   if (n.includes("jet ski")||n.includes("wave rider")||n.includes("гидроцикл")) return "jetski"
   if (n.includes("bangkok")||n.includes("бангкок")) return "bangkok"
   if (n.includes("singapore")||n.includes("malaysia")||n.includes("cambodia")||n.includes("сингапур")||n.includes("малайзия")||n.includes("камбоджа")) return "flight"
@@ -48,7 +49,7 @@ function classifyExcursion(name: string): ExcursionType {
   if (n.includes("city")||n.includes("сити")||n.includes("wonders")) return "city"
   if (n.includes("elephant")||n.includes("слон")) return "elephant"
   if (n.includes("shopping")||n.includes("шоппинг")||n.includes("shop tour")) return "shopping"
-  if (n.includes("safari")||n.includes("сафари")||n.includes("phang")||n.includes("пхангнга")||n.includes("пхангн")||n.includes("avatar")||n.includes("аватар")||n.includes("discovery")||n.includes("asia safari")||n.includes("удивительн")||n.includes("amazing")) return "land"
+  if (n.includes("safari")||n.includes("сафари")||n.includes("phang")||n.includes("пхангнга")||n.includes("пхангн")||n.includes("avatar")||n.includes("аватар")||n.includes("discovery")||n.includes("asia safari")||n.includes("удивительн")||n.includes("amazing")||n.includes("trekking")||n.includes("rafting")||n.includes("трекинг")||n.includes("рафтинг")) return "land"
   return "sea"
 }
 
@@ -535,6 +536,7 @@ function formatExcelValue(v: any): string {
 }
 
 function generateTransferMessage(v: Voucher): string {
+  const isBIG = v.touroperator === "BIG"
   const lines = [
     "🛫 ИНФОРМАЦИЯ О ВЫЕЗДЕ В АЭРОПОРТ",
     "",
@@ -564,8 +566,7 @@ function generateTransferMessage(v: Voucher): string {
     "",
     "☎️ В случае задержки транспорта (более 10 минут):",
     "Свяжитесь с нашей горячей линией:",
-    "📞 Звонки: +66 92 249 49 49",
-    "💬 WhatsApp / Telegram: +66 92 279 09 90",
+    ...(isBIG ? ["📞 Для звонков: +66 92 249 49 49","💬 WhatsApp / Telegram: +66 92 279 09 90"] : ["📞 +66 89 009 50 00 (для звонков с местных телефонов)","💬 +66 92 279 11 99 (WhatsApp, Telegram)"]),
     "",
     "✨ Желаем вам приятного полёта и надеемся вновь увидеть вас в Таиланде!",
   ]
@@ -672,7 +673,8 @@ export default function Page() {
           const vId=String(row[2]||"").trim()
           if(!vId||vId.length<5||isNaN(Number(vId)))return
           const pv=formatExcelValue(row[pickupIdx]),fdv=formatExcelValue(row[29]),ddv=formatExcelValue(row[21])
-          if(!vouchers[vId])vouchers[vId]={vId,hotel:currentHotel,guide:currentGuide,pickup:pv||"—",flightDate:fdv||"—",flightTime:formatExcelValue(row[27])||"—",flightNo:String(row[28]||"").trim()||"—",departureDate:ddv||"—",tourists:[],phones:[]}
+          const toVal=String(row[3]||"").trim().toUpperCase()
+          if(!vouchers[vId])vouchers[vId]={vId,hotel:currentHotel,guide:currentGuide,pickup:pv||"—",flightDate:fdv||"—",flightTime:formatExcelValue(row[27])||"—",flightNo:String(row[28]||"").trim()||"—",departureDate:ddv||"—",tourists:[],phones:[],touroperator:toVal}
           if(pv&&vouchers[vId].pickup==="—")vouchers[vId].pickup=pv
           if(fdv&&vouchers[vId].flightDate==="—")vouchers[vId].flightDate=fdv
           if(ddv&&vouchers[vId].departureDate==="—")vouchers[vId].departureDate=ddv
@@ -898,7 +900,8 @@ export default function Page() {
                             </div>
                             <div style={{padding:"12px",flex:1}}>
                               <div style={{color:t.accent,fontWeight:700,fontSize:"15px",marginBottom:"2px"}}>🏨 {v.hotel}</div>
-                              <div style={{color:"#fbbf24",fontSize:"12px",fontWeight:600,marginBottom:"4px"}}>👤 {v.guide}</div>
+                              <div style={{color:"#fbbf24",fontSize:"12px",fontWeight:600,marginBottom:"2px"}}>👤 {v.guide}</div>
+                              {v.touroperator&&<div style={{display:"inline-block",fontSize:"10px",background:v.touroperator==="BIG"?"#1e3f6a":"#2d1b0e",color:v.touroperator==="BIG"?"#38bdf8":"#fb923c",borderRadius:"4px",padding:"1px 6px",marginBottom:"4px",fontWeight:700}}>{v.touroperator}</div>}
                               <div style={{color:t.muted,fontSize:"12px",marginBottom:"8px"}}>🗓 Выезд из отеля: <span style={{color:t.text,fontWeight:600}}>{v.departureDate}</span></div>
                               <ul style={{margin:"0 0 10px 0",paddingLeft:"16px",fontSize:"13px",color:t.text}}>{v.tourists.map((tt,idx)=><li key={idx} style={{marginBottom:"2px"}}>{tt}</li>)}</ul>
                             </div>
