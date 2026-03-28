@@ -14,7 +14,7 @@ interface Excursion {
   key: string; vId: string; date: string; excursionName: string
   excursionType: ExcursionType; hotel: string; room: string
   tourists: { name: string; phone: string }[]
-  pickup: string; adl: number; chd: number; inf: number; guide: string; cooperateStaff: string
+  pickup: string; adl: number; chd: number; inf: number; guide: string; cooperateStaff: string; touroperator: string
 }
 
 interface LogEntry {
@@ -77,6 +77,10 @@ const TYPE_META: Record<ExcursionType,{label:string;icon:string;color:string;bor
 
 function generateExcursionMessage(e: Excursion): string {
   const p = e.pickup && e.pickup !== "—" ? e.pickup : "уточните у гида"
+  const isBIG = (e.touroperator||"").toLowerCase().includes("bg asia") || (e.touroperator||"").toLowerCase().includes("big")
+  const hotlineMain = isBIG
+    ? ["📞 Для звонков: +66 92 249 49 49", "💬 WhatsApp / Telegram: +66 92 279 09 90"]
+    : ["📞 +66 89 009 50 00 (для звонков с местных телефонов)", "💬 +66 92 279 11 99 (WhatsApp, Telegram)"]
   const msgs: Record<ExcursionType, string[]> = {
     sea: [
       "Уважаемые гости!",
@@ -98,8 +102,7 @@ function generateExcursionMessage(e: Excursion): string {
       "⚠️ Беременным нельзя на морские экскурсии!",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Желаю вам приятной поездки и отличного отдыха! 🌴🚤☀️",
     ],
@@ -120,8 +123,7 @@ function generateExcursionMessage(e: Excursion): string {
       "• хорошее настроение и заряженный телефон — будет что снимать! 📸",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Желаю вам приятной поездки! 🌴",
     ],
@@ -142,8 +144,7 @@ function generateExcursionMessage(e: Excursion): string {
       "На выходе сотрудники направят вас к минивэнам — трансфер в отель.",
       "",
       "Если трансфер задерживается более 10 минут:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Желаю приятного просмотра и ярких впечатлений!",
     ],
@@ -168,8 +169,7 @@ function generateExcursionMessage(e: Excursion): string {
       "Хорошей прогулки и ярких эмоций! 🌊💙",
       "",
       "Если транспорт задерживается:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Желаем вам приятной поездки! 🌴✨",
     ],
@@ -188,8 +188,7 @@ function generateExcursionMessage(e: Excursion): string {
       "• закажите накануне на ресепшене lunch box / breakfast box",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Желаю вам приятной поездки.",
     ],
@@ -208,8 +207,7 @@ function generateExcursionMessage(e: Excursion): string {
       "• закажите накануне на ресепшене lunch box / breakfast box",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Желаю вам приятной поездки.",
     ],
@@ -230,8 +228,7 @@ function generateExcursionMessage(e: Excursion): string {
       "• закажите накануне на ресепшене lunch box / breakfast box",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Желаю вам приятной поездки.",
     ],
@@ -261,8 +258,7 @@ function generateExcursionMessage(e: Excursion): string {
       "• не берите тяжёлые чемоданы — достаточно небольшого рюкзака",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Желаю вам приятной поездки.",
     ],
@@ -281,8 +277,7 @@ function generateExcursionMessage(e: Excursion): string {
       "• заранее закажите на ресепшене завтрак / lunch box",
       "",
       "Если транспорт задерживается:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Хорошей дороги и ярких впечатлений! 🌿😊",
     ],
@@ -303,8 +298,7 @@ function generateExcursionMessage(e: Excursion): string {
       "• носки (перед храмом необходимо разуться)",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Желаю вам приятной поездки.",
     ],
@@ -322,8 +316,7 @@ function generateExcursionMessage(e: Excursion): string {
       "💆 В спа полотенца предоставляются, но при получении берётся депозит 300 бат (возвращается 200 бат).",
       "",
       "Если транспорт задерживается:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Желаем вам приятной поездки и отличного отдыха! 🌴✨",
     ],
@@ -345,8 +338,7 @@ function generateExcursionMessage(e: Excursion): string {
       "• Полотенца можно взять с собой либо арендовать на месте",
       "",
       "В случае вопросов — горячая линия:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Желаем вам ярких впечатлений и отличного отдыха! 🌊",
     ],
@@ -361,8 +353,7 @@ function generateExcursionMessage(e: Excursion): string {
       "Возьмите деньги на дополнительные услуги и чаевые.",
       "",
       "Если транспорт задерживается, звоните на горячую линию:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "✨ Желаем вам приятного отдыха и полного релакса!",
     ],
@@ -379,8 +370,7 @@ function generateExcursionMessage(e: Excursion): string {
       "• тёплую одежду (дорога в авто под кондиционером)",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Желаю вам приятной поездки.",
     ],
@@ -408,8 +398,7 @@ function generateExcursionMessage(e: Excursion): string {
       "По окончании программы вас проводят к трансферу.",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "🎉 Желаем незабываемых эмоций и лёгкого полёта!",
     ],
@@ -428,8 +417,7 @@ function generateExcursionMessage(e: Excursion): string {
       "Важно: лодка оснащена спасательными жилетами, рыболовные снасти предоставляются.",
       "",
       "Если транспорт задерживается, свяжитесь с горячей линией:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Хорошей рыбалки и отличного дня! 🎣",
     ],
@@ -450,8 +438,7 @@ function generateExcursionMessage(e: Excursion): string {
       "• Фотосессия с артистами после шоу (оплачивается дополнительно)",
       "",
       "В случае вопросов — горячая линия:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Желаем вам приятного вечера и незабываемых впечатлений! 💃",
     ],
@@ -477,8 +464,7 @@ function generateExcursionMessage(e: Excursion): string {
       "Желаем вам незабываемых впечатлений и душевного общения с этими добрыми великанами!",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Желаю вам приятной поездки.",
     ],
@@ -504,13 +490,16 @@ function generateExcursionMessage(e: Excursion): string {
       "• тёплую кофту (в центрах работает кондиционер)",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
-      "📞 +66922790990 (WhatsApp, Telegram)",
-      "📞 +66922494949 (звонки с тайских номеров / с ресепшена отеля)",
+      ...hotlineMain,
       "",
       "Желаем приятной поездки и интересных открытий! ✨",
     ],
   }
-  return encodeURIComponent(msgs[e.excursionType].join("\n"))
+  const msgLines = msgs[e.excursionType].reduce((acc:string[],line:string)=>{
+    if(line==="...hotlineMain"){return [...acc,...hotlineMain]}
+    return [...acc,line]
+  },[])
+  return encodeURIComponent(msgLines.join("\n"))
 }
 
 
@@ -711,6 +700,7 @@ export default function Page() {
         const cH=headers.findIndex(h=>h.includes("hotel")&&!h.includes("guide"))
         const cG=headers.findIndex(h=>h.includes("guide")&&!h.includes("hotel"))
         const cCS=headers.findIndex(h=>h.includes("cooperate")||h.includes("staff"))
+        const cTO=headers.findIndex(h=>h.includes("touroperator")||h.includes("tour operator"))
         const map:Record<string,Excursion>={}
         for(let i=headerIdx+1;i<rows.length;i++){
           const row=rows[i]
@@ -720,7 +710,7 @@ export default function Page() {
           const phone=String(row[cP]||"").replace(/[^\d+]/g,"")
           const name=String(row[cN]||"").trim()
           const pickup=String(row[cPu]||"").trim()
-          if(!map[key])map[key]={key,vId,date:String(row[cD]||"").trim(),excursionName:excName,excursionType:classifyExcursion(excName),hotel:String(row[cH]||"").trim(),room:String(row[cR]||"").trim(),tourists:[],pickup:pickup||"—",adl:Number(row[cA]||0),chd:Number(row[cC]||0),inf:Number(row[cI]||0),guide:String(row[cG]||"").trim(),cooperateStaff:cCS>=0?String(row[cCS]||"").trim():""}
+          if(!map[key])map[key]={key,vId,date:String(row[cD]||"").trim(),excursionName:excName,excursionType:classifyExcursion(excName),hotel:String(row[cH]||"").trim(),room:String(row[cR]||"").trim(),tourists:[],pickup:pickup||"—",adl:Number(row[cA]||0),chd:Number(row[cC]||0),inf:Number(row[cI]||0),guide:String(row[cG]||"").trim(),cooperateStaff:cCS>=0?String(row[cCS]||"").trim():"",touroperator:cTO>=0?String(row[cTO]||"").trim():""}
           if(pickup&&map[key].pickup==="—")map[key].pickup=pickup
           if(name&&!map[key].tourists.find(t=>t.name===name)){if(phone)map[key].tourists.push({name,phone});else map[key].tourists.push({name,phone:""})}
           else if(name&&phone&&map[key].tourists.find(t=>t.name===name&&!t.phone)){const idx=map[key].tourists.findIndex(t=>t.name===name);map[key].tourists[idx].phone=phone}
@@ -981,6 +971,7 @@ export default function Page() {
                               <div style={{color:meta.color,fontWeight:700,fontSize:"13px",marginBottom:"4px"}}>{meta.icon} {e.excursionName}</div>
                               <div style={{color:t.accent,fontWeight:700,fontSize:"14px",marginBottom:"2px"}}>🏨 {e.hotel}{e.room?` · №${e.room}`:""}</div>
                               <div style={{color:"#fbbf24",fontSize:"12px",fontWeight:600,marginBottom:"2px"}}>👤 {e.guide}</div>
+                              {e.touroperator&&<div style={{display:"inline-block",fontSize:"10px",background:(e.touroperator||"").toLowerCase().includes("bg asia")?"#1e3f6a":"#2d1b0e",color:(e.touroperator||"").toLowerCase().includes("bg asia")?"#38bdf8":"#fb923c",borderRadius:"4px",padding:"1px 6px",marginBottom:"4px",fontWeight:700}}>{(e.touroperator||"").toLowerCase().includes("bg asia")?"BIG":e.touroperator.split(" ")[0]}</div>}
                               {e.cooperateStaff&&<div style={{color:"#a3e635",fontSize:"12px",marginBottom:"4px"}}>🤝 {e.cooperateStaff}</div>}
                               <div style={{color:t.muted,fontSize:"12px",marginBottom:"8px"}}>📅 {e.date} · 👥 {e.adl} взр{e.chd>0?` · ${e.chd} дет`:""}{e.inf>0?` · ${e.inf} мл`:""}</div>
                               <ul style={{margin:"0 0 6px 0",paddingLeft:"16px",fontSize:"13px",color:t.text}}>{e.tourists.map((tt,idx)=><li key={idx} style={{marginBottom:"2px"}}>{tt.name}</li>)}</ul>
