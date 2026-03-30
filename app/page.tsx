@@ -669,8 +669,7 @@ export default function Page() {
           if(ddv&&vouchers[vId].departureDate==="—")vouchers[vId].departureDate=ddv
           const fn=`${row[4]} ${row[5]}`.trim()
           if(fn&&!fn.toLowerCase().includes("tourist")&&!vouchers[vId].tourists.includes(fn))vouchers[vId].tourists.push(fn)
-          const ph=String(row[8]||row[25]||"").replace(/[^\d+]/g,"")
-          if(ph&&!vouchers[vId].phones.includes(ph))vouchers[vId].phones.push(ph)
+          const phRaw=String(row[8]||row[25]||"").replace(/[^\d+]/g,"");const phParts=phRaw.split("+").filter((p:string)=>p.length>=7).map((p:string)=>"+"+p);phParts.forEach((p:string)=>{if(!vouchers[vId].phones.includes(p))vouchers[vId].phones.push(p)})
         })
         const result=Object.values(vouchers).sort((a,b)=>{if(a.pickup==="—"&&b.pickup!=="—")return 1;if(a.pickup!=="—"&&b.pickup==="—")return -1;return a.pickup.localeCompare(b.pickup)})
         setTransferData(result);setNotifiedVouchers({});setCollapsedDates({});setSelectedGuide("")
@@ -1050,6 +1049,8 @@ export default function Page() {
           </main>
         </>
       )}
+
+
 
     </div>
   )
