@@ -7,7 +7,7 @@ interface Voucher {
   vId: string; hotel: string; guide: string; pickup: string
   flightDate: string; flightTime: string; flightNo: string
   tourists: string[]; phones: string[]; departureDate: string
-  touroperator: string
+  touroperator: string; transferType: string
 }
 
 interface Excursion {
@@ -320,7 +320,25 @@ function generateExcursionMessage(e: Excursion): string {
       "",
       "Желаем вам приятной поездки и отличного отдыха! 🌴✨",
     ],
-    waterpark: [
+    waterpark: (p && p !== "—") ? [
+      "Добрый день.",
+      "",
+      "Завтра выезд у Вас состоится в " + p + " в аквапарк.",
+      "",
+      "С собой необходимо взять:",
+      "• деньги на личные расходы (питание, сувениры, напитки, ячейка для хранения личных вещей)",
+      "• солнцезащитные средства, очки, головные уборы",
+      "• купальные принадлежности и полотенца",
+      "",
+      "По прибытию предъявите наш ваучер на кассе аквапарка.",
+      "",
+      "Обратный трансфер согласно оговоренному времени в 18:00 — за 5-10 минут подходите к кассе, Вас направят к минивэну, который отвезёт в отель.",
+      "",
+      "Если транспорт задерживается, обратитесь на горячую линию:",
+      "...hotlineMain",
+      "",
+      "Хорошего отдыха! 🌊",
+    ] : [
       "Уважаемые гости!",
       "",
       "Завтра у вас запланировано посещение аквапарка Andamanda Phuket.",
@@ -338,7 +356,7 @@ function generateExcursionMessage(e: Excursion): string {
       "• Полотенца можно взять с собой либо арендовать на месте",
       "",
       "В случае вопросов — горячая линия:",
-      ...hotlineMain,
+      "...hotlineMain",
       "",
       "Желаем вам ярких впечатлений и отличного отдыха! 🌊",
     ],
@@ -421,7 +439,25 @@ function generateExcursionMessage(e: Excursion): string {
       "",
       "Хорошей рыбалки и отличного дня! 🎣",
     ],
-    cabaret: [
+    cabaret: (p && p !== "—") ? [
+      "Добрый вечер!",
+      "",
+      "Завтра выезд на шоу Simon Cabaret состоится в " + p + ".",
+      "📍 Просим быть готовыми у лобби за 10 минут до выезда.",
+      "",
+      "Входные билеты у вас уже есть.",
+      "⏰ Начало шоу: 18:00 — прибудьте минимум за 20–30 минут для обмена билетов.",
+      "",
+      "С собой рекомендуем:",
+      "• лёгкую кофту (в зале работает кондиционер)",
+      "• деньги на личные расходы (напитки, сувениры)",
+      "• фотоаппарат — фотосессия с артистами после шоу (оплачивается дополнительно)",
+      "",
+      "Если транспорт задерживается, обратитесь на горячую линию:",
+      "...hotlineMain",
+      "",
+      "Желаем вам приятного вечера и незабываемых впечатлений! 💃",
+    ] : [
       "Уважаемые гости!",
       "",
       "Завтра у вас запланировано посещение кабаре-шоу Simon Cabaret.",
@@ -438,7 +474,7 @@ function generateExcursionMessage(e: Excursion): string {
       "• Фотосессия с артистами после шоу (оплачивается дополнительно)",
       "",
       "В случае вопросов — горячая линия:",
-      ...hotlineMain,
+      "...hotlineMain",
       "",
       "Желаем вам приятного вечера и незабываемых впечатлений! 💃",
     ],
@@ -495,7 +531,8 @@ function generateExcursionMessage(e: Excursion): string {
       "Желаем приятной поездки и интересных открытий! ✨",
     ],
   }
-  const msgLines = msgs[e.excursionType].reduce((acc:string[],line:string)=>{
+  const rawMsgs = Array.isArray(msgs[e.excursionType]) ? msgs[e.excursionType] : []
+  const msgLines = rawMsgs.reduce((acc:string[],line:string)=>{
     if(line==="...hotlineMain"){return [...acc,...hotlineMain]}
     return [...acc,line]
   },[])
@@ -574,6 +611,7 @@ export default function Page() {
   const [notifiedVouchers,setNotifiedVouchers]=useState<Record<string,boolean>>({})
   const [touristSearch,setTouristSearch]=useState("")
   const [selectedGuide,setSelectedGuide]=useState("")
+  const [selectedOperator,setSelectedOperator]=useState("")
   const [collapsedDates,setCollapsedDates]=useState<Record<string,boolean>>({})
   const [transferFileName,setTransferFileName]=useState("")
 
@@ -663,7 +701,8 @@ export default function Page() {
           if(!vId||vId.length<5||isNaN(Number(vId)))return
           const pv=formatExcelValue(row[pickupIdx]),fdv=formatExcelValue(row[29]),ddv=formatExcelValue(row[21])
           const toVal=String(row[3]||"").trim().toUpperCase()
-          if(!vouchers[vId])vouchers[vId]={vId,hotel:currentHotel,guide:currentGuide,pickup:pv||"—",flightDate:fdv||"—",flightTime:formatExcelValue(row[27])||"—",flightNo:String(row[28]||"").trim()||"—",departureDate:ddv||"—",tourists:[],phones:[],touroperator:toVal}
+          const trType=String(row[20]||"").trim()
+          if(!vouchers[vId])vouchers[vId]={vId,hotel:currentHotel,guide:currentGuide,pickup:pv||"—",flightDate:fdv||"—",flightTime:formatExcelValue(row[27])||"—",flightNo:String(row[28]||"").trim()||"—",departureDate:ddv||"—",tourists:[],phones:[],touroperator:toVal,transferType:trType}
           if(pv&&vouchers[vId].pickup==="—")vouchers[vId].pickup=pv
           if(fdv&&vouchers[vId].flightDate==="—")vouchers[vId].flightDate=fdv
           if(ddv&&vouchers[vId].departureDate==="—")vouchers[vId].departureDate=ddv
@@ -727,10 +766,12 @@ export default function Page() {
     const q=touristSearch.toLowerCase().trim()
     return transferData.filter(v=>{
       if(selectedGuide&&v.guide!==selectedGuide)return false
+      if(selectedOperator==="BIG"&&v.touroperator!=="BIG")return false
+      if(selectedOperator==="SAYAMA"&&v.touroperator==="BIG")return false
       if(!q)return true
       return v.vId.toLowerCase().includes(q)||v.tourists.some(t=>t.toLowerCase().includes(q))
     })
-  },[transferData,touristSearch,selectedGuide])
+  },[transferData,touristSearch,selectedGuide,selectedOperator])
 
   const groupedTransfers=useMemo(()=>{
     const map:Record<string,Voucher[]>={}
@@ -850,6 +891,15 @@ export default function Page() {
           <div style={{maxWidth:"1200px",margin:"0 auto",padding:"12px 16px 0"}}>
             <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
               <input placeholder="🔍 Поиск по туристу, фамилии или ваучеру..." value={touristSearch} onChange={e=>setTouristSearch(e.target.value)} style={inp}/>
+              <div style={{display:"flex",gap:"6px"}}>
+                {(["","BIG","SAYAMA"] as string[]).map(op=>(
+                  <button key={op} onClick={()=>setSelectedOperator(op)} style={{
+                    flex:1,padding:"9px 4px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",
+                    background:selectedOperator===op?(op==="BIG"?t.accent:op==="SAYAMA"?"#f97316":t.accent):t.cardBorder,
+                    color:selectedOperator===op?"#fff":t.muted,transition:"all 0.2s"
+                  }}>{op||"🌐 Все"}</button>
+                ))}
+              </div>
               <div style={{position:"relative",width:"100%"}}>
                 <select value={selectedGuide} onChange={e=>setSelectedGuide(e.target.value)} style={{...selStyle,width:"100%"}}>
                   <option value="">👤 Все гиды</option>
@@ -891,6 +941,7 @@ export default function Page() {
                               <div style={{color:t.accent,fontWeight:700,fontSize:"15px",marginBottom:"2px"}}>🏨 {v.hotel}</div>
                               <div style={{color:"#fbbf24",fontSize:"12px",fontWeight:600,marginBottom:"2px"}}>👤 {v.guide}</div>
                               {v.touroperator&&<div style={{display:"inline-block",fontSize:"10px",background:v.touroperator==="BIG"?"#1e3f6a":"#2d1b0e",color:v.touroperator==="BIG"?"#38bdf8":"#fb923c",borderRadius:"4px",padding:"1px 6px",marginBottom:"4px",fontWeight:700}}>{v.touroperator}</div>}
+                              {v.transferType&&<div style={{display:"inline-block",fontSize:"10px",background:v.transferType.startsWith("G")?"#1a2e1a":"#2d1b4e",color:v.transferType.startsWith("G")?"#4ade80":"#c084fc",borderRadius:"4px",padding:"1px 6px",marginBottom:"4px",fontWeight:700,marginLeft:"4px"}}>{v.transferType.startsWith("G")?"🚌 Групповой":"👤 Индивидуальный"}</div>}
                               <div style={{color:t.muted,fontSize:"12px",marginBottom:"8px"}}>🗓 Выезд из отеля: <span style={{color:t.text,fontWeight:600}}>{v.departureDate}</span></div>
                               <ul style={{margin:"0 0 10px 0",paddingLeft:"16px",fontSize:"13px",color:t.text}}>{v.tourists.map((tt,idx)=><li key={idx} style={{marginBottom:"2px"}}>{tt}</li>)}</ul>
                             </div>
