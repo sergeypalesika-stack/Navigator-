@@ -98,6 +98,8 @@ function generateExcursionMessage(e: Excursion): string {
       "• очки от солнца 🕶️",
       "• немного наличных для личных расходов",
       "• зарядку для телефона — будет что снимать! 📸",
+      "• страховка",
+      "• фото паспортов",
       "",
       "⚠️ Беременным нельзя на морские экскурсии!",
       "",
@@ -120,6 +122,8 @@ function generateExcursionMessage(e: Excursion): string {
       "• полотенце",
       "• солнцезащитный крем и головной убор",
       "• удобная обувь, которую легко снять (сланцы, сандалии)",
+      "• страховка",
+      "• фото паспортов",
       "• хорошее настроение и заряженный телефон — будет что снимать! 📸",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
@@ -160,6 +164,8 @@ function generateExcursionMessage(e: Excursion): string {
       "• резиновую / водостойкую обувь (по желанию)",
       "• сухую одежду для переодевания",
       "• телефон в водонепроницаемом чехле (по желанию)",
+      "• страховка",
+      "• фото паспортов",
       "",
       "❗ Важно:",
       "• Будьте готовы на ресепшн за 10 минут до выезда",
@@ -186,6 +192,8 @@ function generateExcursionMessage(e: Excursion): string {
       "• тёплую одежду (в автобусе / аэропорту кондиционер)",
       "• загранпаспорт ОРИГИНАЛ ⚠️",
       "• закажите накануне на ресепшене lunch box / breakfast box",
+      "• страховка",
+      "• фото паспортов",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
       ...hotlineMain,
@@ -205,6 +213,8 @@ function generateExcursionMessage(e: Excursion): string {
       "• тёплую одежду (в автобусе / аэропорту кондиционер)",
       "• загранпаспорт ОРИГИНАЛ ⚠️",
       "• закажите накануне на ресепшене lunch box / breakfast box",
+      "• страховка",
+      "• фото паспортов",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
       ...hotlineMain,
@@ -226,6 +236,8 @@ function generateExcursionMessage(e: Excursion): string {
       "• сменную одежду и средства личной гигиены (overnight) 🧳",
       "• загранпаспорт ОРИГИНАЛ ⚠️",
       "• закажите накануне на ресепшене lunch box / breakfast box",
+      "• страховка",
+      "• фото паспортов",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
       ...hotlineMain,
@@ -252,6 +264,8 @@ function generateExcursionMessage(e: Excursion): string {
       "• заряженный телефон, пауэрбанк, фонарик",
       "• фотоаппарат — пейзажи будут волшебные! 📸",
       "• запасной комплект одежды",
+      "• страховка",
+      "• фото паспортов",
       "",
       "Рекомендации:",
       "• завтрак лучше заказать заранее на ресепшене (с собой)",
@@ -275,6 +289,8 @@ function generateExcursionMessage(e: Excursion): string {
       "• тёплую кофту (в дороге кондиционер)",
       "• наличные на личные расходы",
       "• заранее закажите на ресепшене завтрак / lunch box",
+      "• страховка",
+      "• фото паспортов",
       "",
       "Если транспорт задерживается:",
       ...hotlineMain,
@@ -296,6 +312,8 @@ function generateExcursionMessage(e: Excursion): string {
       "• тёплую одежду (в автобусе кондиционер)",
       "• во время экскурсии вы будете посещать храм — плечи и колени должны быть прикрыты 🙏",
       "• носки (перед храмом необходимо разуться)",
+      "• страховка",
+      "• фото паспортов",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
       ...hotlineMain,
@@ -312,6 +330,8 @@ function generateExcursionMessage(e: Excursion): string {
       "• солнцезащитные средства",
       "• полотенца и купальные принадлежности",
       "• деньги на личные расходы",
+      "• страховка",
+      "• фото паспортов",
       "",
       "💆 В спа полотенца предоставляются, но при получении берётся депозит 300 бат (возвращается 200 бат).",
       "",
@@ -386,6 +406,8 @@ function generateExcursionMessage(e: Excursion): string {
       "• солнцезащитные средства",
       "• деньги на личные расходы (обед и сувениры)",
       "• тёплую одежду (дорога в авто под кондиционером)",
+      "• страховка",
+      "• фото паспортов",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
       ...hotlineMain,
@@ -403,6 +425,8 @@ function generateExcursionMessage(e: Excursion): string {
       "• головной убор — обязательно",
       "• лёгкую и не новую одежду (шорты + футболка, возможно попадание масла с роликовой системы)",
       "• деньги на личные расходы (напитки, сувениры)",
+      "• страховка",
+      "• фото паспортов",
       "",
       "По прибытии в парк:",
       "1. Подходите на ресепшн, получите браслет по вашему пакету.",
@@ -431,6 +455,8 @@ function generateExcursionMessage(e: Excursion): string {
       "• удобная обувь (сланцы / сандалии)",
       "• головной убор, солнцезащитные средства",
       "• полотенце, купальные принадлежности",
+      "• страховка",
+      "• фото паспортов",
       "",
       "Важно: лодка оснащена спасательными жилетами, рыболовные снасти предоставляются.",
       "",
@@ -494,6 +520,8 @@ function generateExcursionMessage(e: Excursion): string {
       "• репеллент от комаров",
       "• солнцезащитный крем и головной убор",
       "• деньги на личные расходы (напитки, сувениры и чаевые)",
+      "• страховка",
+      "• фото паспортов",
       "",
       "❗ По возможности не используйте парфюмы — сильные запахи могут раздражать животных.",
       "",
@@ -524,6 +552,8 @@ function generateExcursionMessage(e: Excursion): string {
       "Возьмите с собой:",
       "• деньги наличными и карту",
       "• тёплую кофту (в центрах работает кондиционер)",
+      "• страховка",
+      "• фото паспортов",
       "",
       "Если транспорт задерживается, обратитесь на горячую линию:",
       ...hotlineMain,
@@ -564,37 +594,36 @@ function formatExcelValue(v: any): string {
 function generateTransferMessage(v: Voucher): string {
   const isBIG = v.touroperator === "BIG"
   const lines = [
-    "🛫 ИНФОРМАЦИЯ О ВЫЕЗДЕ В АЭРОПОРТ",
+    "Здравствуйте!",
     "",
-    "🗓 ДАТА ВЫЕЗДА ИЗ ОТЕЛЯ: " + v.departureDate,
-    "⏰ ВРЕМЯ СБОРА (PICK UP): " + v.pickup,
+    "✈️ ВЫЕЗД В АЭРОПОРТ",
     "",
-    "---",
+    "📅 Дата: " + v.departureDate,
+    "🕰 Выезд из отеля: " + v.pickup,
+    "🛫 Вылет: " + v.flightTime,
+    "🎟 Рейс: " + v.flightNo,
     "",
-    "✈️ ИНФОРМАЦИЯ О РЕЙСЕ:",
-    "🔹 Номер рейса: " + v.flightNo,
-    "🔹 Дата вылета: " + v.flightDate,
-    "🔹 Время вылета: " + v.flightTime,
+    "📌 Подойдите на ресепшн заранее, чтобы:",
     "",
-    "---",
+    "🗝 сдать номер",
+    "💳 оплатить счета (если есть)",
     "",
-    "✅ УВАЖАЕМЫЕ ГОСТИ!",
-    "Пожалуйста, подготовьтесь к выезду заранее.",
+    "📑 Проверьте:",
     "",
-    "🕒 На ресепшн:",
-    "Сдайте номер (стандартный выезд до 12:00. При позднем вылете уточните возможность продления заранее).",
-    "Оплатите счета, если пользовались дополнительными услугами отеля.",
-    "Сделайте это до прибытия транспорта, чтобы не задерживать трансфер.",
+    "🛂 паспорт",
+    "💵 деньги",
+    "📱 телефоны",
+    "🔌 зарядку",
     "",
-    "📑 Перед выходом проверьте наличие:",
-    "Паспортов и авиабилетов;",
-    "Всех личных вещей и багажа.",
+    "🛎 Ожидайте на ресепшн.",
+    "🚐 Зайдёт водитель со списком, в списке ваша фамилия.",
     "",
-    "☎️ В случае задержки транспорта (более 10 минут):",
-    "Свяжитесь с нашей горячей линией:",
-    ...(isBIG ? ["📞 Для звонков: +66 92 249 49 49","💬 WhatsApp / Telegram: +66 92 279 09 90"] : ["📞 +66 89 009 50 00 (для звонков с местных телефонов)","💬 +66 92 279 11 99 (WhatsApp, Telegram)"]),
+    "☎️ Если транспорт задерживается более 10 минут, свяжитесь, пожалуйста:",
+    ...(isBIG
+      ? ["📞 +66 92 249 49 49 (для звонков)", "💬 +66 92 279 09 90 (WhatsApp)"]
+      : ["📞 +66 89 009 50 00 (для звонков)", "💬 +66 92 279 11 99 (WhatsApp)"]),
     "",
-    "✨ Желаем вам приятного полёта и надеемся вновь увидеть вас в Таиланде!",
+    "🙏 Желаем вам приятного полёта и до новых встреч в Таиланде!",
   ]
   return encodeURIComponent(lines.join("\n"))
 }
@@ -745,13 +774,22 @@ export default function Page() {
           const vId=String(row[cV]||"").trim();if(!vId||vId.length<5)continue
           const excName=String(row[cE]||"").trim();if(!excName)continue
           const key=`${vId}_${excName}`
-          const phone=String(row[cP]||"").replace(/[^\d+]/g,"")
+          const phoneRaw=String(row[cP]||"").trim()
+          const phone=phoneRaw.replace(/[^\d+]/g,"").split("+").filter((p:string)=>p.length>=7).map((p:string)=>"+"+p).join("|SPLIT|")
           const name=String(row[cN]||"").trim()
           const pickup=String(row[cPu]||"").trim()
           if(!map[key])map[key]={key,vId,date:String(row[cD]||"").trim(),excursionName:excName,excursionType:classifyExcursion(excName),hotel:String(row[cH]||"").trim(),room:String(row[cR]||"").trim(),tourists:[],pickup:pickup||"—",adl:Number(row[cA]||0),chd:Number(row[cC]||0),inf:Number(row[cI]||0),guide:String(row[cG]||"").trim(),cooperateStaff:cCS>=0?String(row[cCS]||"").trim():"",touroperator:cTO>=0?String(row[cTO]||"").trim():""}
           if(pickup&&map[key].pickup==="—")map[key].pickup=pickup
-          if(name&&!map[key].tourists.find(t=>t.name===name)){if(phone)map[key].tourists.push({name,phone});else map[key].tourists.push({name,phone:""})}
-          else if(name&&phone&&map[key].tourists.find(t=>t.name===name&&!t.phone)){const idx=map[key].tourists.findIndex(t=>t.name===name);map[key].tourists[idx].phone=phone}
+          const phoneParts=phone?phone.split("|SPLIT|").filter((p:string)=>p.length>=7):[]
+          const mainPhone=phoneParts[0]||""
+          if(name&&!map[key].tourists.find(t=>t.name===name)){
+            map[key].tourists.push({name,phone:mainPhone})
+            phoneParts.slice(1).forEach((p:string)=>{if(!map[key].tourists.find(t=>t.phone===p))map[key].tourists.push({name:"",phone:p})})
+          } else if(name&&mainPhone&&map[key].tourists.find(t=>t.name===name&&!t.phone)){
+            const tidx=map[key].tourists.findIndex(t=>t.name===name)
+            map[key].tourists[tidx].phone=mainPhone
+            phoneParts.slice(1).forEach((p:string)=>{if(!map[key].tourists.find(t=>t.phone===p))map[key].tourists.push({name:"",phone:p})})
+          }
         }
         const result=Object.values(map).sort((a,b)=>a.pickup.localeCompare(b.pickup))
         setExcursionData(result);setNotifiedExcursions({});setCollapsedTypes({});setExcGuide("")
@@ -952,6 +990,7 @@ export default function Page() {
                                   <div style={{fontSize:"12px",color:t.muted,marginBottom:"4px"}}>📱 {ph}</div>
                                   <div style={{display:"flex",gap:"6px"}}>
                                     <a href={isProblem?undefined:`https://wa.me/${ph.replace(/\D/g,"")}?text=${generateTransferMessage(v)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isProblem){if(!isDone)setNotifiedVouchers(prev=>({...prev,[v.vId]:true}));addLog("transfer",v.tourists[0]||"",ph,v.hotel,v.vId)}}} style={{flex:1,background:isProblem?t.cardBorder:"#15803d",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700,pointerEvents:isProblem?"none":"auto"}}>WhatsApp</a>
+                                    <a href={isProblem?undefined:`https://t.me/+${ph.replace(/[^\d]/g,"")}`} target="_blank" rel="noreferrer" style={{flex:1,background:isProblem?t.cardBorder:"#0088cc",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700,pointerEvents:isProblem?"none":"auto"}}>Telegram</a>
                                     <a href={`tel:${ph}`} style={{flex:1,background:t.cardBorder,color:t.text,textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700}}>Позвонить</a>
                                   </div>
                                 </div>
@@ -1033,6 +1072,7 @@ export default function Page() {
                                   <div style={{fontSize:"12px",color:t.muted,marginBottom:"4px"}}>📱 {tt.phone}</div>
                                   <div style={{display:"flex",gap:"6px"}}>
                                     <a href={`https://wa.me/${tt.phone.replace(/\D/g,"")}?text=${generateExcursionMessage(e)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isDone)setNotifiedExcursions(prev=>({...prev,[e.key]:true}));addLog("excursion",tt.name,tt.phone,e.hotel,e.vId)}} style={{flex:1,background:"#15803d",color:"#fff",textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700}}>WhatsApp</a>
+                                    <a href={`https://t.me/+${tt.phone.replace(/[^\d]/g,"")}`} target="_blank" rel="noreferrer" style={{flex:1,background:"#0088cc",color:"#fff",textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700}}>Telegram</a>
                                     <a href={`tel:${tt.phone}`} style={{flex:1,background:t.cardBorder,color:t.text,textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700}}>Позвонить</a>
                                   </div>
                                 </div>
