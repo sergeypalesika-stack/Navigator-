@@ -1533,11 +1533,446 @@ function MethodichkaTab({dark}:{dark:boolean}) {
 }
 
 
+// ═══════════════════════════════════════════
+// ЛОДКИ — ДАННЫЕ И КОМПОНЕНТ
+// ═══════════════════════════════════════════
+
+const BOATS_DATA = [
+  { id:1, name:"Bowie 1", size:"46ft", pier:"Royal Phuket Marina", type:"speedboat", maxPax:25, tours:[
+    {name:"Phi Phi + Bamboo",price:45000,extra:1500,paxIncl:"1–2"},
+    {name:"James Bond + Naka Island",price:45000,extra:1500,paxIncl:"1–2"},
+    {name:"Phi Phi Overnight",price:67900,extra:4000,paxIncl:"1–2"},
+    {name:"Krabi",price:42150,extra:1500,paxIncl:"1–2"},
+    {name:"Phi Phi + Krabi",price:55000,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Krabi",price:53600,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Phi Phi",price:59300,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Krabi + Phi Phi",price:63600,extra:2500,paxIncl:"1–2"},
+    {name:"Andaman Treasure 2/1",price:86500,extra:4600,paxIncl:"1–2"},
+  ]},
+  { id:2, name:"Bowie 2", size:"36ft", pier:"Royal Phuket Marina", type:"speedboat", maxPax:20, tours:[
+    {name:"Phi Phi + Bamboo",price:45000,extra:1500,paxIncl:"1–2"},
+    {name:"James Bond + Naka Island",price:45000,extra:1500,paxIncl:"1–2"},
+    {name:"Phi Phi Overnight",price:67900,extra:4000,paxIncl:"1–2"},
+    {name:"Krabi",price:42150,extra:1500,paxIncl:"1–2"},
+    {name:"Phi Phi + Krabi",price:55000,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Krabi",price:53600,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Phi Phi",price:59300,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Krabi + Phi Phi",price:63600,extra:2500,paxIncl:"1–2"},
+    {name:"Andaman Treasure 2/1",price:86500,extra:4600,paxIncl:"1–2"},
+  ]},
+  { id:3, name:"Sofia", size:"45ft", pier:"Bang Rong Pier", type:"speedboat", maxPax:20, tours:[
+    {name:"Phi Phi + Bamboo",price:38000,extra:1500,paxIncl:"1–2"},
+    {name:"James Bond + Naka Island",price:39000,extra:1500,paxIncl:"1–2"},
+    {name:"Krabi",price:38000,extra:1500,paxIncl:"1–2"},
+    {name:"Phi Phi + Krabi",price:50500,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Krabi",price:50500,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Phi Phi",price:50500,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Krabi + Phi Phi",price:62150,extra:2500,paxIncl:"1–2"},
+  ]},
+  { id:4, name:"Thaimarine", size:"47ft", pier:"Royal Phuket Marina", type:"speedboat", maxPax:20, tours:[
+    {name:"Phi Phi + Bamboo",price:72400,extra:1500,paxIncl:"1–2"},
+    {name:"James Bond + Naka Island",price:64900,extra:1500,paxIncl:"1–2"},
+    {name:"Phi Phi + Krabi",price:76900,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Krabi",price:82800,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Phi Phi",price:82800,extra:2500,paxIncl:"1–2"},
+  ]},
+  { id:5, name:"Gambit", size:"36ft", pier:"Chalong Pier", type:"speedboat", maxPax:10, tours:[
+    {name:"Phi Phi + Bamboo",price:38000,extra:1500,paxIncl:"1–2"},
+  ]},
+  { id:6, name:"Yamela", size:"40ft", pier:"Chalong Pier", type:"speedboat", maxPax:15, tours:[
+    {name:"Phi Phi + Bamboo",price:38000,extra:1500,paxIncl:"1–2"},
+  ]},
+  { id:7, name:"Lexi", size:"45ft", pier:"Royal Phuket Marina", type:"speedboat", maxPax:30, tours:[
+    {name:"Phi Phi + Bamboo",price:49300,extra:1600,paxIncl:"1–2"},
+    {name:"James Bond + Naka Island",price:47900,extra:1600,paxIncl:"1–2"},
+    {name:"Phi Phi + Krabi",price:62150,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Krabi",price:77150,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Phi Phi",price:77150,extra:2500,paxIncl:"1–2"},
+    {name:"Similan (RPM)",price:96400,extra:1700,paxIncl:"1–2"},
+    {name:"Similan (Taplamu)",price:68600,extra:2150,paxIncl:"1–2"},
+    {name:"Surin Islands",price:80000,extra:2500,paxIncl:"1–2"},
+    {name:"Koh Rok Ko Ha",price:97000,extra:1800,paxIncl:"1–2"},
+  ]},
+  { id:8, name:"Verona", size:"46ft", pier:"Taplamu Pier", type:"speedboat", maxPax:30, tours:[
+    {name:"Similan Islands",price:68500,extra:1500,paxIncl:"1–2"},
+    {name:"Surin Islands",price:80000,extra:2500,paxIncl:"1–2"},
+  ]},
+  { id:9, name:"Romeo", size:"46ft", pier:"Taplamu Pier", type:"speedboat", maxPax:30, tours:[
+    {name:"Similan Islands",price:68500,extra:1500,paxIncl:"1–2"},
+    {name:"Surin Islands",price:80000,extra:2500,paxIncl:"1–2"},
+  ]},
+  { id:10, name:"Randezvous", size:"44ft", pier:"Chalong Pier", type:"catamaran", maxPax:10,
+    note:"Обед включён. Seafood +650 ฿/чел, рус. гид +3500 ฿",
+    tours:[
+      {name:"Maithon + Racha Yai",price:68800,extra:null,paxIncl:"10"},
+      {name:"Racha Yai Fishing",price:68800,extra:null,paxIncl:"10"},
+      {name:"Phi Phi",price:76500,extra:800,paxIncl:"1–2"},
+      {name:"Phi Phi Bamboo",price:83500,extra:800,paxIncl:"1–2"},
+      {name:"Krabi-Koh Hong",price:83500,extra:800,paxIncl:"1–2"},
+  ]},
+  { id:11, name:"Zoe", size:"46ft", pier:"Chalong Pier", type:"catamaran", maxPax:15,
+    note:"Обед (seafood) включён. Рус. гид +3500 ฿. Бассейн +3500 ฿, горка +3500 ฿",
+    tours:[
+      {name:"Racha Yai + Coral",price:40000,extra:1500,paxIncl:"1–2"},
+      {name:"Racha Noi",price:46500,extra:1500,paxIncl:"1–2"},
+  ]},
+  { id:12, name:"Sunny", size:"38ft", pier:"Chalong Pier", type:"catamaran", maxPax:10,
+    note:"Обед (seafood) включён. Рус. гид +3500 ฿. Бассейн +3500 ฿, горка +3500 ฿",
+    tours:[
+      {name:"Racha Yai + Coral",price:37500,extra:1500,paxIncl:"1–2"},
+      {name:"Racha Noi",price:44500,extra:1500,paxIncl:"1–2"},
+  ]},
+  { id:13, name:"Oceanland", size:"45ft", pier:"Chalong Pier", type:"catamaran", maxPax:20,
+    note:"Обед (seafood) включён. Рус. гид +3500 ฿. Бассейн +3500 ฿, горка +3500 ฿",
+    tours:[
+      {name:"Racha Yai + Coral",price:51500,extra:1500,paxIncl:"1–2"},
+      {name:"Racha Noi",price:57500,extra:1500,paxIncl:"1–2"},
+  ]},
+  { id:14, name:"Pepper", size:"47ft", pier:"Chalong Pier", type:"catamaran", maxPax:30,
+    note:"Обед не включён (640–920 ฿/чел). Рус. гид +3500 ฿. 1–15 чел в базе.",
+    tours:[
+      {name:"Racha Yai + Coral",price:44000,extra:"1500+lunch",paxIncl:"Lunch не вкл."},
+      {name:"Maithon + Coral",price:44000,extra:"1500+lunch",paxIncl:"Lunch не вкл."},
+      {name:"Coral + Promthep",price:44000,extra:"1500+lunch",paxIncl:"Lunch не вкл."},
+  ]},
+  { id:15, name:"Senna", size:"47ft", pier:"Chalong Pier", type:"catamaran", maxPax:30,
+    note:"Обед не включён (640–920 ฿/чел). Рус. гид +3500 ฿. 1–15 чел в базе.",
+    tours:[
+      {name:"Racha Yai + Coral",price:44000,extra:"1500+lunch",paxIncl:"Lunch не вкл."},
+      {name:"Maithon + Coral",price:44000,extra:"1500+lunch",paxIncl:"Lunch не вкл."},
+      {name:"Coral + Promthep",price:44000,extra:"1500+lunch",paxIncl:"Lunch не вкл."},
+  ]},
+  { id:16, name:"Summer", size:"47ft", pier:"Nakalay Pier (Kalim)", type:"catamaran", maxPax:15,
+    note:"Обед включён. Рус. гид +3500 ฿. 1–6 чел в базе.",
+    tours:[
+      {name:"North (Rock Cliff + Kamala + Laem Sing + Surin + Koh Waew + Banana)",price:65500,extra:900,paxIncl:"1–6"},
+      {name:"South (Patong + Freedom Beach + Laem Krating + Promthep)",price:65500,extra:900,paxIncl:"1–6"},
+  ]},
+  { id:17, name:"Coco", size:"40ft", pier:"Chalong Pier", type:"catamaran", maxPax:20,
+    note:"Обед не включён. Рус. гид +3500 ฿. 1–15 чел в базе.",
+    tours:[
+      {name:"Racha Yai + Coral",price:44000,extra:"1500+lunch",paxIncl:"Lunch не вкл."},
+      {name:"Maithon + Coral",price:44000,extra:"1500+lunch",paxIncl:"Lunch не вкл."},
+      {name:"Coral + Promthep",price:44000,extra:"1500+lunch",paxIncl:"Lunch не вкл."},
+  ]},
+  { id:18, name:"Tahaa", size:"42ft", pier:"Chalong Pier", type:"catamaran", maxPax:30,
+    note:"Обед не включён. Рус. гид +3500 ฿. 1–15 чел в базе.",
+    tours:[
+      {name:"Racha Yai + Coral",price:44000,extra:"1500+lunch",paxIncl:"Lunch не вкл."},
+      {name:"Maithon + Coral",price:44000,extra:"1500+lunch",paxIncl:"Lunch не вкл."},
+      {name:"Coral + Promthep",price:44000,extra:"1500+lunch",paxIncl:"Lunch не вкл."},
+  ]},
+  { id:19, name:"Myra", size:"47ft", pier:"Ao Po", type:"catamaran", maxPax:15,
+    note:"Обед не включён. Рус. гид +3500 ฿. Нац. парки и каноэ оплачиваются отдельно.",
+    tours:[
+      {name:"Phang Nga Bay (Panak + Hong + Bond)",price:59600,extra:null,paxIncl:"1–15"},
+      {name:"Khai Island + Naka Island",price:59600,extra:null,paxIncl:"1–15"},
+      {name:"Hong-Krabi (Hong + Lao Lading + Lao Ka + Pakbia + Rai)",price:71000,extra:null,paxIncl:"1–15"},
+  ]},
+  { id:20, name:"Ocean Dream", size:"40ft", pier:"Chalong Pier", type:"catamaran", maxPax:15,
+    note:"Обед включён. Рус. гид +3500 ฿. Бассейн +4500 ฿, горка +3600 ฿. 1–6 чел в базе.",
+    tours:[
+      {name:"Racha Yai + Coral (9:00–16:00)",price:38000,extra:2500,paxIncl:"1–6"},
+      {name:"Khai Island (9:00–18:00)",price:45000,extra:2500,paxIncl:"1–6"},
+      {name:"Racha Yai + Coral + Sunset (10:30–19:00)",price:42000,extra:2500,paxIncl:"1–6"},
+  ]},
+  { id:21, name:"Ameray", size:"37ft", pier:"Chalong Pier", type:"catamaran", maxPax:15,
+    note:"Обед включён. Рус. гид +3500 ฿. Бассейн +4500 ฿, горка +3600 ฿. 1–6 чел в базе.",
+    tours:[
+      {name:"Racha Yai + Coral (9:00–16:00)",price:38000,extra:2500,paxIncl:"1–6"},
+      {name:"Khai Island (9:00–18:00)",price:45000,extra:2500,paxIncl:"1–6"},
+      {name:"Racha Yai + Coral + Sunset (10:30–19:00)",price:42000,extra:2500,paxIncl:"1–6"},
+  ]},
+  { id:22, name:"Wildcat", size:"44ft", pier:"Chalong Pier", type:"catamaran", maxPax:15,
+    note:"Обед включён. Рус. гид +3500 ฿. Бассейн +4500 ฿, горка +3600 ฿. 1–6 чел в базе.",
+    tours:[
+      {name:"Racha Yai + Coral (9:00–16:00)",price:38000,extra:2500,paxIncl:"1–6"},
+      {name:"Khai Island (9:00–18:00)",price:45000,extra:2500,paxIncl:"1–6"},
+      {name:"Racha Yai + Coral + Sunset (10:30–19:00)",price:42000,extra:2500,paxIncl:"1–6"},
+  ]},
+  { id:23, name:"White Corn", size:"38ft", pier:"Chalong Pier", type:"catamaran", maxPax:15,
+    note:"Обед BBQ+Seafood включён. Рус. гид +3500 ฿. 1–5 чел в базе.",
+    tours:[{name:"Racha Yai + Coral",price:40000,extra:1500,paxIncl:"1–5"}]},
+  { id:24, name:"Black Pearl", size:"40ft", pier:"Chalong Pier", type:"catamaran", maxPax:15,
+    note:"Обед BBQ+Seafood включён. Рус. гид +3500 ฿. 1–5 чел в базе.",
+    tours:[{name:"Racha Yai + Coral",price:40000,extra:1500,paxIncl:"1–5"}]},
+  { id:25, name:"Ella", size:"53ft", pier:"Chalong Pier", type:"catamaran", maxPax:20,
+    note:"Обед +500 ฿/чел. Рус. гид +3500 ฿. Бассейн +3500 ฿. 1–10 чел в базе. Цена выше 20/12–01/03.",
+    tours:[
+      {name:"Racha Yai + Coral",price:42000,extra:"1500+lunch",paxIncl:"1–10"},
+      {name:"Racha + Coral + Promthep",price:44000,extra:"1500+lunch",paxIncl:"1–10"},
+  ]},
+  { id:26, name:"Calypso", size:"44ft", pier:"Chalong Pier", type:"catamaran", maxPax:20,
+    note:"Обед +500 ฿/чел. Рус. гид +3500 ฿. Бассейн +3500 ฿. 1–10 чел в базе. Цена выше 20/12–01/03.",
+    tours:[
+      {name:"Racha Yai + Coral",price:44500,extra:"1500+lunch",paxIncl:"1–10"},
+      {name:"Racha + Coral + Promthep",price:46500,extra:"1500+lunch",paxIncl:"1–10"},
+  ]},
+  { id:27, name:"Bohemian", size:"50ft", pier:"Chalong Pier", type:"catamaran", maxPax:25,
+    note:"Обед +500 ฿/чел. Рус. гид +3500 ฿. Бассейн +3500 ฿. 1–10 чел в базе. Цена выше 20/12–01/03.",
+    tours:[
+      {name:"Racha Yai + Coral",price:42000,extra:"1500+lunch",paxIncl:"1–10"},
+      {name:"Racha + Coral + Promthep",price:44000,extra:"1500+lunch",paxIncl:"1–10"},
+  ]},
+  { id:28, name:"F1", size:"42ft", pier:"Chalong Pier", type:"catamaran", maxPax:15,
+    note:"Обед включён. Рус. гид +3500 ฿. Бассейн +3500 ฿. 1–8 чел в базе.",
+    tours:[
+      {name:"Racha Yai + Coral",price:54450,extra:1900,paxIncl:"1–8"},
+      {name:"Racha + Racha Yai",price:58100,extra:1900,paxIncl:"1–8"},
+      {name:"Phi Phi (без Bamboo)",price:59260,extra:"1000/чел до 8, +2800 свыше 8",paxIncl:"1–2"},
+      {name:"James Bond + Koh Khai Nok",price:67800,extra:"1500/чел до 8, +3300 свыше 8",paxIncl:"1–2"},
+  ]},
+  { id:29, name:"Whiskey", size:"48ft", pier:"Chalong Pier", type:"powercat", maxPax:20,
+    note:"Обед включён. Бассейн и горка включены. Удочки бесплатно. Рус. гид +3500 ฿. 1–10 чел в базе.",
+    tours:[{name:"Racha Yai + Coral",price:54600,extra:1500,paxIncl:"1–10"}]},
+  { id:30, name:"Tequila", size:"37ft", pier:"Chalong Pier", type:"powercat", maxPax:10,
+    note:"Обед включён. Бассейн и горка включены. Удочки бесплатно. Рус. гид +3500 ฿.",
+    tours:[
+      {name:"Racha Yai + Coral",price:57150,extra:null,paxIncl:"1–10"},
+      {name:"Racha + Racha Noi",price:62900,extra:null,paxIncl:"1–10"},
+      {name:"Phi Phi + Bamboo",price:66900,extra:1000,paxIncl:"1–2"},
+  ]},
+  { id:31, name:"Vodka", size:"46ft", pier:"Chalong Pier", type:"speedboat", maxPax:10,
+    note:"Обед включён. Бассейн и горка включены. Удочки бесплатно. Рус. гид +3500 ฿.",
+    tours:[
+      {name:"Racha Yai + Coral",price:65710,extra:null,paxIncl:"1–10"},
+      {name:"Racha + Racha Noi",price:80000,extra:null,paxIncl:"1–10"},
+      {name:"Phi Phi + Bamboo",price:88300,extra:1000,paxIncl:"1–2"},
+  ]},
+  { id:32, name:"Origin", size:"90ft", pier:"Chalong Pier", type:"yacht", maxPax:20,
+    note:"Обед не включён (640–920 ฿/чел). Рус. гид +3500 ฿. Complimentary: вино 2 бут., пиво 24 бан., бассейн, горка, iAqua ×2, SUP и т.д.",
+    tours:[
+      {name:"Racha Yai + Coral",price:124300,extra:"+lunch",paxIncl:"1–20"},
+      {name:"Maithon + Coral",price:124300,extra:"+lunch",paxIncl:"1–20"},
+      {name:"Coral + Promthep",price:124300,extra:"+lunch",paxIncl:"1–20"},
+      {name:"Khai + Maithon",price:124300,extra:"+lunch",paxIncl:"1–20"},
+  ]},
+  { id:33, name:"Lady M", size:"54ft", pier:"Royal Phuket Marina", type:"yacht", maxPax:8,
+    note:"Обед и гид включены. Пиво 24 бан. или 12 бан. + 1 бут. вина (на выбор).",
+    tours:[
+      {name:"Coral Island",price:150000,extra:4500,paxIncl:"1–4"},
+      {name:"Maithon Island",price:150000,extra:4500,paxIncl:"1–4"},
+      {name:"Khai Island",price:150000,extra:4500,paxIncl:"1–4"},
+      {name:"Racha",price:200000,extra:4500,paxIncl:"1–4"},
+      {name:"Phi Phi Island",price:190000,extra:4500,paxIncl:"1–4"},
+  ]},
+  { id:34, name:"Azimut", size:"50ft", pier:"Chalong Pier", type:"yacht", maxPax:11,
+    note:"Обед и пиво (24 бан.) включены. Рус. гид +3500 ฿. Цена выше 20/12–20/01. 1–8 чел в базе.",
+    tours:[
+      {name:"Racha Yai",price:85000,extra:1500,paxIncl:"1–8"},
+      {name:"Racha Noi",price:93600,extra:1500,paxIncl:"1–8"},
+      {name:"Phi Phi Bamboo",price:106400,extra:1500,paxIncl:"1–8"},
+      {name:"James Bond",price:99300,extra:1500,paxIncl:"1–8"},
+      {name:"Krabi",price:99300,extra:1500,paxIncl:"1–8"},
+      {name:"Phi Phi",price:99300,extra:1500,paxIncl:"1–8"},
+  ]},
+  { id:35, name:"Bertram", size:"50ft", pier:"Chalong Pier", type:"yacht", maxPax:13,
+    note:"Обед и пиво (24 бан.) включены. Рус. гид +3500 ฿. Цена выше 20/12–20/01. 1–8 чел в базе.",
+    tours:[
+      {name:"Coral Island (Coral + Nui Bay + Promthep)",price:63600,extra:1500,paxIncl:"1–8"},
+      {name:"Racha Yai",price:83600,extra:1500,paxIncl:"1–8"},
+      {name:"Racha Noi",price:92150,extra:1500,paxIncl:"1–8"},
+      {name:"Phi Phi Don / Phi Phi Lay",price:99300,extra:1500,paxIncl:"1–8"},
+      {name:"Racha Yai Fishing",price:83600,extra:1500,paxIncl:"1–8"},
+      {name:"Racha Noi Fishing",price:92150,extra:1500,paxIncl:"1–8"},
+  ]},
+  { id:36, name:"Red Dragon", size:"36ft", pier:"Chalong Pier", type:"speedboat", maxPax:8,
+    note:"Обед включён. Рус. гид +3500 ฿.",
+    tours:[{name:"Racha Yai",price:28500,extra:null,paxIncl:"1–8"}]},
+  { id:37, name:"Solita", size:"48ft", pier:"Chalong Pier", type:"speedboat", maxPax:10,
+    note:"Обед включён. Рус. гид +3500 ฿.",
+    tours:[{name:"Racha Yai",price:31500,extra:null,paxIncl:"1–10"}]},
+]
+
+const BOAT_TYPE_META: Record<string,{label:string;color:string;border:string;bg:string}> = {
+  speedboat: {label:"⚡ Скоростная", color:"#38bdf8", border:"#1e3f6a", bg:"#0c2340"},
+  catamaran: {label:"⛵ Катамаран",  color:"#4ade80", border:"#16a34a", bg:"#0d2010"},
+  powercat:  {label:"🔱 Пауэркат",  color:"#fb923c", border:"#c2410c", bg:"#2d1500"},
+  yacht:     {label:"🛥️ Яхта",      color:"#c084fc", border:"#7c3aed", bg:"#1e1040"},
+}
+const BOAT_PIERS = ["Все","Chalong Pier","Royal Phuket Marina","Bang Rong Pier","Taplamu Pier","Nakalay Pier (Kalim)","Ao Po"]
+
+function fmtPrice(n: number|string|null): string {
+  if (n === null) return "—"
+  if (typeof n === "number") return n.toLocaleString("ru-RU") + " ฿"
+  return n + " ฿"
+}
+
+function BoatsTab({dark}:{dark:boolean}) {
+  const t = {
+    bg:dark?"#0b1120":"#f0f4f8", card:dark?"#131d2e":"#ffffff",
+    cardBorder:dark?"#1e2f45":"#d1dce8", text:dark?"#e2eaf4":"#1a2636",
+    muted:dark?"#5b7a9a":"#6e8aa8", header:dark?"#0d1929":"#e2ecf7",
+    inputBg:dark?"#101c2d":"#ffffff", inputBdr:dark?"#1e3450":"#c5d5e5",
+    row0:dark?"rgba(255,255,255,0.03)":"#fafafa",
+    row1:dark?"transparent":"#ffffff",
+  }
+  const [search, setSearch]       = useState("")
+  const [typeF,  setTypeF]        = useState("Все")
+  const [pierF,  setPierF]        = useState("Все")
+  const [openId, setOpenId]       = useState<number|null>(null)
+
+  const filtered = useMemo(() => BOATS_DATA.filter(b => {
+    if (typeF !== "Все" && b.type !== typeF) return false
+    if (pierF !== "Все" && b.pier !== pierF) return false
+    const q = search.toLowerCase().trim()
+    if (!q) return true
+    return b.name.toLowerCase().includes(q) || b.tours.some(t => t.name.toLowerCase().includes(q))
+  }), [search, typeF, pierF])
+
+  const pill: React.CSSProperties = {
+    padding:"5px 12px", fontSize:"12px", fontWeight:700,
+    borderRadius:"99px", border:"none", cursor:"pointer", whiteSpace:"nowrap", flexShrink:0
+  }
+  const inp: React.CSSProperties = {
+    width:"100%", padding:"9px 12px 9px 34px", fontSize:"13px",
+    borderRadius:"8px", background:t.inputBg, border:`1px solid ${t.inputBdr}`,
+    color:t.text, outline:"none", boxSizing:"border-box"
+  }
+
+  return (
+    <div style={{display:"flex", flexDirection:"column", height:"calc(100vh - 110px)", overflow:"hidden"}}>
+
+      {/* ── TOOLBAR ── */}
+      <div style={{background:t.header, borderBottom:`1px solid ${t.cardBorder}`, padding:"10px 14px", flexShrink:0}}>
+        {/* Search */}
+        <div style={{position:"relative", marginBottom:"8px"}}>
+          <span style={{position:"absolute",left:"10px",top:"50%",transform:"translateY(-50%)",fontSize:"13px",pointerEvents:"none"}}>🔍</span>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Поиск по названию или маршруту..." style={inp}/>
+        </div>
+        {/* Type pills */}
+        <div style={{display:"flex", gap:"5px", marginBottom:"6px", overflowX:"auto", paddingBottom:"2px"}}>
+          {["Все","speedboat","catamaran","powercat","yacht"].map(k => {
+            const meta = k !== "Все" ? BOAT_TYPE_META[k] : null
+            const active = typeF === k
+            return (
+              <button key={k} onClick={()=>setTypeF(k)}
+                style={{...pill, background:active?(meta?meta.color:(dark?"#38bdf8":"#0369a1")):(dark?"#1e2f45":"#dce7f0"), color:active?"#fff":(dark?"#94a3b8":"#374151")}}>
+                {k === "Все" ? "🚢 Все типы" : meta!.label}
+              </button>
+            )
+          })}
+        </div>
+        {/* Pier pills */}
+        <div style={{display:"flex", gap:"5px", overflowX:"auto", paddingBottom:"2px"}}>
+          {BOAT_PIERS.map(p => {
+            const active = pierF === p
+            return (
+              <button key={p} onClick={()=>setPierF(p)}
+                style={{...pill, background:active?(dark?"#0d9488":"#0d9488"):(dark?"#1e2f45":"#dce7f0"), color:active?"#fff":(dark?"#94a3b8":"#374151"), fontSize:"11px"}}>
+                📍 {p}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* ── BOAT LIST ── */}
+      <div style={{overflowY:"auto", flex:1, padding:"12px 14px"}}>
+        <div style={{fontSize:"12px", color:t.muted, marginBottom:"10px"}}>
+          Найдено: <b style={{color:t.text}}>{filtered.length}</b> судов · {BOATS_DATA.length} всего · сезон 2025–2026 · все цены в ฿
+        </div>
+
+        {filtered.length === 0 && (
+          <div style={{textAlign:"center", padding:"60px 20px", color:t.muted}}>
+            <div style={{fontSize:"36px", marginBottom:"10px"}}>🚢</div>
+            <div>Ничего не найдено. Измените фильтры.</div>
+          </div>
+        )}
+
+        <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:"10px"}}>
+          {filtered.map(boat => {
+            const m = BOAT_TYPE_META[boat.type]
+            const isOpen = openId === boat.id
+            const prices = boat.tours.map(tt => tt.price).filter((p): p is number => typeof p === "number")
+            const minPrice = prices.length ? Math.min(...prices) : null
+
+            return (
+              <div key={boat.id}
+                style={{background:t.card, borderRadius:"14px", border:`1.5px solid ${isOpen ? m.color : m.border}`, overflow:"hidden", transition:"border-color 0.2s"}}>
+
+                {/* Card header */}
+                <div onClick={()=>setOpenId(isOpen ? null : boat.id)}
+                  style={{cursor:"pointer", userSelect:"none"}}>
+                  {/* Top color bar */}
+                  <div style={{background:m.bg, borderBottom:`1px solid ${m.border}`, padding:"12px 14px"}}>
+                    <div style={{display:"flex", justifyContent:"space-between", alignItems:"flex-start"}}>
+                      <div>
+                        <div style={{fontSize:"16px", fontWeight:800, color:m.color, letterSpacing:"-0.3px"}}>
+                          {boat.name}
+                          <span style={{fontSize:"12px", fontWeight:400, color:m.color, opacity:0.7, marginLeft:"7px"}}>{boat.size}</span>
+                        </div>
+                        <div style={{fontSize:"11px", color:m.color, opacity:0.65, marginTop:"2px"}}>📍 {boat.pier}</div>
+                      </div>
+                      <div style={{display:"flex", flexDirection:"column", alignItems:"flex-end", gap:"4px"}}>
+                        <span style={{background:`${m.color}22`, color:m.color, border:`1px solid ${m.border}`, borderRadius:"99px", padding:"2px 9px", fontSize:"11px", fontWeight:700}}>
+                          {m.label}
+                        </span>
+                        <span style={{fontSize:"11px", color:m.color, opacity:0.7}}>👥 макс. {boat.maxPax} чел.</span>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Bottom summary */}
+                  <div style={{padding:"10px 14px", display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+                    <div>
+                      {minPrice && <span style={{fontSize:"14px", fontWeight:700, color:m.color}}>от {minPrice.toLocaleString("ru-RU")} ฿</span>}
+                      <span style={{fontSize:"11px", color:t.muted, marginLeft:"8px"}}>{boat.tours.length} {boat.tours.length === 1 ? "маршрут" : boat.tours.length < 5 ? "маршрута" : "маршрутов"}</span>
+                    </div>
+                    <span style={{fontSize:"13px", color:m.color, transition:"transform 0.2s", transform:isOpen?"rotate(180deg)":"rotate(0)"}}>▾</span>
+                  </div>
+                </div>
+
+                {/* Expanded */}
+                {isOpen && (
+                  <div style={{borderTop:`1px solid ${m.border}`, padding:"12px 14px", background:dark?"rgba(0,0,0,0.2)":"rgba(0,0,0,0.02)"}}>
+                    {/* Note */}
+                    {boat.note && (
+                      <div style={{background:dark?"#2d1f00":"#fffbeb", border:"1px solid #d97706", borderRadius:"8px", padding:"8px 11px", fontSize:"12px", color:dark?"#fde68a":"#92400e", marginBottom:"10px", lineHeight:1.5}}>
+                        ℹ️ {boat.note}
+                      </div>
+                    )}
+                    {/* Tours table */}
+                    <div style={{borderRadius:"8px", overflow:"hidden", border:`1px solid ${m.border}`}}>
+                      {/* Table header */}
+                      <div style={{display:"grid", gridTemplateColumns:"1fr auto auto", background:m.bg, padding:"6px 10px", gap:"8px"}}>
+                        <div style={{fontSize:"10px", fontWeight:700, color:m.color, textTransform:"uppercase", letterSpacing:"0.5px"}}>Маршрут</div>
+                        <div style={{fontSize:"10px", fontWeight:700, color:m.color, textAlign:"right", textTransform:"uppercase", letterSpacing:"0.5px"}}>Цена</div>
+                        <div style={{fontSize:"10px", fontWeight:700, color:m.color, textAlign:"right", textTransform:"uppercase", letterSpacing:"0.5px", minWidth:"70px"}}>Экстра/чел</div>
+                      </div>
+                      {/* Rows */}
+                      {boat.tours.map((tour, i) => (
+                        <div key={i} style={{display:"grid", gridTemplateColumns:"1fr auto auto", padding:"7px 10px", gap:"8px", alignItems:"center", background: i%2===0 ? t.row0 : t.row1, borderTop: i===0 ? "none" : `1px solid ${dark?"rgba(255,255,255,0.05)":"#f0f0f0"}`}}>
+                          <div style={{fontSize:"12px", color:t.text, lineHeight:1.4}}>{tour.name}</div>
+                          <div style={{fontSize:"13px", fontWeight:700, color:m.color, textAlign:"right", whiteSpace:"nowrap"}}>
+                            {fmtPrice(tour.price)}
+                          </div>
+                          <div style={{fontSize:"11px", color:t.muted, textAlign:"right", whiteSpace:"nowrap", minWidth:"70px"}}>
+                            {tour.extra !== null ? fmtPrice(typeof tour.extra === "number" ? tour.extra : tour.extra) : "—"}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Collapse */}
+                    <button onClick={()=>setOpenId(null)}
+                      style={{marginTop:"10px", width:"100%", background:"transparent", border:`1px solid ${m.border}`, borderRadius:"8px", padding:"7px", fontSize:"12px", color:m.color, cursor:"pointer", fontWeight:600}}>
+                      Свернуть ▲
+                    </button>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Page() {
   const [unlocked, setUnlocked] = useState(false)
   const [pwInput, setPwInput] = useState("")
   const [pwError, setPwError] = useState(false)
-  const [tab,setTab]=useState<"transfers"|"excursions"|"log"|"methodichka">("transfers")
+  const [tab,setTab]=useState<"transfers"|"excursions"|"log"|"methodichka"|"boats">("transfers")
   const [log,setLog]=useState<LogEntry[]>([])
   const [transferData,setTransferData]=useState<Voucher[]>([])
   const [notifiedVouchers,setNotifiedVouchers]=useState<Record<string,boolean>>({})
@@ -1807,9 +2242,9 @@ export default function Page() {
               <button onClick={()=>setDark(d=>!d)} style={{fontSize:"18px",background:"transparent",border:`1px solid ${t.cardBorder}`,borderRadius:"8px",padding:"5px 10px",cursor:"pointer"}}>{dark?"☀️":"🌙"}</button>
             </div>
           </div>
-          <div style={{display:"flex",gap:"4px",marginTop:"10px",flexWrap:"wrap"}}>
-            {([{key:"transfers",label:"✈️ Трансферы"},{key:"excursions",label:"🗺️ Экскурсии"},{key:"log",label:"📋 Журнал"},{key:"methodichka",label:"📚 Методичка"}] as {key:string,label:string}[]).map(({key,label})=>(
-              <button key={key} onClick={()=>setTab(key as any)} style={{padding:"7px 16px",fontSize:"13px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:tab===key?(key==="excursions"?"#7c3aed":key==="methodichka"?"#0d9488":t.accent):t.cardBorder,color:tab===key?"#fff":t.muted,transition:"all 0.2s"}}>{label}</button>
+          <div style={{display:"flex",gap:"4px",marginTop:"10px",overflowX:"auto",paddingBottom:"2px"}}>
+            {([{key:"transfers",label:"✈️ Трансферы"},{key:"excursions",label:"🗺️ Экскурсии"},{key:"log",label:"📋 Журнал"},{key:"methodichka",label:"📚 Методичка"},{key:"boats",label:"🚢 Лодки"}] as {key:string,label:string}[]).map(({key,label})=>(
+              <button key={key} onClick={()=>setTab(key as any)} style={{padding:"7px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",flexShrink:0,whiteSpace:"nowrap",background:tab===key?(key==="excursions"?"#7c3aed":key==="methodichka"?"#0d9488":key==="boats"?"#0891b2":t.accent):t.cardBorder,color:tab===key?"#fff":t.muted,transition:"all 0.2s"}}>{label}</button>
             ))}
           </div>
           {tab==="transfers"&&filteredTransfers.length>0&&(
@@ -1994,6 +2429,9 @@ export default function Page() {
       )}
 
 
+
+      {/* ── BOATS TAB ── */}
+      {tab==="boats" && <BoatsTab dark={dark}/>}
 
       {/* ── METHODICHKA TAB ── */}
       {tab==="methodichka" && <MethodichkaTab dark={dark}/>}
