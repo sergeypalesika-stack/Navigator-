@@ -1284,6 +1284,161 @@ const VIP_PRICES = [
 ]
 
 // ══════════════════════════════════════════════
+// WA SHARE — ГЕНЕРАЦИЯ ТЕКСТА И ПОПАП
+// ══════════════════════════════════════════════
+
+function buildTourWAShort(tour: typeof MTOURS[0]): string {
+  const lines: string[] = []
+  lines.push(`🗺️ *${tour.name}*`)
+  if (tour.nameEn) lines.push(`_${tour.nameEn}_`)
+  lines.push("")
+  if (tour.duration) lines.push(`⏱ Продолжительность: ${tour.duration}`)
+  if (tour.operator) lines.push(`🏢 Оператор: ${tour.operator}`)
+  if (tour.hotel) lines.push(`🏨 Отель: ${tour.hotel}${tour.single ? ` (single +${tour.single}฿)` : ""}`)
+  if (tour.price) { lines.push(""); lines.push(`💰 Цены: ${tour.price}`) }
+  if (tour.tags && tour.tags.length) lines.push(`\n🏷 ${tour.tags.join(" · ")}`)
+  return lines.join("\n")
+}
+
+function buildTourWAFull(tour: typeof MTOURS[0]): string {
+  const lines: string[] = []
+  lines.push(`🗺️ *${tour.name}*`)
+  if (tour.nameEn) lines.push(`_${tour.nameEn}_`)
+  lines.push("")
+  if (tour.duration) lines.push(`⏱ ${tour.duration}`)
+  if (tour.operator) lines.push(`🏢 ${tour.operator}`)
+  if (tour.hotel) lines.push(`🏨 ${tour.hotel}${tour.single ? ` · single +${tour.single}฿` : ""}`)
+  if (tour.price) { lines.push(""); lines.push(`💰 *Цены:*\n${tour.price}`) }
+  if (tour.includes) { lines.push(""); lines.push(`✅ *Включено:*\n${tour.includes}`) }
+  if (tour.restrictions) { lines.push(""); lines.push(`⚠️ *Важно:*\n${tour.restrictions}`) }
+  if (tour.route && tour.route.length) {
+    lines.push("")
+    lines.push("🗺️ *Программа:*")
+    tour.route.forEach(block => {
+      if (block.day || block.label) lines.push(`\n*${block.label ?? `День ${block.day}`}*`)
+      block.items.forEach(item => {
+        if (item === "") return
+        lines.push(item.startsWith("•") ? item : `• ${item}`)
+      })
+    })
+  }
+  return lines.join("\n")
+}
+
+function buildBoatWAShort(boat: typeof BOATS_DATA[0]): string {
+  const lines: string[] = []
+  const m = BOAT_TYPE_META[boat.type]
+  lines.push(`🚢 *${boat.name}* (${boat.size})`)
+  lines.push(`📍 ${boat.pier} · 👥 до ${boat.maxPax} чел · ${m.label}`)
+  if (boat.note) { lines.push(""); lines.push(`ℹ️ ${boat.note}`) }
+  lines.push("")
+  lines.push("💰 *Маршруты и цены:*")
+  boat.tours.forEach(t => {
+    const extra = t.extra !== null ? ` (экстра: ${typeof t.extra === "number" ? t.extra.toLocaleString("ru-RU")+"฿" : t.extra})` : ""
+    const price = typeof t.price === "number" ? t.price.toLocaleString("ru-RU")+"฿" : (t.price ?? "—")
+    lines.push(`• ${t.name} — ${price}${extra}`)
+  })
+  return lines.join("\n")
+}
+
+function buildBoatWAFull(boat: typeof BOATS_DATA[0]): string {
+  return buildBoatWAShort(boat)
+}
+
+interface WAModalProps {
+  dark: boolean
+  title: string
+  shortText: string
+  fullText: string
+  onClose: () => void
+}
+
+function WAShareModal({ dark, title, shortText, fullText, onClose }: WAModalProps) {
+  const [phone, setPhone] = useState("")
+  const [format, setFormat] = useState<"short"|"full">("short")
+  const [phoneError, setPhoneError] = useState(false)
+
+  const t = {
+    bg: dark ? "#0b1120" : "#f0f4f8",
+    card: dark ? "#131d2e" : "#ffffff",
+    border: dark ? "#1e2f45" : "#d1dce8",
+    text: dark ? "#e2eaf4" : "#1a2636",
+    muted: dark ? "#5b7a9a" : "#6e8aa8",
+    inputBg: dark ? "#101c2d" : "#ffffff",
+  }
+
+  function handleSend() {
+    const cleaned = phone.replace(/[^\d+]/g, "")
+    if (cleaned.length < 7) { setPhoneError(true); return }
+    setPhoneError(false)
+    const text = format === "short" ? shortText : fullText
+    const url = `https://wa.me/${cleaned.replace(/^\+/, "")}?text=${encodeURIComponent(text)}`
+    window.open(url, "_blank")
+    onClose()
+  }
+
+  const previewText = format === "short" ? shortText : fullText
+
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:1000,display:"flex",alignItems:"flex-end",justifyContent:"center",background:"rgba(0,0,0,0.65)"}}
+      onClick={e => { if(e.target === e.currentTarget) onClose() }}>
+      <div style={{background:t.card,borderRadius:"20px 20px 0 0",width:"100%",maxWidth:"560px",padding:"20px 18px 32px",boxShadow:"0 -8px 40px rgba(0,0,0,0.4)",border:`1px solid ${t.border}`,borderBottom:"none",maxHeight:"85vh",overflow:"hidden",display:"flex",flexDirection:"column",gap:"14px"}}>
+
+        {/* Header */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{fontSize:"15px",fontWeight:800,color:t.text}}>📤 Отправить в WhatsApp</div>
+          <button onClick={onClose} style={{background:"transparent",border:"none",fontSize:"20px",cursor:"pointer",color:t.muted,lineHeight:1}}>×</button>
+        </div>
+
+        <div style={{fontSize:"12px",color:"#25d366",fontWeight:700,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>📌 {title}</div>
+
+        {/* Phone input */}
+        <div>
+          <div style={{fontSize:"11px",color:t.muted,marginBottom:"5px",fontWeight:600}}>📱 Номер получателя</div>
+          <input
+            value={phone}
+            onChange={e => { setPhone(e.target.value); setPhoneError(false) }}
+            placeholder="+66 92 279 11 99"
+            type="tel"
+            style={{width:"100%",padding:"10px 12px",fontSize:"14px",borderRadius:"10px",background:t.inputBg,
+              border:`1.5px solid ${phoneError?"#ef4444":t.border}`,color:t.text,outline:"none",boxSizing:"border-box"}}
+          />
+          {phoneError && <div style={{fontSize:"11px",color:"#ef4444",marginTop:"4px"}}>Введите корректный номер</div>}
+        </div>
+
+        {/* Format selector */}
+        <div>
+          <div style={{fontSize:"11px",color:t.muted,marginBottom:"6px",fontWeight:600}}>📝 Формат сообщения</div>
+          <div style={{display:"flex",gap:"8px"}}>
+            {[{k:"short",label:"📋 Краткая сводка"},{k:"full",label:"📄 Полное описание"}].map(f => (
+              <button key={f.k} onClick={() => setFormat(f.k as "short"|"full")}
+                style={{flex:1,padding:"8px 6px",borderRadius:"10px",fontSize:"12px",fontWeight:700,cursor:"pointer",
+                  border:`1.5px solid ${format===f.k?"#25d366":t.border}`,
+                  background:format===f.k?"#25d36622":t.inputBg,
+                  color:format===f.k?"#25d366":t.muted}}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Preview */}
+        <div style={{flex:1,overflowY:"auto",background:dark?"#0a1a10":"#f0fdf4",border:"1px solid #16a34a",borderRadius:"10px",padding:"10px 12px"}}>
+          <div style={{fontSize:"10px",fontWeight:700,color:"#16a34a",marginBottom:"6px",textTransform:"uppercase",letterSpacing:"0.5px"}}>👁 Предпросмотр</div>
+          <pre style={{fontSize:"11px",color:dark?"#86efac":"#14532d",whiteSpace:"pre-wrap",margin:0,fontFamily:"inherit",lineHeight:1.5}}>{previewText}</pre>
+        </div>
+
+        {/* Send button */}
+        <button onClick={handleSend}
+          style={{width:"100%",padding:"13px",background:"#25d366",color:"#fff",border:"none",borderRadius:"12px",fontSize:"15px",fontWeight:800,cursor:"pointer",letterSpacing:"0.3px"}}>
+          Открыть WhatsApp →
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ══════════════════════════════════════════════
 // КОМПОНЕНТ
 // ══════════════════════════════════════════════
 function MethodichkaTab({dark}:{dark:boolean}) {
@@ -1302,6 +1457,7 @@ function MethodichkaTab({dark}:{dark:boolean}) {
   const [showVip, setShowVip] = useState(false)
   const [tocOpen, setTocOpen] = useState(false)
   const tocRef = useRef<HTMLDivElement>(null)
+  const [waModal, setWaModal] = useState<{title:string;short:string;full:string}|null>(null)
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim()
@@ -1580,6 +1736,12 @@ function MethodichkaTab({dark}:{dark:boolean}) {
                         </div>
                       </div>
 
+                      {/* WA share button */}
+                      <button onClick={e => { e.stopPropagation(); setWaModal({title:tour.name, short:buildTourWAShort(tour), full:buildTourWAFull(tour)}) }}
+                        style={{width:"100%",padding:"9px",background:"#25d366",color:"#fff",border:"none",borderRadius:"8px",fontSize:"13px",fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"6px"}}>
+                        <span>📤</span> Отправить в WhatsApp
+                      </button>
+
                       {/* Collapse button */}
                       <button onClick={() => setExpandedTour(null)}
                         style={{background:"transparent", border:`1px solid ${m.border}`, borderRadius:"8px", padding:"7px", fontSize:"12px", color:m.color, cursor:"pointer", fontWeight:600}}>
@@ -1593,6 +1755,9 @@ function MethodichkaTab({dark}:{dark:boolean}) {
           </div>
         )}
       </div>
+
+      {/* WA Modal */}
+      {waModal && <WAShareModal dark={dark} title={waModal.title} shortText={waModal.short} fullText={waModal.full} onClose={() => setWaModal(null)}/>}
     </div>
   )
 }
@@ -1876,6 +2041,7 @@ function BoatsTab({dark}:{dark:boolean}) {
   const [typeF,  setTypeF]        = useState("Все")
   const [pierF,  setPierF]        = useState("Все")
   const [openId, setOpenId]       = useState<number|null>(null)
+  const [waModal, setWaModal]     = useState<{title:string;short:string;full:string}|null>(null)
 
   const filtered = useMemo(() => BOATS_DATA.filter(b => {
     if (typeF !== "Все" && b.type !== typeF) return false
@@ -2017,6 +2183,11 @@ function BoatsTab({dark}:{dark:boolean}) {
                         </div>
                       ))}
                     </div>
+                    {/* WA share */}
+                    <button onClick={e => { e.stopPropagation(); setWaModal({title:boat.name, short:buildBoatWAShort(boat), full:buildBoatWAFull(boat)}) }}
+                      style={{marginTop:"6px",width:"100%",background:"#25d366",color:"#fff",border:"none",borderRadius:"8px",padding:"8px",fontSize:"13px",fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"6px"}}>
+                      <span>📤</span> Отправить в WhatsApp
+                    </button>
                     {/* Collapse */}
                     <button onClick={()=>setOpenId(null)}
                       style={{marginTop:"10px", width:"100%", background:"transparent", border:`1px solid ${m.border}`, borderRadius:"8px", padding:"7px", fontSize:"12px", color:m.color, cursor:"pointer", fontWeight:600}}>
@@ -2029,6 +2200,9 @@ function BoatsTab({dark}:{dark:boolean}) {
           })}
         </div>
       </div>
+
+      {/* WA Modal */}
+      {waModal && <WAShareModal dark={dark} title={waModal.title} shortText={waModal.short} fullText={waModal.full} onClose={() => setWaModal(null)}/>}
     </div>
   )
 }
