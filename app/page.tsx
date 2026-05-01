@@ -2476,7 +2476,7 @@ const BOATS_SUMMER_DATA = [
     tours:[{name:"Racha Yai",price:31500,extra:null,incl:"1–10"}]},
 ]
 
-const BS_TYPE_META = {
+const BS_TYPE_META: Record<string,{label:string;color:string;border:string;bg:string}> = {
   speedboat: {label:"Speedboat",   color:"#38bdf8", border:"#1e3f6a", bg:"#0c2340"},
   sailboat:  {label:"Парусная",    color:"#4ade80", border:"#166534", bg:"#0d2010"},
   catamaran: {label:"Катамаран",   color:"#fb923c", border:"#9a3412", bg:"#2d1500"},
@@ -2485,8 +2485,8 @@ const BS_TYPE_META = {
 }
 
 function buildBoatSummerWA(boat: Record<string, any>): string {
-  const m = BS_TYPE_META[boat.type]
-  const lines = []
+  const m = BS_TYPE_META[String(boat.type)] || {label: boat.type, color:"#38bdf8", border:"#1e3f6a", bg:"#0c2340"}
+  const lines: string[] = []
   lines.push(`🚤 *${boat.name}* (${boat.size}) — ${m.label}`)
   lines.push(`📍 ${boat.pier} · 👥 до ${boat.maxPax} чел.`)
   if (boat.note) { lines.push(""); lines.push(`ℹ️ ${boat.note}`) }
@@ -2604,7 +2604,7 @@ function BoatSummerTab({dark}: {dark: boolean}) {
         )}
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:"10px"}}>
           {filtered.map(boat=>{
-            const m = BS_TYPE_META[boat.type]
+            const m = BS_TYPE_META[String(boat.type)] || {label:boat.type,color:"#38bdf8",border:"#1e3f6a",bg:"#0c2340"}
             const isOpen = openId===boat.id
             const prices = boat.tours.map(tt=>tt.price)
             const minPrice = Math.min(...prices)
