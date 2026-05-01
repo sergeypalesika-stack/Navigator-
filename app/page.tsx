@@ -2492,7 +2492,7 @@ function buildBoatSummerWA(boat: Record<string, any>): string {
   if (boat.note) { lines.push(""); lines.push(`ℹ️ ${boat.note}`) }
   lines.push("")
   lines.push("💰 *Маршруты и цены (Summer Update 1.05.26):*")
-  boat.tours.forEach(tt => {
+  boat.tours.forEach((tt: Record<string,any>) => {
     const price = tt.price.toLocaleString("ru-RU") + " ฿"
     const extra = tt.extra === null ? "" : typeof tt.extra === "number" ? ` (экстра: ${tt.extra.toLocaleString("ru-RU")} ฿/чел)` : ` (экстра: ${tt.extra})`
     lines.push(`• ${tt.name} — *${price}*${extra}`)
@@ -2516,8 +2516,8 @@ function BoatSummerTab({dark}: {dark: boolean}) {
   const [pierFilter, setPierFilter] = useState("all")
   const [typeFilter, setTypeFilter] = useState("all")
   const [sortBy, setSortBy] = useState("name")
-  const [openId, setOpenId] = useState(null)
-  const [waModal, setWaModal] = useState(null)
+  const [openId, setOpenId] = useState<string|null>(null)
+  const [waModal, setWaModal] = useState<{title:string;short:string;full:string}|null>(null)
 
   const allPiers = useMemo(()=>Array.from(new Set(BOATS_SUMMER_DATA.map(b=>b.pier))).sort(),[])
 
@@ -2538,7 +2538,7 @@ function BoatSummerTab({dark}: {dark: boolean}) {
     })
   },[search,pierFilter,typeFilter,sortBy])
 
-  function fmtP(n) { return n.toLocaleString("ru-RU") + " ฿" }
+  function fmtP(n: number) { return n.toLocaleString("ru-RU") + " ฿" }
 
   const typeStats = ["speedboat","sailboat","catamaran","powercat","yacht"].map(tp=>({
     tp, label:BS_TYPE_META[tp].label, color:BS_TYPE_META[tp].color,
