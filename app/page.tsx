@@ -2207,11 +2207,494 @@ function BoatsTab({dark}:{dark:boolean}) {
   )
 }
 
+// ═══════════════════════════════════════════
+// BOAT SUMMER UPDATE 1.05.26 — ДАННЫЕ И КОМПОНЕНТ
+// ═══════════════════════════════════════════
+
+const BOATS_SUMMER_DATA = [
+  { id:"bs1", name:"Bowie 1", size:"46ft", pier:"Royal Phuket Marina", type:"speedboat", maxPax:25,
+    drive:"https://drive.google.com/drive/folders/1DMstt7CMkXog7yp0LCpvxedzSuNXblrG",
+    tours:[
+      {name:"Phi Phi + Bamboo",price:45000,extra:1500,incl:"1–2"},
+      {name:"James Bond + Naka Island",price:45000,extra:1500,incl:"1–2"},
+      {name:"Phi Phi Overnight",price:67900,extra:4000,incl:"1–2"},
+      {name:"Krabi",price:42150,extra:1500,incl:"1–2"},
+      {name:"Phi Phi + Krabi",price:55000,extra:2500,incl:"1–2"},
+      {name:"James Bond + Krabi",price:53600,extra:2500,incl:"1–2"},
+      {name:"James Bond + Phi Phi",price:59300,extra:2500,incl:"1–2"},
+      {name:"James Bond + Krabi + Phi Phi",price:63600,extra:2500,incl:"1–2"},
+      {name:"Andaman Treasure 2/1",price:86500,extra:4600,incl:"1–2"},
+    ]},
+  { id:"bs2", name:"Bowie 2", size:"36ft", pier:"Royal Phuket Marina", type:"speedboat", maxPax:20,
+    drive:"https://drive.google.com/drive/folders/1soiMLhTVqupUqYL7TuE1Ln7RERkiw5XV",
+    tours:[
+      {name:"Phi Phi + Bamboo",price:45000,extra:1500,incl:"1–2"},
+      {name:"James Bond + Naka Island",price:45000,extra:1500,incl:"1–2"},
+      {name:"Phi Phi Overnight",price:67900,extra:4000,incl:"1–2"},
+      {name:"Krabi",price:42150,extra:1500,incl:"1–2"},
+      {name:"Phi Phi + Krabi",price:55000,extra:2500,incl:"1–2"},
+      {name:"James Bond + Krabi",price:53600,extra:2500,incl:"1–2"},
+      {name:"James Bond + Phi Phi",price:59300,extra:2500,incl:"1–2"},
+      {name:"James Bond + Krabi + Phi Phi",price:63600,extra:2500,incl:"1–2"},
+      {name:"Andaman Treasure 2/1",price:86500,extra:4600,incl:"1–2"},
+    ]},
+  { id:"bs3", name:"Sofia", size:"45ft", pier:"Bang Rong Pier", type:"speedboat", maxPax:20, tours:[
+    {name:"Phi Phi + Bamboo",price:42300,extra:1500,incl:"1–2"},
+    {name:"James Bond + Naka Island",price:43300,extra:1500,incl:"1–2"},
+    {name:"Krabi",price:42300,extra:1500,incl:"1–2"},
+    {name:"Phi Phi + Krabi",price:54800,extra:2500,incl:"1–2"},
+    {name:"James Bond + Krabi",price:54800,extra:2500,incl:"1–2"},
+    {name:"James Bond + Phi Phi",price:54800,extra:2500,incl:"1–2"},
+    {name:"James Bond + Krabi + Phi Phi",price:66450,extra:2500,incl:"1–2"},
+  ]},
+  { id:"bs4", name:"Thaimarine", size:"47ft", pier:"Royal Phuket Marina", type:"speedboat", maxPax:20,
+    drive:"https://drive.google.com/drive/folders/1jEEnwwBajxtSO5I0vGUfdXlolOtgcY3q",
+    tours:[
+      {name:"Phi Phi + Bamboo",price:72400,extra:1500,incl:"1–2"},
+      {name:"James Bond + Naka Island",price:64900,extra:1500,incl:"1–2"},
+      {name:"Phi Phi + Krabi",price:76900,extra:2500,incl:"1–2"},
+      {name:"James Bond + Krabi",price:82800,extra:2500,incl:"1–2"},
+      {name:"James Bond + Phi Phi",price:82800,extra:2500,incl:"1–2"},
+    ]},
+  { id:"bs5", name:"Gambit", size:"36ft", pier:"Chalong Pier", type:"speedboat", maxPax:10,
+    drive:"https://drive.google.com/drive/folders/1NN6M-ea9pDlKgz51s_WP-UkcvQutt3OC",
+    tours:[{name:"Phi Phi + Bamboo",price:38000,extra:1500,incl:"1–2"}]},
+  { id:"bs6", name:"Yamela", size:"40ft", pier:"Chalong Pier", type:"speedboat", maxPax:15,
+    drive:"https://drive.google.com/drive/folders/1iTg81mXUhcR_j36oqNas69a30tQEmQHU",
+    tours:[{name:"Phi Phi + Bamboo",price:38000,extra:1500,incl:"1–2"}]},
+  { id:"bs7", name:"Verona", size:"46ft", pier:"Taplamu Pier", type:"speedboat", maxPax:30,
+    drive:"https://drive.google.com/drive/folders/1c0AMe86EWdQU0HLwDOoLAk7P4kuI2oq4",
+    tours:[
+      {name:"Similan Islands",price:68500,extra:1500,incl:"1–2"},
+      {name:"Surin Islands",price:80000,extra:2500,incl:"1–2"},
+    ]},
+  { id:"bs8", name:"Romeo", size:"46ft", pier:"Taplamu Pier", type:"speedboat", maxPax:30,
+    drive:"https://drive.google.com/drive/folders/1qs-REzkEGfGWyfIJXGj66OfssaFxFUAn",
+    tours:[
+      {name:"Similan Islands",price:68500,extra:1500,incl:"1–2"},
+      {name:"Surin Islands",price:80000,extra:2500,incl:"1–2"},
+    ]},
+  { id:"bs9", name:"Lexi", size:"45ft", pier:"Royal Phuket Marina", type:"speedboat", maxPax:30,
+    drive:"https://drive.google.com/drive/folders/1XBSdmfPFk1LXadlJ4qAIU0QsdczFGUOj",
+    tours:[
+      {name:"Phi Phi + Bamboo",price:49300,extra:1600,incl:"1–2"},
+      {name:"James Bond + Naka Island",price:47900,extra:1600,incl:"1–2"},
+      {name:"Phi Phi + Krabi",price:62150,extra:2500,incl:"1–2"},
+      {name:"James Bond + Krabi",price:77150,extra:2500,incl:"1–2"},
+      {name:"James Bond + Phi Phi",price:77150,extra:2500,incl:"1–2"},
+      {name:"Similan (RPM)",price:96400,extra:1700,incl:"1–2"},
+      {name:"Similan (Taplamu)",price:68600,extra:2150,incl:"1–2"},
+      {name:"Surin Islands",price:80000,extra:2500,incl:"1–2"},
+      {name:"Koh Rok Ko Ha",price:97000,extra:1800,incl:"1–2"},
+    ]},
+  { id:"bs10", name:"Randezvous", size:"44ft", pier:"Chalong Pier", type:"catamaran", maxPax:10,
+    note:"Обед включён. Seafood +650฿/чел, рус. гид +3500฿",
+    drive:"https://drive.google.com/drive/folders/1ILUqV3U8VJq-gA3cBEIczFy86qArFSD-",
+    tours:[
+      {name:"Maithon + Racha Yai",price:50000,extra:null,incl:"10 PAX"},
+      {name:"Racha Yai Fishing",price:50000,extra:null,incl:"10 PAX"},
+      {name:"Phi Phi",price:56800,extra:800,incl:"1–2"},
+      {name:"Phi Phi Bamboo",price:64800,extra:800,incl:"1–2"},
+      {name:"Krabi-Koh Hong",price:64800,extra:800,incl:"1–2"},
+    ]},
+  { id:"bs11", name:"Zoe", size:"46ft", pier:"Chalong Pier", type:"sailboat", maxPax:15,
+    note:"Обед (seafood) включён. >11 чел +3500฿ доп. вэн. Бассейн/горка/рус. гид — доп.",
+    drive:"https://drive.google.com/drive/folders/1PUVoPqbYKkYnZqjMiN5zyVypphtNZj3h",
+    tours:[
+      {name:"Racha Yai + Coral",price:40000,extra:1500,incl:"1–2"},
+      {name:"Racha Noi",price:46500,extra:1500,incl:"1–2"},
+    ]},
+  { id:"bs12", name:"Sunny", size:"38ft", pier:"Chalong Pier", type:"sailboat", maxPax:10,
+    note:"Обед (seafood) включён. Бассейн/горка/рус. гид — доп.",
+    drive:"https://drive.google.com/drive/folders/1jfPZgXfTy58EfSvG3wR7znvR8lCalzHX",
+    tours:[
+      {name:"Racha Yai + Coral",price:37500,extra:1500,incl:"1–2"},
+      {name:"Racha Noi",price:44500,extra:1500,incl:"1–2"},
+    ]},
+  { id:"bs13", name:"Oceanland", size:"45ft", pier:"Chalong Pier", type:"sailboat", maxPax:20,
+    note:"Обед (seafood) включён. >11 чел +3500฿ доп. вэн.",
+    drive:"https://drive.google.com/drive/folders/1--7mTJnU-FfdGaPT8BdIcGBc1QlBgmr3",
+    tours:[
+      {name:"Racha Yai + Coral",price:51500,extra:1500,incl:"1–2"},
+      {name:"Racha Noi",price:57500,extra:1500,incl:"1–2"},
+    ]},
+  { id:"bs14", name:"Pepper", size:"47ft", pier:"Chalong Pier", type:"sailboat", maxPax:30,
+    note:"Обед НЕ включён (оплач. отдельно). База 1–15 чел. >11 чел +3500฿ доп. вэн.",
+    drive:"https://drive.google.com/drive/folders/1O9usPG_S7xSzonv2xDHhh4h57cyjj5PC",
+    tours:[
+      {name:"Racha Yai + Coral",price:44000,extra:"1500+обед",incl:"1–15"},
+      {name:"Maithon + Coral",price:44000,extra:"1500+обед",incl:"1–15"},
+      {name:"Coral + Promthep",price:44000,extra:"1500+обед",incl:"1–15"},
+    ]},
+  { id:"bs15", name:"Senna", size:"47ft", pier:"Chalong Pier", type:"sailboat", maxPax:30,
+    note:"Обед НЕ включён. >11 чел +3500฿ доп. вэн.",
+    drive:"https://drive.google.com/drive/folders/1dhoafTN76LDlEcXhXxG_O2ZR4alXh3Lu",
+    tours:[
+      {name:"Racha Yai + Coral",price:44000,extra:"1500+обед",incl:"1–15"},
+      {name:"Maithon + Coral",price:44000,extra:"1500+обед",incl:"1–15"},
+      {name:"Coral + Promthep",price:44000,extra:"1500+обед",incl:"1–15"},
+    ]},
+  { id:"bs16", name:"Summer", size:"47ft", pier:"Nakalay Pier (Kalim)", type:"sailboat", maxPax:15,
+    note:"Обед включён. >11 чел +3500฿ доп. вэн. Рус. гид +3500฿",
+    drive:"https://drive.google.com/drive/folders/1PCh6daqP_fB7o7HV2Vgpj4w1ANnhQnzE",
+    tours:[
+      {name:"North (Rock Cliff + Kamala + Laem Sing + Surin + Koh Waew + Banana Beach)",price:65500,extra:900,incl:"1–6"},
+      {name:"South (Patong + Freedom Beach + Laem Krating + Promthep Cape)",price:65500,extra:900,incl:"1–6"},
+    ]},
+  { id:"bs17", name:"Coco", size:"40ft", pier:"Chalong Pier", type:"catamaran", maxPax:20,
+    note:"Обед НЕ включён. >11 чел +3500฿ доп. вэн.",
+    drive:"https://drive.google.com/drive/folders/1YJ3hrUBHgZs1uB_WfzfUZ4wJwP2pczUM",
+    tours:[
+      {name:"Racha Yai + Coral",price:44000,extra:"1500+обед",incl:"1–15"},
+      {name:"Maithon + Coral",price:44000,extra:"1500+обед",incl:"1–15"},
+      {name:"Coral + Promthep",price:44000,extra:"1500+обед",incl:"1–15"},
+    ]},
+  { id:"bs18", name:"Tahaa", size:"42ft", pier:"Chalong Pier", type:"catamaran", maxPax:30,
+    note:"Обед НЕ включён. >11 чел +3500฿ доп. вэн.",
+    drive:"https://drive.google.com/drive/folders/1yKSJmaghsTTzabRivmWpVZrwekFsLFDm",
+    tours:[
+      {name:"Racha Yai + Coral",price:44000,extra:"1500+обед",incl:"1–15"},
+      {name:"Maithon + Coral",price:44000,extra:"1500+обед",incl:"1–15"},
+      {name:"Coral + Promthep",price:44000,extra:"1500+обед",incl:"1–15"},
+    ]},
+  { id:"bs19", name:"Myra", size:"47ft", pier:"Ao Po", type:"sailboat", maxPax:15,
+    note:"Обед — доп. (сет 6 чел: A-4800/B-5500/C-6500฿). Нац. парк и каноэ — доп.",
+    drive:"https://drive.google.com/drive/folders/1T4Vn3ub7ohqk3qI46phscLA8yW-SZl_j",
+    tours:[
+      {name:"Phang Nga Bay (Panak+Hong+Bond)",price:59600,extra:null,incl:"1–15"},
+      {name:"Khai Island + Naka Island",price:59600,extra:null,incl:"1–15"},
+      {name:"Hong-Krabi (Hong+Lao Lading+Lao Ka+Pakbia+Rai)",price:71000,extra:null,incl:"1–15"},
+    ]},
+  { id:"bs20", name:"Ocean Dream", size:"40ft", pier:"Chalong Pier", type:"sailboat", maxPax:15,
+    note:"Обед (seafood) включён. >11 чел +3500฿ доп. вэн. Бассейн +4500฿, горка +3600฿, рус. гид +3500฿",
+    drive:"https://drive.google.com/drive/u/0/folders/1dIqceqeU4jpv0_8Jb722pxOrV2sW63Z",
+    tours:[
+      {name:"Racha Yai + Coral (9:00–16:00)",price:38000,extra:2500,incl:"1–6"},
+      {name:"Khai Island (9:00–18:00)",price:45000,extra:2500,incl:"1–6"},
+      {name:"Racha Yai + Coral + Sunset (10:30–19:00)",price:42000,extra:2500,incl:"1–6"},
+    ]},
+  { id:"bs21", name:"Ameray", size:"37ft", pier:"Chalong Pier", type:"sailboat", maxPax:15,
+    note:"Обед (seafood) включён. >11 чел +3500฿ доп. вэн. Бассейн +4500฿, горка +3600฿, рус. гид +3500฿",
+    drive:"https://drive.google.com/drive/folders/1RvMJgxFDf-2QWPqX2eGoqwC99VDGXF1w",
+    tours:[
+      {name:"Racha Yai + Coral (9:00–16:00)",price:38000,extra:2500,incl:"1–6"},
+      {name:"Khai Island (9:00–18:00)",price:45000,extra:2500,incl:"1–6"},
+      {name:"Racha Yai + Coral + Sunset (10:30–19:00)",price:42000,extra:2500,incl:"1–6"},
+    ]},
+  { id:"bs22", name:"Wildcat", size:"44ft", pier:"Chalong Pier", type:"catamaran", maxPax:15,
+    note:"Обед (seafood) включён. >11 чел +3500฿ доп. вэн. Бассейн +4500฿, горка +3600฿, рус. гид +3500฿",
+    drive:"https://drive.google.com/drive/folders/1FzZp3QV2x8wWhQY23bDmJTEMvKRIajqC",
+    tours:[
+      {name:"Racha Yai + Coral (9:00–16:00)",price:38000,extra:2500,incl:"1–6"},
+      {name:"Khai Island (9:00–18:00)",price:45000,extra:2500,incl:"1–6"},
+      {name:"Racha Yai + Coral + Sunset (10:30–19:00)",price:42000,extra:2500,incl:"1–6"},
+    ]},
+  { id:"bs23", name:"White Corn", size:"38ft", pier:"Chalong Pier", type:"sailboat", maxPax:15,
+    note:"Обед BBQ + Seafood включён. >11 чел +3500฿ доп. вэн. Рус. гид +3500฿",
+    drive:"https://drive.google.com/drive/folders/1-_WwAhjkyJACcXK0uW9dF5K7pUugVD7H",
+    tours:[{name:"Racha Yai + Coral",price:40000,extra:1500,incl:"1–5"}]},
+  { id:"bs24", name:"Black Pearl", size:"40ft", pier:"Chalong Pier", type:"sailboat", maxPax:15,
+    note:"Обед BBQ + Seafood включён. >11 чел +3500฿ доп. вэн. Рус. гид +3500฿",
+    drive:"https://drive.google.com/drive/folders/1-MNse3i6r3OHoxtR2gukV5lKWQFBkU2j",
+    tours:[{name:"Racha Yai + Coral",price:40000,extra:1500,incl:"1–5"}]},
+  { id:"bs25", name:"Ella", size:"53ft", pier:"Chalong Pier", type:"catamaran", maxPax:20,
+    note:"Обед +500฿/чел доп. >11 чел +3500฿ доп. вэн. Бассейн 3500฿, горка 3600฿, удочки 1000฿, BBQ 1500฿, рус. гид +3500฿. Выше цена 20/12–01/03.",
+    drive:"https://drive.google.com/drive/folders/1GaJbjLCzLO7clwYJNC6Ewiw1JWjeNHij",
+    tours:[
+      {name:"Racha Yai + Coral",price:42000,extra:"1500+обед",incl:"1–10"},
+      {name:"Racha + Coral + Promthep",price:44000,extra:"1500+обед",incl:"1–10"},
+    ]},
+  { id:"bs26", name:"Calypso", size:"44ft", pier:"Chalong Pier", type:"catamaran", maxPax:20,
+    note:"Обед +500฿/чел доп. >11 чел +3500฿ доп. вэн. Бассейн 3500฿, горка 3600฿. Выше цена 20/12–01/03.",
+    drive:"https://drive.google.com/drive/folders/1ow1u3IqmpJ0H-U-HDsCo46JZgg48-s0j",
+    tours:[
+      {name:"Racha Yai + Coral",price:44500,extra:"1500+обед",incl:"1–10"},
+      {name:"Racha + Coral + Promthep",price:56500,extra:"1500+обед",incl:"1–10"},
+    ]},
+  { id:"bs27", name:"Bohemian", size:"50ft", pier:"Chalong Pier", type:"catamaran", maxPax:25,
+    note:"Обед +500฿/чел доп. >11 чел +3500฿ доп. вэн. Выше цена 20/12–01/03.",
+    drive:"https://drive.google.com/drive/folders/1Oo4-GftlfLBhgKGygQCRSFgrC0giEb2B",
+    tours:[
+      {name:"Racha Yai + Coral",price:42000,extra:"1500+обед",incl:"1–10"},
+      {name:"Racha + Coral + Promthep",price:44000,extra:"1500+обед",incl:"1–10"},
+    ]},
+  { id:"bs28", name:"F1", size:"42ft", pier:"Chalong Pier", type:"powercat", maxPax:15,
+    note:"Обед включён. >11 чел +3500฿ доп. вэн. Бассейн 3500฿, горка 3600฿, рус. гид +3500฿",
+    drive:"https://drive.google.com/drive/folders/17JVhaqA7fg5OgtWL5BpQQgudR9aonYbX",
+    tours:[
+      {name:"Racha Yai + Coral",price:54450,extra:1900,incl:"1–8"},
+      {name:"Racha + Racha Yai",price:58100,extra:1900,incl:"1–8"},
+      {name:"Phi Phi Island (No Bamboo)",price:59260,extra:"1000 (до 8 чел) / 2800 (>8)",incl:"1–2"},
+      {name:"James Bond + Koh Khai Nok",price:67800,extra:"1500 (до 8 чел) / 3300 (>8)",incl:"1–2"},
+    ]},
+  { id:"bs29", name:"Whiskey", size:"48ft", pier:"Chalong Pier", type:"powercat", maxPax:20,
+    note:"Бассейн и горка включены. Обед включён. Удочки бесплатно по запросу. >11 чел +3500฿ доп. вэн.",
+    drive:"https://drive.google.com/drive/folders/1GcrhgI2zst9ZIXddiFu4QbltigqChkLo",
+    tours:[{name:"Racha Yai + Coral",price:54600,extra:1500,incl:"1–10"}]},
+  { id:"bs30", name:"Tequila", size:"37ft", pier:"Chalong Pier", type:"speedboat", maxPax:10,
+    note:"Бассейн и горка включены. Обед включён. Удочки бесплатно по запросу.",
+    drive:"https://drive.google.com/drive/folders/1Qj56ehlML7DrSU7NArhed0gFszIXZCxn",
+    tours:[
+      {name:"Racha Yai + Coral",price:57150,extra:null,incl:"1–10"},
+      {name:"Racha + Racha Noi",price:62900,extra:null,incl:"1–10"},
+      {name:"Phi Phi Island + Bamboo",price:66900,extra:1000,incl:"1–2"},
+    ]},
+  { id:"bs31", name:"Vodka", size:"46ft", pier:"Chalong Pier", type:"speedboat", maxPax:10,
+    note:"Бассейн и горка включены. Обед включён. Удочки бесплатно по запросу.",
+    drive:"https://drive.google.com/drive/folders/1a6gwWKdpaI1k6IvddudzA4MLJmFKETWz",
+    tours:[
+      {name:"Racha Yai + Coral",price:65710,extra:null,incl:"1–10"},
+      {name:"Racha + Racha Noi",price:80000,extra:null,incl:"1–10"},
+      {name:"Phi Phi Island + Bamboo",price:88300,extra:1000,incl:"1–2"},
+    ]},
+  { id:"bs32", name:"Origin", size:"90ft", pier:"Chalong Pier", type:"yacht", maxPax:20,
+    note:"20 чел включены. Просекко x2, пиво x24, AC/WiFi/TV, бассейн и горка, морской скутер x2, доп. обед по меню.",
+    drive:"https://drive.google.com/drive/folders/1Qk63PA8BPrLb5i-eonuOpXa73Ih1-nw3",
+    tours:[
+      {name:"Racha Yai + Coral",price:124300,extra:null,incl:"1–20"},
+      {name:"Maithon + Coral",price:124300,extra:null,incl:"1–20"},
+      {name:"Coral + Promthep",price:124300,extra:null,incl:"1–20"},
+      {name:"Khai + Maithon",price:124300,extra:null,incl:"1–20"},
+    ]},
+  { id:"bs33", name:"Lady M", size:"54ft", pier:"Royal Phuket Marina", type:"yacht", maxPax:8,
+    note:"Обед и гид включены. 24 пива ИЛИ 12 пива + 1 бут. вина.",
+    drive:"https://drive.google.com/drive/folders/1S7xW_Ffg4DAsJu1Q74jlvF-jZgWGajNM",
+    tours:[
+      {name:"Coral Island",price:150000,extra:4500,incl:"1–4"},
+      {name:"Maithon Island",price:150000,extra:4500,incl:"1–4"},
+      {name:"Khai Island",price:150000,extra:4500,incl:"1–4"},
+      {name:"Racha",price:200000,extra:4500,incl:"1–4"},
+      {name:"Phi Phi Island",price:190000,extra:4500,incl:"1–4"},
+    ]},
+  { id:"bs34", name:"Red Dragon", size:"36ft", pier:"Chalong Pier", type:"speedboat", maxPax:8,
+    note:"Обед включён. Рус. гид +3500฿",
+    drive:"https://drive.google.com/drive/folders/13xVqPmzDQ37ZZatcGqYvJLoEaoSx1it0",
+    tours:[{name:"Racha Yai",price:28500,extra:null,incl:"1–8"}]},
+  { id:"bs35", name:"Solita", size:"48ft", pier:"Chalong Pier", type:"speedboat", maxPax:10,
+    note:"Обед включён. Рус. гид +3500฿",
+    drive:"https://drive.google.com/drive/folders/182eRIu9f4Eh9QTKZr37VDdoW23gKBphx",
+    tours:[{name:"Racha Yai",price:31500,extra:null,incl:"1–10"}]},
+]
+
+const BS_TYPE_META = {
+  speedboat: {label:"Speedboat",   color:"#38bdf8", border:"#1e3f6a", bg:"#0c2340"},
+  sailboat:  {label:"Парусная",    color:"#4ade80", border:"#166534", bg:"#0d2010"},
+  catamaran: {label:"Катамаран",   color:"#fb923c", border:"#9a3412", bg:"#2d1500"},
+  powercat:  {label:"Power Cat",   color:"#c084fc", border:"#6b21a8", bg:"#2d1b4e"},
+  yacht:     {label:"Яхта",        color:"#f9a8d4", border:"#9d174d", bg:"#2d0a1a"},
+}
+
+function buildBoatSummerWA(boat) {
+  const m = BS_TYPE_META[boat.type]
+  const lines = []
+  lines.push(`🚤 *${boat.name}* (${boat.size}) — ${m.label}`)
+  lines.push(`📍 ${boat.pier} · 👥 до ${boat.maxPax} чел.`)
+  if (boat.note) { lines.push(""); lines.push(`ℹ️ ${boat.note}`) }
+  lines.push("")
+  lines.push("💰 *Маршруты и цены (Summer Update 1.05.26):*")
+  boat.tours.forEach(tt => {
+    const price = tt.price.toLocaleString("ru-RU") + " ฿"
+    const extra = tt.extra === null ? "" : typeof tt.extra === "number" ? ` (экстра: ${tt.extra.toLocaleString("ru-RU")} ฿/чел)` : ` (экстра: ${tt.extra})`
+    lines.push(`• ${tt.name} — *${price}*${extra}`)
+  })
+  lines.push("")
+  lines.push("🌴 Navigator-Sayama Travel")
+  return lines.join("\n")
+}
+
+function BoatSummerTab({dark}) {
+  const t = {
+    bg:dark?"#0b1120":"#f0f4f8", card:dark?"#131d2e":"#ffffff",
+    cardBorder:dark?"#1e2f45":"#d1dce8", text:dark?"#e2eaf4":"#1a2636",
+    muted:dark?"#5b7a9a":"#6e8aa8", accent:dark?"#38bdf8":"#0369a1",
+    header:dark?"#0d1929":"#e2ecf7", inputBg:dark?"#101c2d":"#ffffff",
+    inputBdr:dark?"#1e3450":"#c5d5e5", row0:dark?"transparent":"#fafafa",
+    row1:dark?"rgba(255,255,255,0.02)":"#f0f4f8",
+  }
+
+  const [search, setSearch] = useState("")
+  const [pierFilter, setPierFilter] = useState("all")
+  const [typeFilter, setTypeFilter] = useState("all")
+  const [sortBy, setSortBy] = useState("name")
+  const [openId, setOpenId] = useState(null)
+  const [waModal, setWaModal] = useState(null)
+
+  const allPiers = useMemo(()=>Array.from(new Set(BOATS_SUMMER_DATA.map(b=>b.pier))).sort(),[])
+
+  const filtered = useMemo(()=>{
+    return [...BOATS_SUMMER_DATA].filter(b=>{
+      const q = search.toLowerCase()
+      const matchQ = !q || b.name.toLowerCase().includes(q) || b.pier.toLowerCase().includes(q) ||
+        b.tours.some(tt=>tt.name.toLowerCase().includes(q))
+      const matchP = pierFilter==="all" || b.pier===pierFilter
+      const matchT = typeFilter==="all" || b.type===typeFilter
+      return matchQ && matchP && matchT
+    }).sort((a,b2)=>{
+      if(sortBy==="name") return a.name.localeCompare(b2.name)
+      if(sortBy==="price") return Math.min(...a.tours.map(tt=>tt.price)) - Math.min(...b2.tours.map(tt=>tt.price))
+      if(sortBy==="size") return parseInt(b2.size) - parseInt(a.size)
+      if(sortBy==="pax") return b2.maxPax - a.maxPax
+      return 0
+    })
+  },[search,pierFilter,typeFilter,sortBy])
+
+  function fmtP(n) { return n.toLocaleString("ru-RU") + " ฿" }
+
+  const typeStats = ["speedboat","sailboat","catamaran","powercat","yacht"].map(tp=>({
+    tp, label:BS_TYPE_META[tp].label, color:BS_TYPE_META[tp].color,
+    count: BOATS_SUMMER_DATA.filter(b=>b.type===tp).length
+  }))
+
+  const selStyle = {padding:"8px 10px",fontSize:"12px",borderRadius:"8px",border:`1px solid ${t.inputBdr}`,background:t.inputBg,color:t.text,outline:"none",cursor:"pointer"}
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 110px)",overflow:"hidden"}}>
+
+      {/* ── Toolbar ── */}
+      <div style={{background:t.header,borderBottom:`1px solid ${t.cardBorder}`,padding:"10px 12px",flexShrink:0}}>
+
+        {/* Title row */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px",flexWrap:"wrap",gap:"6px"}}>
+          <div>
+            <div style={{fontSize:"14px",fontWeight:800,color:t.accent}}>🚤 Boat Summer Update 1.05.26</div>
+            <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {BOATS_SUMMER_DATA.length} судов · сезон 2025–2026 · все цены ฿</div>
+          </div>
+          <div style={{display:"flex",gap:"5px",flexWrap:"wrap"}}>
+            {typeStats.map(s=>(
+              <span key={s.tp} style={{fontSize:"10px",padding:"2px 7px",borderRadius:"99px",background:`${s.color}22`,color:s.color,fontWeight:700,border:`1px solid ${s.color}44`}}>
+                {s.label}: {s.count}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div style={{display:"flex",gap:"6px",flexWrap:"wrap"}}>
+          <input value={search} onChange={e=>setSearch(e.target.value)}
+            placeholder="🔍 Поиск по названию, туру, пирсу..."
+            style={{...selStyle,flex:"1 1 180px",padding:"8px 12px"}}/>
+          <select value={pierFilter} onChange={e=>setPierFilter(e.target.value)} style={{...selStyle,flex:"0 0 auto"}}>
+            <option value="all">Все пирсы</option>
+            {allPiers.map(p=><option key={p} value={p}>{p}</option>)}
+          </select>
+          <select value={typeFilter} onChange={e=>setTypeFilter(e.target.value)} style={{...selStyle,flex:"0 0 auto"}}>
+            <option value="all">Все типы</option>
+            {["speedboat","sailboat","catamaran","powercat","yacht"].map(tp=>(
+              <option key={tp} value={tp}>{BS_TYPE_META[tp].label}</option>
+            ))}
+          </select>
+          <select value={sortBy} onChange={e=>setSortBy(e.target.value as typeof sortBy)} style={{...selStyle,flex:"0 0 auto"}}>
+            <option value="name">По имени</option>
+            <option value="price">По цене ↑</option>
+            <option value="size">По размеру ↓</option>
+            <option value="pax">По PAX ↓</option>
+          </select>
+        </div>
+
+        <div style={{fontSize:"11px",color:t.muted,marginTop:"6px"}}>Найдено: {filtered.length} из {BOATS_SUMMER_DATA.length}</div>
+      </div>
+
+      {/* ── Boat list ── */}
+      <div style={{overflowY:"auto",flex:1,padding:"12px 14px"}}>
+        {filtered.length===0 && (
+          <div style={{textAlign:"center",padding:"60px 20px",color:t.muted}}>
+            <div style={{fontSize:"36px",marginBottom:"10px"}}>🚤</div>
+            <div>Ничего не найдено. Измените фильтры.</div>
+          </div>
+        )}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:"10px"}}>
+          {filtered.map(boat=>{
+            const m = BS_TYPE_META[boat.type]
+            const isOpen = openId===boat.id
+            const prices = boat.tours.map(tt=>tt.price)
+            const minPrice = Math.min(...prices)
+            return (
+              <div key={boat.id} style={{background:t.card,borderRadius:"14px",border:`1.5px solid ${isOpen?m.color:m.border}`,overflow:"hidden",transition:"border-color 0.2s"}}>
+                <div onClick={()=>setOpenId(isOpen?null:boat.id)} style={{cursor:"pointer",userSelect:"none"}}>
+                  <div style={{background:m.bg,borderBottom:`1px solid ${m.border}`,padding:"12px 14px"}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                      <div>
+                        <div style={{fontSize:"16px",fontWeight:800,color:m.color,letterSpacing:"-0.3px"}}>
+                          {boat.name}
+                          <span style={{fontSize:"12px",fontWeight:400,color:m.color,opacity:0.7,marginLeft:"7px"}}>{boat.size}</span>
+                        </div>
+                        <div style={{fontSize:"11px",color:m.color,opacity:0.65,marginTop:"2px"}}>📍 {boat.pier}</div>
+                      </div>
+                      <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"4px"}}>
+                        <span style={{background:`${m.color}22`,color:m.color,border:`1px solid ${m.border}`,borderRadius:"99px",padding:"2px 9px",fontSize:"11px",fontWeight:700}}>{m.label}</span>
+                        <span style={{fontSize:"11px",color:m.color,opacity:0.7}}>👥 макс. {boat.maxPax} чел.</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div>
+                      <span style={{fontSize:"14px",fontWeight:700,color:m.color}}>от {fmtP(minPrice)}</span>
+                      <span style={{fontSize:"11px",color:t.muted,marginLeft:"8px"}}>{boat.tours.length} {boat.tours.length===1?"маршрут":boat.tours.length<5?"маршрута":"маршрутов"}</span>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+                      {"drive" in boat && boat.drive && (
+                        <a href={boat.drive} target="_blank" rel="noreferrer"
+                          onClick={e=>e.stopPropagation()}
+                          style={{fontSize:"10px",color:t.accent,background:`${t.accent}18`,padding:"2px 7px",borderRadius:"6px",border:`1px solid ${t.accent}44`,textDecoration:"none"}}>
+                          📁 Фото
+                        </a>
+                      )}
+                      <span style={{fontSize:"13px",color:m.color,transition:"transform 0.2s",transform:isOpen?"rotate(180deg)":"rotate(0)"}}>▾</span>
+                    </div>
+                  </div>
+                </div>
+
+                {isOpen && (
+                  <div style={{borderTop:`1px solid ${m.border}`,padding:"12px 14px",background:dark?"rgba(0,0,0,0.2)":"rgba(0,0,0,0.02)"}}>
+                    {"note" in boat && boat.note && (
+                      <div style={{background:dark?"#2d1f00":"#fffbeb",border:"1px solid #d97706",borderRadius:"8px",padding:"8px 11px",fontSize:"11px",color:dark?"#fde68a":"#92400e",marginBottom:"10px",lineHeight:1.5}}>
+                        ℹ️ {boat.note}
+                      </div>
+                    )}
+                    <div style={{borderRadius:"8px",overflow:"hidden",border:`1px solid ${m.border}`}}>
+                      <div style={{display:"grid",gridTemplateColumns:"1fr auto auto auto",background:m.bg,padding:"6px 10px",gap:"8px"}}>
+                        {["Маршрут","Цена","Экстра/чел","Вкл. чел"].map(h=>(
+                          <div key={h} style={{fontSize:"10px",fontWeight:700,color:m.color,textAlign:h==="Маршрут"?"left":"right",textTransform:"uppercase",letterSpacing:"0.5px"}}>{h}</div>
+                        ))}
+                      </div>
+                      {boat.tours.map((tour,i)=>(
+                        <div key={i} style={{display:"grid",gridTemplateColumns:"1fr auto auto auto",padding:"7px 10px",gap:"8px",alignItems:"center",background:i%2===0?t.row0:t.row1,borderTop:i===0?"none":`1px solid ${dark?"rgba(255,255,255,0.05)":"#f0f0f0"}`}}>
+                          <div style={{fontSize:"12px",color:t.text,lineHeight:1.4}}>{tour.name}</div>
+                          <div style={{fontSize:"13px",fontWeight:700,color:m.color,textAlign:"right",whiteSpace:"nowrap"}}>{fmtP(tour.price)}</div>
+                          <div style={{fontSize:"11px",color:t.muted,textAlign:"right",whiteSpace:"nowrap"}}>
+                            {tour.extra===null?"—":typeof tour.extra==="number"?fmtP(tour.extra):String(tour.extra)}
+                          </div>
+                          <div style={{fontSize:"11px",color:t.muted,textAlign:"right",whiteSpace:"nowrap"}}>{tour.incl}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <button onClick={e => { e.stopPropagation(); setWaModal({title:boat.name, short:buildBoatSummerWA(boat), full:buildBoatSummerWA(boat)}) }}
+                      style={{marginTop:"6px",width:"100%",background:"#25d366",color:"#fff",border:"none",borderRadius:"8px",padding:"8px",fontSize:"13px",fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"6px"}}>
+                      <span>📤</span> Отправить в WhatsApp
+                    </button>
+                    <button onClick={()=>setOpenId(null)}
+                      style={{marginTop:"10px",width:"100%",background:"transparent",border:`1px solid ${m.border}`,borderRadius:"8px",padding:"7px",fontSize:"12px",color:m.color,cursor:"pointer",fontWeight:600}}>
+                      Свернуть ▲
+                    </button>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* WA Modal */}
+      {waModal && <WAShareModal dark={dark} title={waModal.title} shortText={waModal.short} fullText={waModal.full} onClose={() => setWaModal(null)}/>}
+    </div>
+  )
+}
+
 export default function Page() {
   const [unlocked, setUnlocked] = useState(false)
   const [pwInput, setPwInput] = useState("")
   const [pwError, setPwError] = useState(false)
-  const [tab,setTab]=useState<"transfers"|"excursions"|"log"|"methodichka"|"boats">("transfers")
+  const [tab,setTab]=useState<"transfers"|"excursions"|"log"|"methodichka"|"boats"|"boatsummer">("transfers")
   const [log,setLog]=useState<LogEntry[]>([])
   const [transferData,setTransferData]=useState<Voucher[]>([])
   const [notifiedVouchers,setNotifiedVouchers]=useState<Record<string,boolean>>({})
@@ -2429,24 +2912,35 @@ export default function Page() {
   // Password check
   if (!unlocked) {
     return (
-      <div style={{ minHeight: "100vh", background: "#0b1120", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'IBM Plex Sans','Segoe UI',sans-serif" }}>
-        <div style={{ background: "#131d2e", border: "1px solid #1e2f45", borderRadius: "16px", padding: "40px 32px", width: "100%", maxWidth: "340px", textAlign: "center" }}>
-          <div style={{ fontSize: "48px", marginBottom: "12px" }}>🚐</div>
-          <div style={{ fontSize: "22px", fontWeight: 800, color: "#e2eaf4", marginBottom: "4px" }}>Navigator</div>
-          <div style={{ fontSize: "13px", color: "#5b7a9a", marginBottom: "28px" }}>Введите пароль для входа</div>
-          <input
-            type="password"
-            value={pwInput}
-            onChange={e => { setPwInput(e.target.value); setPwError(false) }}
-            onKeyDown={e => e.key === "Enter" && handleLogin()}
-            placeholder="Пароль"
-            style={{ width: "100%", padding: "12px 16px", fontSize: "18px", borderRadius: "10px", border: `1.5px solid ${pwError ? "#ef4444" : "#1e3450"}`, background: "#101c2d", color: "#e2eaf4", outline: "none", textAlign: "center", letterSpacing: "6px", boxSizing: "border-box", marginBottom: "8px" }}
-            autoFocus
-          />
-          {pwError && <div style={{ fontSize: "12px", color: "#f87171", marginBottom: "8px" }}>Неверный пароль</div>}
-          <button onClick={handleLogin} style={{ width: "100%", padding: "12px", fontSize: "15px", fontWeight: 700, borderRadius: "10px", border: "none", background: "#38bdf8", color: "#fff", cursor: "pointer", marginTop: "4px" }}>
-            Войти
-          </button>
+      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#060d1a 0%,#0b1829 50%,#060d1a 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'IBM Plex Sans','Segoe UI',sans-serif" }}>
+        <div style={{ width: "100%", maxWidth: "340px", padding: "0 20px" }}>
+
+          {/* Logo block */}
+          <div style={{ textAlign: "center", marginBottom: "32px" }}>
+            <div style={{ width: "72px", height: "72px", borderRadius: "20px", background: "linear-gradient(135deg,#38bdf8,#0369a1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "36px", margin: "0 auto 16px", boxShadow: "0 8px 32px rgba(56,189,248,0.35)" }}>🚐</div>
+            <div style={{ fontSize: "24px", fontWeight: 800, color: "#f0f6ff", letterSpacing: "-0.5px" }}>Navigator</div>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "#38bdf8", letterSpacing: "2px", marginTop: "2px" }}>SAYAMA TRAVEL</div>
+          </div>
+
+          {/* Card */}
+          <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "20px", padding: "28px 24px", backdropFilter: "blur(12px)" }}>
+            <div style={{ fontSize: "13px", color: "#7a9abf", marginBottom: "16px", textAlign: "center" }}>Введите пароль для входа</div>
+            <input
+              type="password"
+              value={pwInput}
+              onChange={e => { setPwInput(e.target.value); setPwError(false) }}
+              onKeyDown={e => e.key === "Enter" && handleLogin()}
+              placeholder="••••"
+              style={{ width: "100%", padding: "14px 16px", fontSize: "22px", borderRadius: "12px", border: `1.5px solid ${pwError ? "#ef4444" : "rgba(56,189,248,0.25)"}`, background: "rgba(56,189,248,0.06)", color: "#f0f6ff", outline: "none", textAlign: "center", letterSpacing: "8px", boxSizing: "border-box", marginBottom: "8px", transition: "border-color 0.2s" }}
+              autoFocus
+            />
+            {pwError && <div style={{ fontSize: "12px", color: "#f87171", marginBottom: "10px", textAlign: "center" }}>⚠️ Неверный пароль</div>}
+            <button onClick={handleLogin} style={{ width: "100%", padding: "14px", fontSize: "15px", fontWeight: 700, borderRadius: "12px", border: "none", background: "linear-gradient(135deg,#38bdf8,#0369a1)", color: "#fff", cursor: "pointer", marginTop: "4px", boxShadow: "0 4px 16px rgba(56,189,248,0.3)", letterSpacing: "0.3px" }}>
+              Войти →
+            </button>
+          </div>
+
+          <div style={{ textAlign: "center", marginTop: "20px", fontSize: "11px", color: "#3a5a7a" }}>Phuket · Thailand 🌴</div>
         </div>
       </div>
     )
@@ -2471,33 +2965,92 @@ export default function Page() {
   return (
     <div style={{minHeight:"100vh",background:t.bg,color:t.text,fontFamily:"'IBM Plex Sans','Segoe UI',sans-serif",transition:"background 0.3s,color 0.3s"}}>
 
-      <header style={{background:t.header,borderBottom:`1px solid ${t.cardBorder}`,padding:"12px 16px",position:"sticky",top:0,zIndex:50,backdropFilter:"blur(8px)"}}>
+      <header style={{background:dark?"#080f1e":"#ffffff",borderBottom:`1px solid ${t.cardBorder}`,position:"sticky",top:0,zIndex:50,backdropFilter:"blur(12px)",boxShadow:dark?"0 2px 20px rgba(0,0,0,0.4)":"0 2px 12px rgba(0,0,0,0.08)"}}>
         <div style={{maxWidth:"1200px",margin:"0 auto"}}>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"8px"}}>
-            <span style={{fontSize:"22px",fontWeight:800,letterSpacing:"-0.5px"}}>🚐 Navigator</span>
-            <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-              {tab==="transfers"&&<label style={{fontSize:"12px",background:t.accent,color:"#fff",padding:"7px 14px",borderRadius:"8px",cursor:"pointer",fontWeight:600}}>📂 {transferFileName?transferFileName.slice(0,14)+"…":"Загрузить"}<input type="file" onChange={handleTransferFile} accept=".xlsx,.xls" style={{display:"none"}}/></label>}
-              {tab==="excursions"&&<label style={{fontSize:"12px",background:"#7c3aed",color:"#fff",padding:"7px 14px",borderRadius:"8px",cursor:"pointer",fontWeight:600}}>📂 {excFileName?excFileName.slice(0,14)+"…":"Загрузить"}<input type="file" onChange={handleExcursionFile} accept=".xlsx,.xls" style={{display:"none"}}/></label>}
-              <button onClick={()=>setDark(d=>!d)} style={{fontSize:"18px",background:"transparent",border:`1px solid ${t.cardBorder}`,borderRadius:"8px",padding:"5px 10px",cursor:"pointer"}}>{dark?"☀️":"🌙"}</button>
+
+          {/* ── Top bar ── */}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 16px 0"}}>
+            {/* Logo */}
+            <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+              <div style={{width:"36px",height:"36px",borderRadius:"10px",background:"linear-gradient(135deg,#38bdf8,#0369a1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"18px",flexShrink:0,boxShadow:"0 2px 8px rgba(56,189,248,0.4)"}}>🚐</div>
+              <div>
+                <div style={{fontSize:"15px",fontWeight:800,letterSpacing:"-0.3px",color:t.text,lineHeight:1.1}}>Navigator</div>
+                <div style={{fontSize:"10px",fontWeight:600,color:t.muted,letterSpacing:"0.3px"}}>SAYAMA TRAVEL</div>
+              </div>
+            </div>
+
+            {/* Right controls */}
+            <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+              {tab==="transfers"&&(
+                <label style={{display:"flex",alignItems:"center",gap:"6px",fontSize:"12px",background:t.accent,color:"#fff",padding:"7px 12px",borderRadius:"10px",cursor:"pointer",fontWeight:700,boxShadow:"0 2px 8px rgba(56,189,248,0.3)"}}>
+                  📂 <span>{transferFileName ? transferFileName.slice(0,12)+"…" : "Загрузить"}</span>
+                  <input type="file" onChange={handleTransferFile} accept=".xlsx,.xls" style={{display:"none"}}/>
+                </label>
+              )}
+              {tab==="excursions"&&(
+                <label style={{display:"flex",alignItems:"center",gap:"6px",fontSize:"12px",background:"#7c3aed",color:"#fff",padding:"7px 12px",borderRadius:"10px",cursor:"pointer",fontWeight:700,boxShadow:"0 2px 8px rgba(124,58,237,0.3)"}}>
+                  📂 <span>{excFileName ? excFileName.slice(0,12)+"…" : "Загрузить"}</span>
+                  <input type="file" onChange={handleExcursionFile} accept=".xlsx,.xls" style={{display:"none"}}/>
+                </label>
+              )}
+              <button onClick={()=>setDark(d=>!d)} style={{width:"36px",height:"36px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"16px",background:t.cardBorder,border:"none",borderRadius:"10px",cursor:"pointer",flexShrink:0}}>
+                {dark?"☀️":"🌙"}
+              </button>
             </div>
           </div>
-          <div style={{display:"flex",gap:"4px",marginTop:"10px",overflowX:"auto",paddingBottom:"2px"}}>
-            {([{key:"transfers",label:"✈️ Трансферы"},{key:"excursions",label:"🗺️ Экскурсии"},{key:"log",label:"📋 Журнал"},{key:"methodichka",label:"📚 Методичка"},{key:"boats",label:"🚢 Лодки"}] as {key:string,label:string}[]).map(({key,label})=>(
-              <button key={key} onClick={()=>setTab(key as any)} style={{padding:"7px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",flexShrink:0,whiteSpace:"nowrap",background:tab===key?(key==="excursions"?"#7c3aed":key==="methodichka"?"#0d9488":key==="boats"?"#0891b2":t.accent):t.cardBorder,color:tab===key?"#fff":t.muted,transition:"all 0.2s"}}>{label}</button>
-            ))}
-          </div>
+
+          {/* ── Progress bar (transfers / excursions) ── */}
           {tab==="transfers"&&filteredTransfers.length>0&&(
-            <div style={{marginTop:"10px"}}>
-              <div style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:t.muted,marginBottom:"4px"}}><span>Уведомлено: {tDone} из {filteredTransfers.length}</span><span>{tPct}%</span></div>
-              <div style={{height:"5px",borderRadius:"99px",background:t.cardBorder,overflow:"hidden"}}><div style={{height:"100%",width:`${tPct}%`,background:"linear-gradient(90deg,#22c55e,#16a34a)",borderRadius:"99px",transition:"width 0.4s ease"}}/></div>
+            <div style={{padding:"8px 16px 0"}}>
+              <div style={{display:"flex",justifyContent:"space-between",fontSize:"10px",color:t.muted,marginBottom:"3px"}}>
+                <span>✉️ Уведомлено: {tDone} / {filteredTransfers.length}</span>
+                <span style={{fontWeight:700,color:tPct===100?"#22c55e":t.muted}}>{tPct}%</span>
+              </div>
+              <div style={{height:"4px",borderRadius:"99px",background:t.cardBorder,overflow:"hidden"}}>
+                <div style={{height:"100%",width:`${tPct}%`,background:"linear-gradient(90deg,#22c55e,#16a34a)",borderRadius:"99px",transition:"width 0.4s ease"}}/>
+              </div>
             </div>
           )}
           {tab==="excursions"&&filteredExcursions.length>0&&(
-            <div style={{marginTop:"10px"}}>
-              <div style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:t.muted,marginBottom:"4px"}}><span>Уведомлено: {eDone} из {filteredExcursions.length}</span><span>{ePct}%</span></div>
-              <div style={{height:"5px",borderRadius:"99px",background:t.cardBorder,overflow:"hidden"}}><div style={{height:"100%",width:`${ePct}%`,background:"linear-gradient(90deg,#a855f7,#7c3aed)",borderRadius:"99px",transition:"width 0.4s ease"}}/></div>
+            <div style={{padding:"8px 16px 0"}}>
+              <div style={{display:"flex",justifyContent:"space-between",fontSize:"10px",color:t.muted,marginBottom:"3px"}}>
+                <span>✉️ Уведомлено: {eDone} / {filteredExcursions.length}</span>
+                <span style={{fontWeight:700,color:ePct===100?"#a855f7":t.muted}}>{ePct}%</span>
+              </div>
+              <div style={{height:"4px",borderRadius:"99px",background:t.cardBorder,overflow:"hidden"}}>
+                <div style={{height:"100%",width:`${ePct}%`,background:"linear-gradient(90deg,#a855f7,#7c3aed)",borderRadius:"99px",transition:"width 0.4s ease"}}/>
+              </div>
             </div>
           )}
+
+          {/* ── Tab bar ── */}
+          <div style={{display:"flex",gap:"2px",padding:"8px 16px 10px",overflowX:"auto",scrollbarWidth:"none"}}>
+            {[
+              {key:"transfers",    label:"Трансферы", icon:"✈️", color:"#38bdf8"},
+              {key:"excursions",   label:"Экскурсии",  icon:"🗺️", color:"#a855f7"},
+              {key:"log",          label:"Журнал",     icon:"📋", color:"#38bdf8"},
+              {key:"methodichka",  label:"Методичка",  icon:"📚", color:"#0d9488"},
+              {key:"boats",        label:"Лодки",      icon:"🚢", color:"#0891b2"},
+              {key:"boatsummer",   label:"Summer 1.05",icon:"🚤", color:"#06b6d4"},
+            ].map(({key,label,icon,color})=>{
+              const active = tab===key
+              return (
+                <button key={key} onClick={()=>setTab(key as any)}
+                  style={{
+                    display:"flex",flexDirection:"column",alignItems:"center",gap:"3px",
+                    padding:"7px 12px",fontSize:"10px",fontWeight:700,borderRadius:"12px",
+                    border:"none",cursor:"pointer",flexShrink:0,whiteSpace:"nowrap",
+                    background:active?color+"22":t.cardBorder,
+                    color:active?color:t.muted,
+                    transition:"all 0.2s",
+                    outline:active?`1.5px solid ${color}44`:"none",
+                  }}>
+                  <span style={{fontSize:"16px",lineHeight:1}}>{icon}</span>
+                  <span>{label}</span>
+                </button>
+              )
+            })}
+          </div>
         </div>
       </header>
 
@@ -2671,6 +3224,9 @@ export default function Page() {
 
       {/* ── BOATS TAB ── */}
       {tab==="boats" && <BoatsTab dark={dark}/>}
+
+      {/* ── BOAT SUMMER 1.05.26 TAB ── */}
+      {tab==="boatsummer" && <BoatSummerTab dark={dark}/>}
 
       {/* ── METHODICHKA TAB ── */}
       {tab==="methodichka" && <MethodichkaTab dark={dark}/>}
