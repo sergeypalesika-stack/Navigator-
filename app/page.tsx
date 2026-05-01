@@ -2484,7 +2484,7 @@ const BS_TYPE_META = {
   yacht:     {label:"Яхта",        color:"#f9a8d4", border:"#9d174d", bg:"#2d0a1a"},
 }
 
-function buildBoatSummerWA(boat) {
+function buildBoatSummerWA(boat: Record<string, any>): string {
   const m = BS_TYPE_META[boat.type]
   const lines = []
   lines.push(`🚤 *${boat.name}* (${boat.size}) — ${m.label}`)
@@ -2502,7 +2502,7 @@ function buildBoatSummerWA(boat) {
   return lines.join("\n")
 }
 
-function BoatSummerTab({dark}) {
+function BoatSummerTab({dark}: {dark: boolean}) {
   const t = {
     bg:dark?"#0b1120":"#f0f4f8", card:dark?"#131d2e":"#ffffff",
     cardBorder:dark?"#1e2f45":"#d1dce8", text:dark?"#e2eaf4":"#1a2636",
@@ -2791,13 +2791,15 @@ export default function Page() {
           const pv=formatExcelValue(row[pickupIdx]),fdv=formatExcelValue(row[29]),ddv=formatExcelValue(row[21])
           const toVal=String(row[3]||"").trim().toUpperCase()
           const trType=String(row[20]||"").trim()
-          if(!vouchers[vId])vouchers[vId]={vId,hotel:currentHotel,guide:currentGuide,pickup:pv||"—",flightDate:fdv||"—",flightTime:formatExcelValue(row[27])||"—",flightNo:String(row[28]||"").trim()||"—",departureDate:ddv||"—",tourists:[],phones:[],touroperator:toVal,transferType:trType}
-          if(pv&&vouchers[vId].pickup==="—")vouchers[vId].pickup=pv
-          if(fdv&&vouchers[vId].flightDate==="—")vouchers[vId].flightDate=fdv
-          if(ddv&&vouchers[vId].departureDate==="—")vouchers[vId].departureDate=ddv
+          // Составной ключ: ваучер + отель + гид — чтобы один ваучер с разными отелями не терял данные
+          const ck=`${vId}||${currentHotel}||${currentGuide}`
+          if(!vouchers[ck])vouchers[ck]={vId,hotel:currentHotel,guide:currentGuide,pickup:pv||"—",flightDate:fdv||"—",flightTime:formatExcelValue(row[27])||"—",flightNo:String(row[28]||"").trim()||"—",departureDate:ddv||"—",tourists:[],phones:[],touroperator:toVal,transferType:trType}
+          if(pv&&vouchers[ck].pickup==="—")vouchers[ck].pickup=pv
+          if(fdv&&vouchers[ck].flightDate==="—")vouchers[ck].flightDate=fdv
+          if(ddv&&vouchers[ck].departureDate==="—")vouchers[ck].departureDate=ddv
           const fn=`${row[4]} ${row[5]}`.trim()
-          if(fn&&!fn.toLowerCase().includes("tourist")&&!vouchers[vId].tourists.includes(fn))vouchers[vId].tourists.push(fn)
-          const phRaw=String(row[8]||row[25]||"").replace(/[^\d+]/g,"");const phParts=phRaw.split("+").filter((p:string)=>p.length>=7).map((p:string)=>"+"+p);phParts.forEach((p:string)=>{if(!vouchers[vId].phones.includes(p))vouchers[vId].phones.push(p)})
+          if(fn&&!fn.toLowerCase().includes("tourist")&&!vouchers[ck].tourists.includes(fn))vouchers[ck].tourists.push(fn)
+          const phRaw=String(row[8]||row[25]||"").replace(/[^\d+]/g,"");const phParts=phRaw.split("+").filter((p:string)=>p.length>=7).map((p:string)=>"+"+p);phParts.forEach((p:string)=>{if(!vouchers[ck].phones.includes(p))vouchers[ck].phones.push(p)})
         })
         const result=Object.values(vouchers).sort((a,b)=>{if(a.pickup==="—"&&b.pickup!=="—")return 1;if(a.pickup!=="—"&&b.pickup==="—")return -1;return a.pickup.localeCompare(b.pickup)})
         setTransferData(result);setNotifiedVouchers({});setCollapsedDates({});setSelectedGuide("")
@@ -2946,7 +2948,7 @@ export default function Page() {
     )
   }
 
-  const selStyle:React.CSSProperties={flex:1,padding:"9px 12px",fontSize:"13px",borderRadius:"8px",background:t.inputBg,border:`1px solid ${t.inputBdr}`,color:t.text,outline:"none",cursor:"pointer",appearance:"none",WebkitAppearance:"none"}
+  const selStyle:React.CSSProperties={flex:1,padding:"9px 12px",fontSize:"13px",borderRadius:"8px",background:t.inputBg,border:`1px solid ${t.inputBdr}`,color:t.text,outline:"none",cursor:"pointer"}
   const inp:React.CSSProperties={flex:1,padding:"9px 12px",fontSize:"13px",borderRadius:"8px",background:t.inputBg,border:`1px solid ${t.inputBdr}`,color:t.text,outline:"none"}
 
   function exportReport() {
@@ -3024,7 +3026,7 @@ export default function Page() {
           )}
 
           {/* ── Tab bar ── */}
-          <div style={{display:"flex",gap:"2px",padding:"8px 16px 10px",overflowX:"auto",scrollbarWidth:"none"}}>
+          <div style={{display:"flex",gap:"2px",padding:"8px 16px 10px",overflowX:"auto"}}>
             {[
               {key:"transfers",    label:"Трансферы", icon:"✈️", color:"#38bdf8"},
               {key:"excursions",   label:"Экскурсии",  icon:"🗺️", color:"#a855f7"},
