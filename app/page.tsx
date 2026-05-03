@@ -2518,6 +2518,18 @@ function BoatSummerTab({dark}: {dark: boolean}) {
   const [sortBy, setSortBy] = useState("name")
   const [openId, setOpenId] = useState<string|null>(null)
   const [waModal, setWaModal] = useState<{title:string;short:string;full:string}|null>(null)
+  const [calcOpen, setCalcOpen] = useState(false)
+  const [calcBoat, setCalcBoat] = useState<string>("")
+  const [calcTour, setCalcTour] = useState<number>(0)
+  const [calcPax, setCalcPax] = useState<number>(2)
+  const [calcGuide, setCalcGuide] = useState(false)
+  const [calcMeal, setCalcMeal] = useState<"none"|"A"|"B"|"C">("none")
+  const [calcPool, setCalcPool] = useState(false)
+  const [calcSlide, setCalcSlide] = useState(false)
+  const [calcSeafood, setCalcSeafood] = useState(false)
+  const [calcBBQ, setCalcBBQ] = useState(false)
+  const [calcFishing, setCalcFishing] = useState(false)
+  const [calcCanoe, setCalcCanoe] = useState(false)
 
   const allPiers = useMemo(()=>Array.from(new Set(BOATS_SUMMER_DATA.map(b=>b.pier))).sort(),[])
 
@@ -2559,12 +2571,18 @@ function BoatSummerTab({dark}: {dark: boolean}) {
             <div style={{fontSize:"14px",fontWeight:800,color:t.accent}}>🚤 Boat Summer Update 1.05.26</div>
             <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {BOATS_SUMMER_DATA.length} судов · сезон 2025–2026 · все цены ฿</div>
           </div>
-          <div style={{display:"flex",gap:"5px",flexWrap:"wrap"}}>
-            {typeStats.map(s=>(
-              <span key={s.tp} style={{fontSize:"10px",padding:"2px 7px",borderRadius:"99px",background:`${s.color}22`,color:s.color,fontWeight:700,border:`1px solid ${s.color}44`}}>
-                {s.label}: {s.count}
-              </span>
-            ))}
+          <div style={{display:"flex",gap:"6px",alignItems:"center",flexWrap:"wrap"}}>
+            <button onClick={()=>{setCalcOpen(true);setCalcBoat("");setCalcTour(0);setCalcPax(2);setCalcGuide(false);setCalcMeal("none");setCalcPool(false);setCalcSlide(false);setCalcSeafood(false);setCalcBBQ(false);setCalcFishing(false);setCalcCanoe(false)}}
+              style={{padding:"6px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#fff",boxShadow:"0 2px 8px rgba(245,158,11,0.35)"}}>
+              🧮 Калькулятор
+            </button>
+            <div style={{display:"flex",gap:"5px",flexWrap:"wrap"}}>
+              {typeStats.map(s=>(
+                <span key={s.tp} style={{fontSize:"10px",padding:"2px 7px",borderRadius:"99px",background:`${s.color}22`,color:s.color,fontWeight:700,border:`1px solid ${s.color}44`}}>
+                  {s.label}: {s.count}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -2684,8 +2702,457 @@ function BoatSummerTab({dark}: {dark: boolean}) {
         </div>
       </div>
 
-      {/* WA Modal */}
+      {/* ── Calculator Modal ── */}
+      {calcOpen && (()=>{
+        const boat = (BOATS_SUMMER_DATA as any[]).find((b:any)=>b.id===calcBoat)
+        const tour = boat ? boat.tours[calcTour] : null
+        const m = boat ? (BS_TYPE_META[String(boat.type)] || BS_TYPE_META["speedboat"]) : null
+        const note:string = boat?.note||""
+
+        // Detect available extras from note
+        const hasGuide   = true // available for all
+        const hasMeal    = note.includes("обед") || note.includes("Lunch") || note.includes("640") || note.includes("500")
+        const hasPool    = note.includes("бассейн") || note.includes("Pool") || note.includes("3500")
+        const hasSlide   = note.includes("горка") || note.includes("Slide") || note.includes("3600")
+        const hasSeafood = note.includes("seafood") || note.includes("Seafood") || note.includes("650")
+        const hasBBQ     = note.includes("BBQ") || note.includes("bbq") || note.includes("1500")
+        const hasFishing = note.includes("удочки") || note.includes("Fishing") || note.includes("1000")
+        const hasCanoe   = note.includes("каноэ") || note.includes("Canoe") || note.includes("canoe")
+
+        // Meal prices per pax
+        const mealPrice: Record<string,number> = {none:0, A:640, B:780, C:920}
+
+        // Build breakdown
+        const rows: {label:string; amount:number; perPax?:boolean}[] = []
+        let total = 0
+
+        if(boat && tour){
+          const extra = tour.extra
+          const inclStr = String(tour.incl||"")
+          const inclMax = parseInt(inclStr.split("–")[1]||inclStr.replace(/\D/g,""))||2
+          rows.push({label:`🚤 База (вкл. ${tour.incl} чел.)`, amount:tour.price})
+          total += tour.price
+          if(calcPax > inclMax){
+            if(extra !== null && typeof extra === "number"){
+              const ep = calcPax - inclMax
+              const et = ep * extra
+              rows.push({label:`👤 Доп. ${ep} чел × ${extra.toLocaleString("ru-RU")} ฿`, amount:et})
+              total += et
+            } else if(extra !== null && typeof extra === "string"){
+              rows.push({label:`⚠️ Доп. тариф: ${extra}`, amount:0})
+            }
+          }
+        }
+
+        if(calcGuide){ rows.push({label:"🇷🇺 Русскоговорящий гид", amount:3500}); total+=3500 }
+
+        if(calcMeal !== "none" && hasMeal){
+          const mp = mealPrice[calcMeal] * calcPax
+          rows.push({label:`🍽️ Питание кат. ${calcMeal} × ${calcPax} чел.`, amount:mp})
+          total += mp
+        }
+        if(calcPool && hasPool){ rows.push({label:"🏊 Бассейн на борту", amount:3500}); total+=3500 }
+        if(calcSlide && hasSlide){ rows.push({label:"🎢 Горка", amount:3600}); total+=3600 }
+        if(calcSeafood && hasSeafood){
+          const sf = 650*calcPax
+          rows.push({label:`🦐 Морепродукты × ${calcPax} чел.`, amount:sf})
+          total+=sf
+        }
+        if(calcBBQ && hasBBQ){ rows.push({label:"🍗 BBQ (курица + морепродукты)", amount:1500}); total+=1500 }
+        if(calcFishing && hasFishing){ rows.push({label:"🎣 Удочки", amount:1000}); total+=1000 }
+        if(calcCanoe && hasCanoe){
+          const cn = 500*calcPax
+          rows.push({label:`🛶 Каноэ × ${calcPax} чел.`, amount:cn})
+          total+=cn
+        }
+
+        const inputSt:React.CSSProperties={width:"100%",padding:"10px 12px",borderRadius:"10px",border:`1px solid ${t.inputBdr}`,background:t.inputBg,color:t.text,fontSize:"13px",fontWeight:600,outline:"none",boxSizing:"border-box"}
+
+        function Checkbox({checked,onChange,label,price,available}:{checked:boolean;onChange:(v:boolean)=>void;label:string;price:string;available:boolean}){
+          if(!available) return null
+          return (
+            <label style={{display:"flex",alignItems:"center",gap:"10px",padding:"8px 10px",borderRadius:"8px",cursor:"pointer",border:`1px solid ${checked?(m?.border||t.cardBorder):t.cardBorder}`,background:checked?(m?.bg||t.header):t.header,marginBottom:"6px",transition:"all 0.15s"}}>
+              <div style={{width:"18px",height:"18px",borderRadius:"5px",border:`2px solid ${checked?(m?.color||t.accent):t.muted}`,background:checked?(m?.color||t.accent):"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all 0.15s"}}
+                onClick={()=>onChange(!checked)}>
+                {checked && <span style={{color:"#fff",fontSize:"11px",fontWeight:900}}>✓</span>}
+              </div>
+              <span style={{flex:1,fontSize:"12px",color:t.text,fontWeight:500}}>{label}</span>
+              <span style={{fontSize:"11px",color:m?.color||t.accent,fontWeight:700,flexShrink:0}}>{price}</span>
+            </label>
+          )
+        }
+
+        return (
+          <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:"12px"}} onClick={()=>setCalcOpen(false)}>
+            <div style={{background:t.card,border:`1.5px solid ${t.cardBorder}`,borderRadius:"20px",width:"100%",maxWidth:"420px",boxShadow:"0 20px 60px rgba(0,0,0,0.5)",display:"flex",flexDirection:"column",maxHeight:"92vh"}} onClick={(e:React.MouseEvent)=>e.stopPropagation()}>
+
+              {/* Header */}
+              <div style={{padding:"18px 20px 14px",borderBottom:`1px solid ${t.cardBorder}`,flexShrink:0}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div>
+                    <div style={{fontSize:"16px",fontWeight:800,color:t.text}}>🧮 Калькулятор цены</div>
+                    <div style={{fontSize:"10px",color:t.muted,marginTop:"1px"}}>Summer Update 1.05.26 · все цены в ฿</div>
+                  </div>
+                  <button onClick={()=>setCalcOpen(false)} style={{background:t.cardBorder,border:"none",borderRadius:"8px",width:"30px",height:"30px",cursor:"pointer",fontSize:"14px",color:t.text,flexShrink:0}}>✕</button>
+                </div>
+              </div>
+
+              {/* Scrollable body */}
+              <div style={{overflowY:"auto",flex:1,padding:"16px 20px"}}>
+
+                {/* Boat */}
+                <div style={{marginBottom:"12px"}}>
+                  <div style={{fontSize:"10px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"5px"}}>Лодка</div>
+                  <select value={calcBoat} onChange={e=>{setCalcBoat(e.target.value);setCalcTour(0);setCalcPool(false);setCalcSlide(false);setCalcSeafood(false);setCalcBBQ(false);setCalcFishing(false);setCalcCanoe(false);setCalcMeal("none")}} style={inputSt}>
+                    <option value="">— Выберите лодку —</option>
+                    {([...BOATS_SUMMER_DATA] as any[]).sort((a:any,b2:any)=>a.name.localeCompare(b2.name)).map((b:any)=>(
+                      <option key={b.id} value={b.id}>{b.name} ({b.size}) · {BS_TYPE_META[String(b.type)]?.label||b.type}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Tour */}
+                {boat && (
+                  <div style={{marginBottom:"12px"}}>
+                    <div style={{fontSize:"10px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"5px"}}>Маршрут</div>
+                    <select value={calcTour} onChange={e=>setCalcTour(Number(e.target.value))} style={inputSt}>
+                      {boat.tours.map((tt:any,i:number)=>(
+                        <option key={i} value={i}>{tt.name} — {tt.price.toLocaleString("ru-RU")} ฿</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* PAX */}
+                {boat && (
+                  <div style={{marginBottom:"16px"}}>
+                    <div style={{fontSize:"10px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"5px"}}>
+                      Человек: <span style={{color:m?.color||t.accent,fontSize:"13px"}}>{calcPax}</span> <span style={{fontWeight:400}}>/ макс. {boat.maxPax}</span>
+                    </div>
+                    <input type="range" min={1} max={boat.maxPax} value={calcPax} onChange={e=>setCalcPax(Number(e.target.value))} style={{width:"100%",accentColor:m?.color||"#38bdf8",cursor:"pointer"}}/>
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:"10px",color:t.muted,marginTop:"1px"}}>
+                      <span>1</span><span>{boat.maxPax}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Extra services */}
+                {boat && tour && (
+                  <div style={{marginBottom:"16px"}}>
+                    <div style={{fontSize:"10px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"8px"}}>Доп. услуги</div>
+
+                    <Checkbox checked={calcGuide} onChange={setCalcGuide} label="🇷🇺 Русскоговорящий гид" price="+3 500 ฿" available={hasGuide}/>
+                    <Checkbox checked={calcPool} onChange={setCalcPool} label="🏊 Бассейн на борту" price="+3 500 ฿" available={hasPool}/>
+                    <Checkbox checked={calcSlide} onChange={setCalcSlide} label="🎢 Горка" price="+3 600 ฿" available={hasSlide}/>
+                    <Checkbox checked={calcSeafood} onChange={setCalcSeafood} label={`🦐 Морепродукты (×${calcPax} чел.)`} price={`+${(650*calcPax).toLocaleString("ru-RU")} ฿`} available={hasSeafood}/>
+                    <Checkbox checked={calcBBQ} onChange={setCalcBBQ} label="🍗 BBQ (курица + морепродукты)" price="+1 500 ฿" available={hasBBQ}/>
+                    <Checkbox checked={calcFishing} onChange={setCalcFishing} label="🎣 Удочки" price="+1 000 ฿" available={hasFishing}/>
+                    <Checkbox checked={calcCanoe} onChange={setCalcCanoe} label={`🛶 Каноэ (×${calcPax} чел.)`} price={`+${(500*calcPax).toLocaleString("ru-RU")} ฿`} available={hasCanoe}/>
+
+                    {/* Meal selector */}
+                    {hasMeal && (
+                      <div style={{marginTop:"8px"}}>
+                        <div style={{fontSize:"10px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"6px"}}>🍽️ Питание (на {calcPax} чел.)</div>
+                        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"6px"}}>
+                          {(["none","A","B","C"] as const).map(cat=>{
+                            const labels:{[k:string]:string} = {none:"Нет",A:`A\n${640*calcPax}฿`,B:`B\n${780*calcPax}฿`,C:`C\n${920*calcPax}฿`}
+                            const active = calcMeal===cat
+                            return (
+                              <button key={cat} onClick={()=>setCalcMeal(cat)}
+                                style={{padding:"8px 4px",borderRadius:"8px",border:`1.5px solid ${active?(m?.color||t.accent):t.cardBorder}`,background:active?(m?.bg||t.header):t.header,color:active?(m?.color||t.accent):t.muted,fontSize:"10px",fontWeight:700,cursor:"pointer",lineHeight:1.4,whiteSpace:"pre-wrap" as any,textAlign:"center" as any}}>
+                                {labels[cat]}
+                              </button>
+                            )
+                          })}
+                        </div>
+                        <div style={{fontSize:"10px",color:t.muted,marginTop:"4px"}}>A = 640฿ · B = 780฿ · C = 920฿ за человека</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Result — sticky footer */}
+              {boat && tour && (
+                <div style={{borderTop:`1.5px solid ${m?.border||t.cardBorder}`,background:m?m.bg:t.header,padding:"14px 20px",flexShrink:0,borderRadius:"0 0 18px 18px"}}>
+                  {rows.map((row,i)=>(
+                    <div key={i} style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:t.text,marginBottom:"3px",opacity:0.8}}>
+                      <span>{row.label}</span>
+                      <span style={{fontWeight:600,flexShrink:0,marginLeft:"8px"}}>{row.amount>0?row.amount.toLocaleString("ru-RU")+" ฿":"—"}</span>
+                    </div>
+                  ))}
+                  <div style={{borderTop:`1px solid ${m?.border||t.cardBorder}`,marginTop:"10px",paddingTop:"10px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div>
+                      <div style={{fontSize:"10px",color:t.muted}}>ИТОГО за {calcPax} чел.</div>
+                      <div style={{fontSize:"26px",fontWeight:900,color:m?.color||t.accent,letterSpacing:"-0.5px"}}>{total.toLocaleString("ru-RU")} ฿</div>
+                    </div>
+                    <div style={{textAlign:"right" as any}}>
+                      <div style={{fontSize:"10px",color:t.muted}}>НА ЧЕЛОВЕКА</div>
+                      <div style={{fontSize:"20px",fontWeight:800,color:m?.color||t.accent}}>{Math.round(total/calcPax).toLocaleString("ru-RU")} ฿</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {(!boat||!tour) && (
+                <div style={{padding:"20px",textAlign:"center" as any,color:t.muted,fontSize:"13px",borderTop:`1px solid ${t.cardBorder}`}}>
+                  👆 Выберите лодку и маршрут для расчёта
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* WA Modal BoatSummer */}
       {waModal && <WAShareModal dark={dark} title={waModal.title} shortText={waModal.short} fullText={waModal.full} onClose={() => setWaModal(null)}/>}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════
+// VIP TOUR CALCULATOR
+// ═══════════════════════════════════════════
+
+const VIP_ATTRACTIONS = [
+  {id:"tiger_big",    label:"🐯 Тигры Большие/Средние/Маленькие", adultPrice:1050, childPrice:1050, hasChild:false},
+  {id:"tiger_white",  label:"🐯 Тигры Белый/Гигант",              adultPrice:1500, childPrice:1500, hasChild:false},
+  {id:"cheetah",      label:"🐆 Гепард",                          adultPrice:1500, childPrice:1500, hasChild:false},
+  {id:"lion",         label:"🦁 Львы Большие/Средние/Маленькие",  adultPrice:1000, childPrice:1000, hasChild:false},
+  {id:"lion_white",   label:"🦁 Лев Белый",                       adultPrice:1500, childPrice:1500, hasChild:false},
+  {id:"dolphin_vip",  label:"🐬 Дельфины VIP",                    adultPrice:1200, childPrice:1200, hasChild:false},
+  {id:"dolphin_std",  label:"🐬 Дельфины Обычные",                adultPrice:1000, childPrice:1000, hasChild:false},
+  {id:"dolphin_swim", label:"🐬 Купание с дельфинами",            adultPrice:6000, childPrice:6000, hasChild:false},
+  {id:"elephant",     label:"🐘 Слоны",                           adultPrice:800,  childPrice:800,  hasChild:false},
+  {id:"elephant_res", label:"🐘 Заповедник слонов (Sanctuary)",   adultPrice:1500, childPrice:1500, hasChild:false},
+  {id:"bird_park",    label:"🦜 Птичий парк (пт–вс)",             adultPrice:500,  childPrice:500,  hasChild:false},
+  {id:"crocodile",    label:"🐊 Крокодилы",                       adultPrice:500,  childPrice:300,  hasChild:true},
+  {id:"aquarium",     label:"🐠 Океанариум",                       adultPrice:1290, childPrice:700,  hasChild:true},
+  {id:"transfer_ap",  label:"✈️ Инд. трансфер в аэропорт",        adultPrice:2400, childPrice:0,    hasChild:false, fixed:true},
+]
+
+function VIPCalcTab({dark}: {dark:boolean}) {
+  const t = {
+    bg:    dark?"#0b1120":"#f0f4f8",
+    card:  dark?"#131d2e":"#ffffff",
+    cardBorder: dark?"#1e2f45":"#d1dce8",
+    text:  dark?"#e2eaf4":"#1a2636",
+    muted: dark?"#5b7a9a":"#6e8aa8",
+    accent:"#f59e0b",
+    gold:  dark?"#fde68a":"#d97706",
+    header:dark?"#0d1929":"#fefce8",
+    inputBg:  dark?"#101c2d":"#ffffff",
+    inputBdr: dark?"#1e3450":"#c5d5e5",
+  }
+
+  const [adults,   setAdults]   = useState(2)
+  const [children, setChildren] = useState(0)
+  const [extraLoc, setExtraLoc] = useState(0)
+  const [selected, setSelected] = useState<Record<string,boolean>>({})
+  const [waText,   setWaText]   = useState<string|null>(null)
+
+  const totalPax = adults + children
+
+  // Cost calculation
+  let base = 5000 + 1000 // минивэн + гид
+  base += extraLoc * 1000  // доп. локации сверх 2 бесплатных
+
+  const attrRows: {label:string; amount:number}[] = []
+  let attrTotal = 0
+
+  VIP_ATTRACTIONS.forEach(a => {
+    if (!selected[a.id]) return
+    let amount = 0
+    if (a.fixed) {
+      amount = a.adultPrice
+    } else if (a.hasChild) {
+      amount = adults * a.adultPrice + children * a.childPrice
+    } else {
+      amount = totalPax * a.adultPrice
+    }
+    attrRows.push({label: a.label, amount})
+    attrTotal += amount
+  })
+
+  const grandTotal = base + attrTotal
+
+  function toggle(id: string) {
+    setSelected(s => ({...s, [id]: !s[id]}))
+  }
+
+  function buildWA() {
+    const lines: string[] = []
+    lines.push("👑 *VIP тур — расчёт стоимости*")
+    lines.push(`👥 Взрослых: ${adults} · Детей: ${children}`)
+    lines.push("")
+    lines.push("💼 *База:*")
+    lines.push(`• Минивэн: 5 000 ฿`)
+    lines.push(`• Гид: 1 000 ฿`)
+    if (extraLoc > 0) lines.push(`• Доп. локации (×${extraLoc}): ${(extraLoc*1000).toLocaleString("ru-RU")} ฿`)
+    if (attrRows.length > 0) {
+      lines.push("")
+      lines.push("🎫 *Аттракционы (оплата на месте):*")
+      attrRows.forEach(r => lines.push(`• ${r.label}: ${r.amount.toLocaleString("ru-RU")} ฿`))
+    }
+    lines.push("")
+    lines.push(`💰 *ИТОГО: ${grandTotal.toLocaleString("ru-RU")} ฿*`)
+    if (totalPax > 0) lines.push(`👤 На человека: ${Math.round(grandTotal/totalPax).toLocaleString("ru-RU")} ฿`)
+    lines.push("")
+    lines.push("🌴 Navigator-Sayama Travel")
+    setWaText(lines.join("\n"))
+  }
+
+  const selStyle: React.CSSProperties = {
+    width:"100%", padding:"10px 12px", borderRadius:"10px",
+    border:`1px solid ${t.inputBdr}`, background:t.inputBg,
+    color:t.text, fontSize:"13px", fontWeight:600, outline:"none", boxSizing:"border-box"
+  }
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 110px)",overflow:"hidden"}}>
+
+      {/* Header */}
+      <div style={{background:dark?"#1a1000":"#fefce8",borderBottom:`1px solid #d9770644`,padding:"12px 16px",flexShrink:0}}>
+        <div style={{fontSize:"15px",fontWeight:800,color:"#d97706"}}>👑 VIP Tour Calculator</div>
+        <div style={{fontSize:"11px",color:t.muted,marginTop:"1px"}}>
+          База: минивэн 5 000 ฿ + гид 1 000 ฿ · 2 локации бесплатно
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{overflowY:"auto",flex:1,padding:"12px 14px"}}>
+
+        {/* PAX */}
+        <div style={{background:t.card,border:`1px solid ${t.cardBorder}`,borderRadius:"12px",padding:"14px",marginBottom:"10px"}}>
+          <div style={{fontSize:"11px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"10px"}}>👥 Количество гостей</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+            <div>
+              <div style={{fontSize:"11px",color:t.muted,marginBottom:"4px"}}>Взрослых</div>
+              <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                <button onClick={()=>setAdults(Math.max(1,adults-1))} style={{width:"30px",height:"30px",borderRadius:"8px",border:`1px solid ${t.cardBorder}`,background:t.inputBg,color:t.text,fontSize:"16px",cursor:"pointer",fontWeight:700}}>−</button>
+                <span style={{fontSize:"18px",fontWeight:800,color:t.gold,minWidth:"24px",textAlign:"center" as any}}>{adults}</span>
+                <button onClick={()=>setAdults(adults+1)} style={{width:"30px",height:"30px",borderRadius:"8px",border:`1px solid ${t.cardBorder}`,background:t.inputBg,color:t.text,fontSize:"16px",cursor:"pointer",fontWeight:700}}>+</button>
+              </div>
+            </div>
+            <div>
+              <div style={{fontSize:"11px",color:t.muted,marginBottom:"4px"}}>Детей</div>
+              <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                <button onClick={()=>setChildren(Math.max(0,children-1))} style={{width:"30px",height:"30px",borderRadius:"8px",border:`1px solid ${t.cardBorder}`,background:t.inputBg,color:t.text,fontSize:"16px",cursor:"pointer",fontWeight:700}}>−</button>
+                <span style={{fontSize:"18px",fontWeight:800,color:t.gold,minWidth:"24px",textAlign:"center" as any}}>{children}</span>
+                <button onClick={()=>setChildren(children+1)} style={{width:"30px",height:"30px",borderRadius:"8px",border:`1px solid ${t.cardBorder}`,background:t.inputBg,color:t.text,fontSize:"16px",cursor:"pointer",fontWeight:700}}>+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Extra locations */}
+        <div style={{background:t.card,border:`1px solid ${t.cardBorder}`,borderRadius:"12px",padding:"14px",marginBottom:"10px"}}>
+          <div style={{fontSize:"11px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"6px"}}>📍 Доп. локации (сверх 2 бесплатных)</div>
+          <div style={{fontSize:"11px",color:t.muted,marginBottom:"8px"}}>+1 000 ฿ за каждую дополнительную</div>
+          <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+            <button onClick={()=>setExtraLoc(Math.max(0,extraLoc-1))} style={{width:"34px",height:"34px",borderRadius:"8px",border:`1px solid ${t.cardBorder}`,background:t.inputBg,color:t.text,fontSize:"18px",cursor:"pointer",fontWeight:700}}>−</button>
+            <div style={{textAlign:"center" as any}}>
+              <div style={{fontSize:"22px",fontWeight:900,color:t.gold}}>{extraLoc}</div>
+              {extraLoc>0 && <div style={{fontSize:"10px",color:t.muted}}>+{(extraLoc*1000).toLocaleString("ru-RU")} ฿</div>}
+            </div>
+            <button onClick={()=>setExtraLoc(extraLoc+1)} style={{width:"34px",height:"34px",borderRadius:"8px",border:`1px solid ${t.cardBorder}`,background:t.inputBg,color:t.text,fontSize:"18px",cursor:"pointer",fontWeight:700}}>+</button>
+          </div>
+        </div>
+
+        {/* Attractions */}
+        <div style={{background:t.card,border:`1px solid ${t.cardBorder}`,borderRadius:"12px",padding:"14px",marginBottom:"10px"}}>
+          <div style={{fontSize:"11px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"10px"}}>🎫 Аттракционы (оплата на месте)</div>
+          {VIP_ATTRACTIONS.map(a => {
+            const active = !!selected[a.id]
+            let priceLabel = ""
+            if (a.fixed) {
+              priceLabel = `${a.adultPrice.toLocaleString("ru-RU")} ฿ (фикс.)`
+            } else if (a.hasChild) {
+              priceLabel = `взр. ${a.adultPrice}/дет. ${a.childPrice} ฿`
+            } else {
+              priceLabel = `${a.adultPrice.toLocaleString("ru-RU")} ฿/чел`
+            }
+            let calcAmount = 0
+            if (active) {
+              if (a.fixed) calcAmount = a.adultPrice
+              else if (a.hasChild) calcAmount = adults*a.adultPrice + children*a.childPrice
+              else calcAmount = totalPax * a.adultPrice
+            }
+            return (
+              <div key={a.id} onClick={()=>toggle(a.id)}
+                style={{display:"flex",alignItems:"center",gap:"10px",padding:"9px 10px",borderRadius:"9px",cursor:"pointer",marginBottom:"5px",border:`1px solid ${active?"#d97706":t.cardBorder}`,background:active?(dark?"#2d1f00":"#fffbeb"):"transparent",transition:"all 0.15s"}}>
+                <div style={{width:"20px",height:"20px",borderRadius:"6px",border:`2px solid ${active?"#d97706":t.muted}`,background:active?"#d97706":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all 0.15s"}}>
+                  {active && <span style={{color:"#fff",fontSize:"11px",fontWeight:900}}>✓</span>}
+                </div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:"12px",color:t.text,fontWeight:500,lineHeight:1.3}}>{a.label}</div>
+                  <div style={{fontSize:"10px",color:t.muted,marginTop:"1px"}}>{priceLabel}</div>
+                </div>
+                {active && calcAmount > 0 && (
+                  <div style={{fontSize:"12px",fontWeight:700,color:"#d97706",flexShrink:0}}>{calcAmount.toLocaleString("ru-RU")} ฿</div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Sticky total footer */}
+      <div style={{background:dark?"#1a1000":"#fffbeb",borderTop:`2px solid #d97706`,padding:"12px 16px",flexShrink:0}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"4px"}}>
+          <div style={{fontSize:"11px",color:t.muted}}>База (минивэн + гид{extraLoc>0?` + ${extraLoc} лок.`:""})</div>
+          <div style={{fontSize:"12px",fontWeight:700,color:t.muted}}>{base.toLocaleString("ru-RU")} ฿</div>
+        </div>
+        {attrRows.map((r,i)=>(
+          <div key={i} style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:t.text,marginBottom:"2px"}}>
+            <span style={{opacity:0.7,flex:1,marginRight:"8px"}}>{r.label}</span>
+            <span style={{fontWeight:600,flexShrink:0}}>{r.amount.toLocaleString("ru-RU")} ฿</span>
+          </div>
+        ))}
+        <div style={{borderTop:`1px solid #d9770644`,marginTop:"8px",paddingTop:"8px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <div style={{fontSize:"10px",color:t.muted}}>ИТОГО за {totalPax} чел.</div>
+            <div style={{fontSize:"28px",fontWeight:900,color:"#d97706",letterSpacing:"-0.5px"}}>{grandTotal.toLocaleString("ru-RU")} <span style={{fontSize:"16px"}}>฿</span></div>
+          </div>
+          <div style={{textAlign:"right" as any}}>
+            {totalPax > 0 && <>
+              <div style={{fontSize:"10px",color:t.muted}}>НА ЧЕЛОВЕКА</div>
+              <div style={{fontSize:"20px",fontWeight:800,color:"#d97706"}}>{Math.round(grandTotal/totalPax).toLocaleString("ru-RU")} ฿</div>
+            </>}
+          </div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginTop:"10px"}}>
+          <button onClick={()=>{setAdults(2);setChildren(0);setExtraLoc(0);setSelected({});setWaText(null)}}
+            style={{padding:"9px",borderRadius:"10px",border:`1px solid ${t.cardBorder}`,background:t.inputBg,color:t.muted,fontSize:"12px",fontWeight:700,cursor:"pointer"}}>
+            🔄 Сбросить
+          </button>
+          <button onClick={buildWA}
+            style={{padding:"9px",borderRadius:"10px",border:"none",background:"#25d366",color:"#fff",fontSize:"12px",fontWeight:700,cursor:"pointer"}}>
+            📤 WhatsApp
+          </button>
+        </div>
+      </div>
+
+      {/* WA Modal */}
+      {waText && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"}} onClick={()=>setWaText(null)}>
+          <div style={{background:t.card,border:`1px solid ${t.cardBorder}`,borderRadius:"16px",padding:"20px",width:"100%",maxWidth:"400px",boxShadow:"0 20px 60px rgba(0,0,0,0.5)"}} onClick={(e:React.MouseEvent)=>e.stopPropagation()}>
+            <div style={{fontSize:"15px",fontWeight:800,color:t.text,marginBottom:"12px"}}>📤 Отправить в WhatsApp</div>
+            <textarea readOnly value={waText} rows={12}
+              style={{width:"100%",padding:"10px",borderRadius:"8px",border:`1px solid ${t.cardBorder}`,background:t.inputBg,color:t.text,fontSize:"11px",resize:"none",outline:"none",boxSizing:"border-box" as any,fontFamily:"monospace",lineHeight:1.5}}/>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginTop:"12px"}}>
+              <button onClick={()=>{navigator.clipboard?.writeText(waText);setWaText(null)}}
+                style={{padding:"10px",borderRadius:"10px",border:"none",background:"#0891b2",color:"#fff",fontSize:"13px",fontWeight:700,cursor:"pointer"}}>
+                📋 Скопировать
+              </button>
+              <a href={`https://wa.me/?text=${encodeURIComponent(waText)}`} target="_blank" rel="noreferrer"
+                style={{padding:"10px",borderRadius:"10px",background:"#25d366",color:"#fff",fontSize:"13px",fontWeight:700,cursor:"pointer",display:"block",textAlign:"center" as any,textDecoration:"none"}}>
+                Открыть WhatsApp →
+              </a>
+            </div>
+            <button onClick={()=>setWaText(null)} style={{marginTop:"8px",width:"100%",padding:"8px",borderRadius:"8px",border:`1px solid ${t.cardBorder}`,background:"transparent",color:t.muted,fontSize:"12px",cursor:"pointer"}}>Закрыть</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -2694,7 +3161,7 @@ export default function Page() {
   const [unlocked, setUnlocked] = useState(false)
   const [pwInput, setPwInput] = useState("")
   const [pwError, setPwError] = useState(false)
-  const [tab,setTab]=useState<"transfers"|"excursions"|"log"|"methodichka"|"boats"|"boatsummer">("transfers")
+  const [tab,setTab]=useState<"transfers"|"excursions"|"log"|"methodichka"|"boats"|"boatsummer"|"vipcalc">("transfers")
   const [log,setLog]=useState<LogEntry[]>([])
   const [transferData,setTransferData]=useState<Voucher[]>([])
   const [notifiedVouchers,setNotifiedVouchers]=useState<Record<string,boolean>>({})
@@ -3034,6 +3501,7 @@ export default function Page() {
               {key:"methodichka",  label:"Методичка",  icon:"📚", color:"#0d9488"},
               {key:"boats",        label:"Лодки",      icon:"🚢", color:"#0891b2"},
               {key:"boatsummer",   label:"Summer 1.05",icon:"🚤", color:"#06b6d4"},
+              {key:"vipcalc",      label:"VIP тур",    icon:"👑", color:"#f59e0b"},
             ].map(({key,label,icon,color})=>{
               const active = tab===key
               return (
@@ -3229,6 +3697,9 @@ export default function Page() {
 
       {/* ── BOAT SUMMER 1.05.26 TAB ── */}
       {tab==="boatsummer" && <BoatSummerTab dark={dark}/>}
+
+      {/* ── VIP CALCULATOR TAB ── */}
+      {tab==="vipcalc" && <VIPCalcTab dark={dark}/>}
 
       {/* ── METHODICHKA TAB ── */}
       {tab==="methodichka" && <MethodichkaTab dark={dark}/>}
