@@ -2028,169 +2028,240 @@ function fmtPrice(n: number|string|null): string {
   return n + " ฿"
 }
 
+const BOATS_DRIVE_LINKS: Record<string,string> = {
+  "Bowie 1":    "https://drive.google.com/drive/folders/1DMstt7CMkXog7yp0LCpvxedzSuNXblrG",
+  "Bowie 2":    "https://drive.google.com/drive/folders/1soiMLhTVqupUqYL7TuE1Ln7RERkiw5XV",
+  "Thaimarine": "https://drive.google.com/drive/folders/1jEEnwwBajxtSO5I0vGUfdXlolOtgcY3q",
+  "Gambit":     "https://drive.google.com/drive/folders/1NN6M-ea9pDlKgz51s_WP-UkcvQutt3OC",
+  "Yamela":     "https://drive.google.com/drive/folders/1iTg81mXUhcR_j36oqNas69a30tQEmQHU",
+  "Verona":     "https://drive.google.com/drive/folders/1c0AMe86EWdQU0HLwDOoLAk7P4kuI2oq4",
+  "Romeo":      "https://drive.google.com/drive/folders/1qs-REzkEGfGWyfIJXGj66OfssaFxFUAn",
+  "Lexi":       "https://drive.google.com/drive/folders/1XBSdmfPFk1LXadlJ4qAIU0QsdczFGUOj",
+  "Randezvous": "https://drive.google.com/drive/folders/1ILUqV3U8VJq-gA3cBEIczFy86qArFSD-",
+  "Zoe":        "https://drive.google.com/drive/folders/1PUVoPqbYKkYnZqjMiN5zyVypphtNZj3h",
+  "Sunny":      "https://drive.google.com/drive/folders/1jfPZgXfTy58EfSvG3wR7znvR8lCalzHX",
+  "Oceanland":  "https://drive.google.com/drive/folders/1--7mTJnU-FfdGaPT8BdIcGBc1QlBgmr3",
+  "Pepper":     "https://drive.google.com/drive/folders/1O9usPG_S7xSzonv2xDHhh4h57cyjj5PC",
+  "Senna":      "https://drive.google.com/drive/folders/1dhoafTN76LDlEcXhXxG_O2ZR4alXh3Lu",
+  "Summer":     "https://drive.google.com/drive/folders/1PCh6daqP_fB7o7HV2Vgpj4w1ANnhQnzE",
+  "Coco":       "https://drive.google.com/drive/folders/1YJ3hrUBHgZs1uB_WfzfUZ4wJwP2pczUM",
+  "Tahaa":      "https://drive.google.com/drive/folders/1yKSJmaghsTTzabRivmWpVZrwekFsLFDm",
+  "Myra":       "https://drive.google.com/drive/folders/1T4Vn3ub7ohqk3qI46phscLA8yW-SZl_j",
+  "Ocean Dream":"https://drive.google.com/drive/u/0/folders/1dIqceqeU4jpv0_8Jb722pxOrV2sW63Z",
+  "Ameray":     "https://drive.google.com/drive/folders/1RvMJgxFDf-2QWPqX2eGoqwC99VDGXF1w",
+  "Wildcat":    "https://drive.google.com/drive/folders/1FzZp3QV2x8wWhQY23bDmJTEMvKRIajqC",
+  "White Corn": "https://drive.google.com/drive/folders/1-_WwAhjkyJACcXK0uW9dF5K7pUugVD7H",
+  "Black Pearl":"https://drive.google.com/drive/folders/1-MNse3i6r3OHoxtR2gukV5lKWQFBkU2j",
+  "Ella":       "https://drive.google.com/drive/folders/1GaJbjLCzLO7clwYJNC6Ewiw1JWjeNHij",
+  "Calypso":    "https://drive.google.com/drive/folders/1ow1u3IqmpJ0H-U-HDsCo46JZgg48-s0j",
+  "Bohemian":   "https://drive.google.com/drive/folders/1Oo4-GftlfLBhgKGygQCRSFgrC0giEb2B",
+  "F1":         "https://drive.google.com/drive/folders/17JVhaqA7fg5OgtWL5BpQQgudR9aonYbX",
+  "Whiskey":    "https://drive.google.com/drive/folders/1GcrhgI2zst9ZIXddiFu4QbltigqChkLo",
+  "Tequila":    "https://drive.google.com/drive/folders/1Qj56ehlML7DrSU7NArhed0gFszIXZCxn",
+  "Vodka":      "https://drive.google.com/drive/folders/1a6gwWKdpaI1k6IvddudzA4MLJmFKETWz",
+  "Origin":     "https://drive.google.com/drive/folders/1Qk63PA8BPrLb5i-eonuOpXa73Ih1-nw3",
+  "Lady M":     "https://drive.google.com/drive/folders/1S7xW_Ffg4DAsJu1Q74jlvF-jZgWGajNM",
+  "Red Dragon": "https://drive.google.com/drive/folders/13xVqPmzDQ37ZZatcGqYvJLoEaoSx1it0",
+  "Solita":     "https://drive.google.com/drive/folders/182eRIu9f4Eh9QTKZr37VDdoW23gKBphx",
+}
+
 function BoatsTab({dark}:{dark:boolean}) {
   const t = {
     bg:dark?"#0b1120":"#f0f4f8", card:dark?"#131d2e":"#ffffff",
     cardBorder:dark?"#1e2f45":"#d1dce8", text:dark?"#e2eaf4":"#1a2636",
-    muted:dark?"#5b7a9a":"#6e8aa8", header:dark?"#0d1929":"#e2ecf7",
-    inputBg:dark?"#101c2d":"#ffffff", inputBdr:dark?"#1e3450":"#c5d5e5",
-    row0:dark?"rgba(255,255,255,0.03)":"#fafafa",
-    row1:dark?"transparent":"#ffffff",
+    muted:dark?"#5b7a9a":"#6e8aa8", accent:dark?"#38bdf8":"#0369a1",
+    header:dark?"#0d1929":"#e2ecf7", inputBg:dark?"#101c2d":"#ffffff",
+    inputBdr:dark?"#1e3450":"#c5d5e5", row0:dark?"transparent":"#fafafa",
+    row1:dark?"rgba(255,255,255,0.02)":"#f0f4f8",
   }
-  const [search, setSearch]       = useState("")
-  const [typeF,  setTypeF]        = useState("Все")
-  const [pierF,  setPierF]        = useState("Все")
-  const [openId, setOpenId]       = useState<number|null>(null)
-  const [waModal, setWaModal]     = useState<{title:string;short:string;full:string}|null>(null)
 
-  const filtered = useMemo(() => BOATS_DATA.filter(b => {
-    if (typeF !== "Все" && b.type !== typeF) return false
-    if (pierF !== "Все" && b.pier !== pierF) return false
-    const q = search.toLowerCase().trim()
-    if (!q) return true
-    return b.name.toLowerCase().includes(q) || b.tours.some(t => t.name.toLowerCase().includes(q))
-  }), [search, typeF, pierF])
+  const [search,  setSearch]  = useState("")
+  const [typeF,   setTypeF]   = useState("all")
+  const [pierF,   setPierF]   = useState("all")
+  const [sortBy,  setSortBy]  = useState<"name"|"price"|"size"|"pax">("name")
+  const [openId,  setOpenId]  = useState<number|null>(null)
+  const [waModal, setWaModal] = useState<{title:string;short:string;full:string}|null>(null)
 
-  const pill: React.CSSProperties = {
-    padding:"5px 12px", fontSize:"12px", fontWeight:700,
-    borderRadius:"99px", border:"none", cursor:"pointer", whiteSpace:"nowrap", flexShrink:0
-  }
-  const inp: React.CSSProperties = {
-    width:"100%", padding:"9px 12px 9px 34px", fontSize:"13px",
-    borderRadius:"8px", background:t.inputBg, border:`1px solid ${t.inputBdr}`,
-    color:t.text, outline:"none", boxSizing:"border-box"
-  }
+  // Calculator state
+  const [calcOpen,     setCalcOpen]     = useState(false)
+  const [calcBoatId,   setCalcBoatId]   = useState<number|string>("")
+  const [calcTour,     setCalcTour]     = useState(0)
+  const [calcPax,      setCalcPax]      = useState(2)
+  const [calcGuide,    setCalcGuide]    = useState(false)
+  const [calcMeal,     setCalcMeal]     = useState<"none"|"A"|"B"|"C">("none")
+  const [calcPool,     setCalcPool]     = useState(false)
+  const [calcSlide,    setCalcSlide]    = useState(false)
+  const [calcSeafood,  setCalcSeafood]  = useState(false)
+  const [calcBBQ,      setCalcBBQ]      = useState(false)
+  const [calcFishing,  setCalcFishing]  = useState(false)
+  const [calcCanoe,    setCalcCanoe]    = useState(false)
+
+  const allPiers = useMemo(()=>Array.from(new Set(BOATS_DATA.map(b=>b.pier))).sort(),[])
+
+  const filtered = useMemo(()=>{
+    return [...BOATS_DATA].filter(b=>{
+      const q = search.toLowerCase().trim()
+      const matchQ = !q || b.name.toLowerCase().includes(q) || b.pier.toLowerCase().includes(q) ||
+        b.tours.some(tt=>tt.name.toLowerCase().includes(q))
+      const matchT = typeF==="all" || b.type===typeF
+      const matchP = pierF==="all" || b.pier===pierF
+      return matchQ && matchT && matchP
+    }).sort((a,b2)=>{
+      if(sortBy==="name") return a.name.localeCompare(b2.name)
+      if(sortBy==="price"){
+        const pa = Math.min(...a.tours.map(tt=>typeof tt.price==="number"?tt.price:999999))
+        const pb = Math.min(...b2.tours.map(tt=>typeof tt.price==="number"?tt.price:999999))
+        return pa - pb
+      }
+      if(sortBy==="size") return parseInt(b2.size)-parseInt(a.size)
+      if(sortBy==="pax")  return b2.maxPax - a.maxPax
+      return 0
+    })
+  },[search,typeF,pierF,sortBy])
+
+  const typeStats = ["speedboat","catamaran","powercat","yacht"].map(tp=>({
+    tp, label:BOAT_TYPE_META[tp]?.label||tp, color:BOAT_TYPE_META[tp]?.color||"#888",
+    count:BOATS_DATA.filter(b=>b.type===tp).length
+  }))
+
+  const inputSt:React.CSSProperties={width:"100%",padding:"9px 12px",borderRadius:"10px",border:`1px solid ${t.inputBdr}`,background:t.inputBg,color:t.text,fontSize:"13px",fontWeight:600,outline:"none",boxSizing:"border-box"}
 
   return (
-    <div style={{display:"flex", flexDirection:"column", height:"calc(100vh - 110px)", overflow:"hidden"}}>
+    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 110px)",overflow:"hidden"}}>
 
-      {/* ── TOOLBAR ── */}
-      <div style={{background:t.header, borderBottom:`1px solid ${t.cardBorder}`, padding:"10px 14px", flexShrink:0}}>
-        {/* Search */}
-        <div style={{position:"relative", marginBottom:"8px"}}>
-          <span style={{position:"absolute",left:"10px",top:"50%",transform:"translateY(-50%)",fontSize:"13px",pointerEvents:"none"}}>🔍</span>
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Поиск по названию или маршруту..." style={inp}/>
+      {/* ── Toolbar ── */}
+      <div style={{background:t.header,borderBottom:`1px solid ${t.cardBorder}`,padding:"10px 12px",flexShrink:0}}>
+
+        {/* Title row */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px",flexWrap:"wrap",gap:"6px"}}>
+          <div>
+            <div style={{fontSize:"14px",fontWeight:800,color:t.accent}}>🚢 Лодки и яхты</div>
+            <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {BOATS_DATA.length} судов · сезон 2025–2026 · все цены ฿</div>
+          </div>
+          <div style={{display:"flex",gap:"5px",alignItems:"center",flexWrap:"wrap"}}>
+            <button onClick={()=>{setCalcOpen(true);setCalcBoatId("");setCalcTour(0);setCalcPax(2);setCalcGuide(false);setCalcMeal("none");setCalcPool(false);setCalcSlide(false);setCalcSeafood(false);setCalcBBQ(false);setCalcFishing(false);setCalcCanoe(false)}}
+              style={{padding:"6px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#fff",boxShadow:"0 2px 8px rgba(245,158,11,0.3)"}}>
+              🧮 Калькулятор
+            </button>
+            {typeStats.map(s=>(
+              <span key={s.tp} style={{fontSize:"10px",padding:"2px 7px",borderRadius:"99px",background:`${s.color}22`,color:s.color,fontWeight:700,border:`1px solid ${s.color}44`}}>
+                {s.label}: {s.count}
+              </span>
+            ))}
+          </div>
         </div>
-        {/* Type pills */}
-        <div style={{display:"flex", gap:"5px", marginBottom:"6px", overflowX:"auto", paddingBottom:"2px"}}>
-          {["Все","speedboat","catamaran","powercat","yacht"].map(k => {
-            const meta = k !== "Все" ? BOAT_TYPE_META[k] : null
-            const active = typeF === k
-            return (
-              <button key={k} onClick={()=>setTypeF(k)}
-                style={{...pill, background:active?(meta?meta.color:(dark?"#38bdf8":"#0369a1")):(dark?"#1e2f45":"#dce7f0"), color:active?"#fff":(dark?"#94a3b8":"#374151")}}>
-                {k === "Все" ? "🚢 Все типы" : meta!.label}
-              </button>
-            )
-          })}
+
+        {/* Filters */}
+        <div style={{display:"flex",gap:"6px",flexWrap:"wrap"}}>
+          <input value={search} onChange={e=>setSearch(e.target.value)}
+            placeholder="🔍 Поиск по названию, маршруту, пирсу..."
+            style={{...inputSt,flex:"1 1 160px",padding:"8px 12px"}}/>
+          <select value={pierF} onChange={e=>setPierF(e.target.value)} style={{...inputSt,flex:"0 0 auto"}}>
+            <option value="all">Все пирсы</option>
+            {allPiers.map(p=><option key={p} value={p}>{p}</option>)}
+          </select>
+          <select value={typeF} onChange={e=>setTypeF(e.target.value)} style={{...inputSt,flex:"0 0 auto"}}>
+            <option value="all">Все типы</option>
+            {["speedboat","catamaran","powercat","yacht"].map(tp=>(
+              <option key={tp} value={tp}>{BOAT_TYPE_META[tp]?.label||tp}</option>
+            ))}
+          </select>
+          <select value={sortBy} onChange={e=>setSortBy(e.target.value as typeof sortBy)} style={{...inputSt,flex:"0 0 auto"}}>
+            <option value="name">По имени</option>
+            <option value="price">По цене ↑</option>
+            <option value="size">По размеру ↓</option>
+            <option value="pax">По PAX ↓</option>
+          </select>
         </div>
-        {/* Pier pills */}
-        <div style={{display:"flex", gap:"5px", overflowX:"auto", paddingBottom:"2px"}}>
-          {BOAT_PIERS.map(p => {
-            const active = pierF === p
-            return (
-              <button key={p} onClick={()=>setPierF(p)}
-                style={{...pill, background:active?(dark?"#0d9488":"#0d9488"):(dark?"#1e2f45":"#dce7f0"), color:active?"#fff":(dark?"#94a3b8":"#374151"), fontSize:"11px"}}>
-                📍 {p}
-              </button>
-            )
-          })}
-        </div>
+        <div style={{fontSize:"11px",color:t.muted,marginTop:"6px"}}>Найдено: {filtered.length} из {BOATS_DATA.length}</div>
       </div>
 
-      {/* ── BOAT LIST ── */}
-      <div style={{overflowY:"auto", flex:1, padding:"12px 14px"}}>
-        <div style={{fontSize:"12px", color:t.muted, marginBottom:"10px"}}>
-          Найдено: <b style={{color:t.text}}>{filtered.length}</b> судов · {BOATS_DATA.length} всего · сезон 2025–2026 · все цены в ฿
-        </div>
-
-        {filtered.length === 0 && (
-          <div style={{textAlign:"center", padding:"60px 20px", color:t.muted}}>
-            <div style={{fontSize:"36px", marginBottom:"10px"}}>🚢</div>
+      {/* ── Boat list ── */}
+      <div style={{overflowY:"auto",flex:1,padding:"12px 14px"}}>
+        {filtered.length===0 && (
+          <div style={{textAlign:"center",padding:"60px 20px",color:t.muted}}>
+            <div style={{fontSize:"36px",marginBottom:"10px"}}>🚢</div>
             <div>Ничего не найдено. Измените фильтры.</div>
           </div>
         )}
-
-        <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:"10px"}}>
-          {filtered.map(boat => {
-            const m = BOAT_TYPE_META[boat.type]
-            const isOpen = openId === boat.id
-            const prices = boat.tours.map(tt => tt.price).filter((p): p is number => typeof p === "number")
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:"10px"}}>
+          {filtered.map(boat=>{
+            const m = BOAT_TYPE_META[boat.type]||{label:boat.type,color:"#888",border:"#444",bg:"#111"}
+            const isOpen = openId===boat.id
+            const prices = boat.tours.map(tt=>tt.price).filter((p):p is number=>typeof p==="number")
             const minPrice = prices.length ? Math.min(...prices) : null
-
             return (
-              <div key={boat.id}
-                style={{background:t.card, borderRadius:"14px", border:`1.5px solid ${isOpen ? m.color : m.border}`, overflow:"hidden", transition:"border-color 0.2s"}}>
-
-                {/* Card header */}
-                <div onClick={()=>setOpenId(isOpen ? null : boat.id)}
-                  style={{cursor:"pointer", userSelect:"none"}}>
-                  {/* Top color bar */}
-                  <div style={{background:m.bg, borderBottom:`1px solid ${m.border}`, padding:"12px 14px"}}>
-                    <div style={{display:"flex", justifyContent:"space-between", alignItems:"flex-start"}}>
+              <div key={boat.id} style={{background:t.card,borderRadius:"14px",border:`1.5px solid ${isOpen?m.color:m.border}`,overflow:"hidden",transition:"border-color 0.2s"}}>
+                <div onClick={()=>setOpenId(isOpen?null:boat.id)} style={{cursor:"pointer",userSelect:"none"}}>
+                  <div style={{background:m.bg,borderBottom:`1px solid ${m.border}`,padding:"12px 14px"}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                       <div>
-                        <div style={{fontSize:"16px", fontWeight:800, color:m.color, letterSpacing:"-0.3px"}}>
+                        <div style={{fontSize:"16px",fontWeight:800,color:m.color,letterSpacing:"-0.3px"}}>
                           {boat.name}
-                          <span style={{fontSize:"12px", fontWeight:400, color:m.color, opacity:0.7, marginLeft:"7px"}}>{boat.size}</span>
+                          <span style={{fontSize:"12px",fontWeight:400,color:m.color,opacity:0.7,marginLeft:"7px"}}>{boat.size}</span>
                         </div>
-                        <div style={{fontSize:"11px", color:m.color, opacity:0.65, marginTop:"2px"}}>📍 {boat.pier}</div>
+                        <div style={{fontSize:"11px",color:m.color,opacity:0.65,marginTop:"2px"}}>📍 {boat.pier}</div>
                       </div>
-                      <div style={{display:"flex", flexDirection:"column", alignItems:"flex-end", gap:"4px"}}>
-                        <span style={{background:`${m.color}22`, color:m.color, border:`1px solid ${m.border}`, borderRadius:"99px", padding:"2px 9px", fontSize:"11px", fontWeight:700}}>
-                          {m.label}
-                        </span>
-                        <span style={{fontSize:"11px", color:m.color, opacity:0.7}}>👥 макс. {boat.maxPax} чел.</span>
+                      <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"4px"}}>
+                        <span style={{background:`${m.color}22`,color:m.color,border:`1px solid ${m.border}`,borderRadius:"99px",padding:"2px 9px",fontSize:"11px",fontWeight:700}}>{m.label}</span>
+                        <span style={{fontSize:"11px",color:m.color,opacity:0.7}}>👥 макс. {boat.maxPax} чел.</span>
                       </div>
                     </div>
                   </div>
-                  {/* Bottom summary */}
-                  <div style={{padding:"10px 14px", display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+                  <div style={{padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                     <div>
-                      {minPrice && <span style={{fontSize:"14px", fontWeight:700, color:m.color}}>от {minPrice.toLocaleString("ru-RU")} ฿</span>}
-                      <span style={{fontSize:"11px", color:t.muted, marginLeft:"8px"}}>{boat.tours.length} {boat.tours.length === 1 ? "маршрут" : boat.tours.length < 5 ? "маршрута" : "маршрутов"}</span>
+                      {minPrice && <span style={{fontSize:"14px",fontWeight:700,color:m.color}}>от {minPrice.toLocaleString("ru-RU")} ฿</span>}
+                      <span style={{fontSize:"11px",color:t.muted,marginLeft:"8px"}}>{boat.tours.length} {boat.tours.length===1?"маршрут":boat.tours.length<5?"маршрута":"маршрутов"}</span>
                     </div>
-                    <span style={{fontSize:"13px", color:m.color, transition:"transform 0.2s", transform:isOpen?"rotate(180deg)":"rotate(0)"}}>▾</span>
+                    <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+                      {BOATS_DRIVE_LINKS[boat.name] && (
+                        <a href={BOATS_DRIVE_LINKS[boat.name]} target="_blank" rel="noreferrer"
+                          onClick={e=>e.stopPropagation()}
+                          style={{fontSize:"10px",color:t.accent,background:`${t.accent}18`,padding:"2px 7px",borderRadius:"6px",border:`1px solid ${t.accent}44`,textDecoration:"none",fontWeight:700}}>
+                          📁 Фото
+                        </a>
+                      )}
+                      <span style={{fontSize:"13px",color:m.color,transition:"transform 0.2s",transform:isOpen?"rotate(180deg)":"rotate(0)"}}>▾</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Expanded */}
                 {isOpen && (
-                  <div style={{borderTop:`1px solid ${m.border}`, padding:"12px 14px", background:dark?"rgba(0,0,0,0.2)":"rgba(0,0,0,0.02)"}}>
-                    {/* Note */}
+                  <div style={{borderTop:`1px solid ${m.border}`,padding:"12px 14px",background:dark?"rgba(0,0,0,0.2)":"rgba(0,0,0,0.02)"}}>
                     {boat.note && (
-                      <div style={{background:dark?"#2d1f00":"#fffbeb", border:"1px solid #d97706", borderRadius:"8px", padding:"8px 11px", fontSize:"12px", color:dark?"#fde68a":"#92400e", marginBottom:"10px", lineHeight:1.5}}>
+                      <div style={{background:dark?"#2d1f00":"#fffbeb",border:"1px solid #d97706",borderRadius:"8px",padding:"8px 11px",fontSize:"11px",color:dark?"#fde68a":"#92400e",marginBottom:"10px",lineHeight:1.5}}>
                         ℹ️ {boat.note}
                       </div>
                     )}
-                    {/* Tours table */}
-                    <div style={{borderRadius:"8px", overflow:"hidden", border:`1px solid ${m.border}`}}>
-                      {/* Table header */}
-                      <div style={{display:"grid", gridTemplateColumns:"1fr auto auto", background:m.bg, padding:"6px 10px", gap:"8px"}}>
-                        <div style={{fontSize:"10px", fontWeight:700, color:m.color, textTransform:"uppercase", letterSpacing:"0.5px"}}>Маршрут</div>
-                        <div style={{fontSize:"10px", fontWeight:700, color:m.color, textAlign:"right", textTransform:"uppercase", letterSpacing:"0.5px"}}>Цена</div>
-                        <div style={{fontSize:"10px", fontWeight:700, color:m.color, textAlign:"right", textTransform:"uppercase", letterSpacing:"0.5px", minWidth:"70px"}}>Экстра/чел</div>
+                    <div style={{borderRadius:"8px",overflow:"hidden",border:`1px solid ${m.border}`}}>
+                      <div style={{display:"grid",gridTemplateColumns:"1fr auto auto auto",background:m.bg,padding:"6px 10px",gap:"8px"}}>
+                        {["Маршрут","Цена","Экстра/чел","Вкл. чел"].map(h=>(
+                          <div key={h} style={{fontSize:"10px",fontWeight:700,color:m.color,textAlign:h==="Маршрут"?"left":"right",textTransform:"uppercase" as any,letterSpacing:"0.5px"}}>{h}</div>
+                        ))}
                       </div>
-                      {/* Rows */}
-                      {boat.tours.map((tour, i) => (
-                        <div key={i} style={{display:"grid", gridTemplateColumns:"1fr auto auto", padding:"7px 10px", gap:"8px", alignItems:"center", background: i%2===0 ? t.row0 : t.row1, borderTop: i===0 ? "none" : `1px solid ${dark?"rgba(255,255,255,0.05)":"#f0f0f0"}`}}>
-                          <div style={{fontSize:"12px", color:t.text, lineHeight:1.4}}>{tour.name}</div>
-                          <div style={{fontSize:"13px", fontWeight:700, color:m.color, textAlign:"right", whiteSpace:"nowrap"}}>
-                            {fmtPrice(tour.price)}
+                      {boat.tours.map((tour,i)=>(
+                        <div key={i} style={{display:"grid",gridTemplateColumns:"1fr auto auto auto",padding:"7px 10px",gap:"8px",alignItems:"center",background:i%2===0?t.row0:t.row1,borderTop:i===0?"none":`1px solid ${dark?"rgba(255,255,255,0.05)":"#f0f0f0"}`}}>
+                          <div style={{fontSize:"12px",color:t.text,lineHeight:1.4}}>{tour.name}</div>
+                          <div style={{fontSize:"13px",fontWeight:700,color:m.color,textAlign:"right" as any,whiteSpace:"nowrap"}}>{fmtPrice(tour.price)}</div>
+                          <div style={{fontSize:"11px",color:t.muted,textAlign:"right" as any,whiteSpace:"nowrap"}}>
+                            {tour.extra===null?"—":typeof tour.extra==="number"?`${tour.extra.toLocaleString("ru-RU")} ฿`:String(tour.extra)}
                           </div>
-                          <div style={{fontSize:"11px", color:t.muted, textAlign:"right", whiteSpace:"nowrap", minWidth:"70px"}}>
-                            {tour.extra !== null ? fmtPrice(typeof tour.extra === "number" ? tour.extra : tour.extra) : "—"}
-                          </div>
+                          <div style={{fontSize:"11px",color:t.muted,textAlign:"right" as any,whiteSpace:"nowrap"}}>{tour.paxIncl||"—"}</div>
                         </div>
                       ))}
                     </div>
-                    {/* WA share */}
-                    <button onClick={e => { e.stopPropagation(); setWaModal({title:boat.name, short:buildBoatWAShort(boat), full:buildBoatWAFull(boat)}) }}
-                      style={{marginTop:"6px",width:"100%",background:"#25d366",color:"#fff",border:"none",borderRadius:"8px",padding:"8px",fontSize:"13px",fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"6px"}}>
-                      <span>📤</span> Отправить в WhatsApp
-                    </button>
-                    {/* Collapse */}
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px",marginTop:"8px"}}>
+                      <button onClick={e=>{e.stopPropagation();setCalcBoatId(boat.id);setCalcTour(0);setCalcPax(2);setCalcGuide(false);setCalcMeal("none");setCalcPool(false);setCalcSlide(false);setCalcSeafood(false);setCalcBBQ(false);setCalcFishing(false);setCalcCanoe(false);setCalcOpen(true)}}
+                        style={{padding:"8px",borderRadius:"8px",border:"none",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#fff",fontSize:"12px",fontWeight:700,cursor:"pointer"}}>
+                        🧮 Калькулятор
+                      </button>
+                      <button onClick={e=>{e.stopPropagation();setWaModal({title:boat.name,short:buildBoatWAShort(boat),full:buildBoatWAFull(boat)})}}
+                        style={{padding:"8px",borderRadius:"8px",border:"none",background:"#25d366",color:"#fff",fontSize:"12px",fontWeight:700,cursor:"pointer"}}>
+                        📤 WhatsApp
+                      </button>
+                    </div>
                     <button onClick={()=>setOpenId(null)}
-                      style={{marginTop:"10px", width:"100%", background:"transparent", border:`1px solid ${m.border}`, borderRadius:"8px", padding:"7px", fontSize:"12px", color:m.color, cursor:"pointer", fontWeight:600}}>
+                      style={{marginTop:"6px",width:"100%",background:"transparent",border:`1px solid ${m.border}`,borderRadius:"8px",padding:"7px",fontSize:"12px",color:m.color,cursor:"pointer",fontWeight:600}}>
                       Свернуть ▲
                     </button>
                   </div>
@@ -2200,6 +2271,162 @@ function BoatsTab({dark}:{dark:boolean}) {
           })}
         </div>
       </div>
+
+      {/* ── Calculator Modal ── */}
+      {calcOpen && (()=>{
+        const boat = BOATS_DATA.find(b=>b.id===calcBoatId)
+        const tour = boat ? boat.tours[calcTour] : null
+        const m = boat ? (BOAT_TYPE_META[boat.type]||BOAT_TYPE_META["speedboat"]) : null
+        const note:string = (boat as any)?.note||""
+        const hasGuide   = true
+        const hasMeal    = note.includes("не включ") || note.includes("640") || note.includes("500")
+        const hasPool    = note.includes("Бассейн") || note.includes("бассейн")
+        const hasSlide   = note.includes("горка")
+        const hasSeafood = note.includes("seafood") || note.includes("Seafood") || note.includes("650")
+        const hasBBQ     = note.includes("BBQ")
+        const hasFishing = note.includes("удочки") || note.includes("Удочки")
+        const hasCanoe   = note.includes("каноэ") || note.includes("Каноэ")
+        const mealPrice:{[k:string]:number}={none:0,A:640,B:780,C:920}
+
+        const rows:{label:string;amount:number}[]=[]
+        let total=0
+
+        if(boat&&tour){
+          const extra=tour.extra
+          const inclStr=String(tour.paxIncl||"")
+          const inclMax=parseInt(inclStr.split("–")[1]||inclStr.replace(/\D/g,""))||2
+          rows.push({label:`🚢 База (вкл. ${tour.paxIncl} чел.)`,amount:tour.price as number})
+          total+=tour.price as number
+          if(calcPax>inclMax&&extra!==null&&typeof extra==="number"){
+            const ep=calcPax-inclMax; const et=ep*extra
+            rows.push({label:`👤 Доп. ${ep} чел × ${extra.toLocaleString("ru-RU")} ฿`,amount:et})
+            total+=et
+          } else if(calcPax>inclMax&&extra!==null&&typeof extra==="string"){
+            rows.push({label:`⚠️ Доп. тариф: ${extra}`,amount:0})
+          }
+        }
+        if(calcGuide){rows.push({label:"🇷🇺 Рус. гид",amount:3500});total+=3500}
+        if(calcMeal!=="none"&&hasMeal){const mp=mealPrice[calcMeal]*calcPax;rows.push({label:`🍽️ Питание кат.${calcMeal} ×${calcPax}`,amount:mp});total+=mp}
+        if(calcPool&&hasPool){const pp=note.includes("4500")?4500:3500;rows.push({label:"🏊 Бассейн",amount:pp});total+=pp}
+        if(calcSlide&&hasSlide){const sp=note.includes("3600")?3600:3500;rows.push({label:"🎢 Горка",amount:sp});total+=sp}
+        if(calcSeafood&&hasSeafood){const sf=650*calcPax;rows.push({label:`🦐 Морепродукты ×${calcPax}`,amount:sf});total+=sf}
+        if(calcBBQ&&hasBBQ){rows.push({label:"🍗 BBQ",amount:1500});total+=1500}
+        if(calcFishing&&hasFishing){rows.push({label:"🎣 Удочки",amount:1000});total+=1000}
+        if(calcCanoe&&hasCanoe){const cn=500*calcPax;rows.push({label:`🛶 Каноэ ×${calcPax}`,amount:cn});total+=cn}
+
+        function CBox({checked,onChange,label,price,avail}:{checked:boolean;onChange:(v:boolean)=>void;label:string;price:string;avail:boolean}){
+          if(!avail)return null
+          return(
+            <label style={{display:"flex",alignItems:"center",gap:"10px",padding:"8px 10px",borderRadius:"8px",cursor:"pointer",border:`1px solid ${checked?(m?.border||t.cardBorder):t.cardBorder}`,background:checked?(m?.bg||t.header):t.header,marginBottom:"6px",transition:"all 0.15s"}}>
+              <div style={{width:"18px",height:"18px",borderRadius:"5px",border:`2px solid ${checked?(m?.color||t.accent):t.muted}`,background:checked?(m?.color||t.accent):"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} onClick={()=>onChange(!checked)}>
+                {checked&&<span style={{color:"#fff",fontSize:"11px",fontWeight:900}}>✓</span>}
+              </div>
+              <span style={{flex:1,fontSize:"12px",color:t.text,fontWeight:500}}>{label}</span>
+              <span style={{fontSize:"11px",color:m?.color||t.accent,fontWeight:700,flexShrink:0}}>{price}</span>
+            </label>
+          )
+        }
+
+        return(
+          <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:"12px"}} onClick={()=>setCalcOpen(false)}>
+            <div style={{background:t.card,border:`1.5px solid ${t.cardBorder}`,borderRadius:"20px",width:"100%",maxWidth:"420px",boxShadow:"0 20px 60px rgba(0,0,0,0.5)",display:"flex",flexDirection:"column",maxHeight:"92vh"}} onClick={(e:React.MouseEvent)=>e.stopPropagation()}>
+              <div style={{padding:"18px 20px 14px",borderBottom:`1px solid ${t.cardBorder}`,flexShrink:0,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div>
+                  <div style={{fontSize:"16px",fontWeight:800,color:t.text}}>🧮 Калькулятор лодки</div>
+                  <div style={{fontSize:"10px",color:t.muted,marginTop:"1px"}}>Лодки и яхты · сезон 2025–2026</div>
+                </div>
+                <button onClick={()=>setCalcOpen(false)} style={{background:t.cardBorder,border:"none",borderRadius:"8px",width:"30px",height:"30px",cursor:"pointer",fontSize:"14px",color:t.text,flexShrink:0}}>✕</button>
+              </div>
+              <div style={{overflowY:"auto",flex:1,padding:"16px 20px"}}>
+                <div style={{marginBottom:"12px"}}>
+                  <div style={{fontSize:"10px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"5px"}}>Лодка</div>
+                  <select value={String(calcBoatId)} onChange={e=>{setCalcBoatId(Number(e.target.value));setCalcTour(0);setCalcPool(false);setCalcSlide(false);setCalcSeafood(false);setCalcBBQ(false);setCalcFishing(false);setCalcCanoe(false);setCalcMeal("none")}} style={inputSt}>
+                    <option value="">— Выберите лодку —</option>
+                    {[...BOATS_DATA].sort((a,b2)=>a.name.localeCompare(b2.name)).map(b=>(
+                      <option key={b.id} value={b.id}>{b.name} ({b.size}) · {BOAT_TYPE_META[b.type]?.label||b.type}</option>
+                    ))}
+                  </select>
+                </div>
+                {boat&&(
+                  <div style={{marginBottom:"12px"}}>
+                    <div style={{fontSize:"10px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"5px"}}>Маршрут</div>
+                    <select value={calcTour} onChange={e=>setCalcTour(Number(e.target.value))} style={inputSt}>
+                      {boat.tours.map((tt,i)=>(
+                        <option key={i} value={i}>{tt.name} — {fmtPrice(tt.price)}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                {boat&&(
+                  <div style={{marginBottom:"16px"}}>
+                    <div style={{fontSize:"10px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"5px"}}>
+                      Количество человек: <span style={{color:m?.color||t.accent,fontSize:"13px"}}>{calcPax}</span> <span style={{fontWeight:400}}>/ макс. {boat.maxPax}</span>
+                    </div>
+                    <input type="range" min={1} max={boat.maxPax} value={calcPax} onChange={e=>setCalcPax(Number(e.target.value))} style={{width:"100%",accentColor:m?.color||"#38bdf8",cursor:"pointer"}}/>
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:"10px",color:t.muted,marginTop:"1px"}}>
+                      <span>1</span><span>{boat.maxPax}</span>
+                    </div>
+                  </div>
+                )}
+                {boat&&tour&&(
+                  <div style={{marginBottom:"16px"}}>
+                    <div style={{fontSize:"10px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"8px"}}>Доп. услуги</div>
+                    <CBox checked={calcGuide} onChange={setCalcGuide} label="🇷🇺 Русскоговорящий гид" price="+3 500 ฿" avail={hasGuide}/>
+                    <CBox checked={calcPool}  onChange={setCalcPool}  label="🏊 Бассейн на борту" price={note.includes("4500")?"+4 500 ฿":"+3 500 ฿"} avail={hasPool}/>
+                    <CBox checked={calcSlide} onChange={setCalcSlide} label="🎢 Горка" price={note.includes("3600")?"+3 600 ฿":"+3 500 ฿"} avail={hasSlide}/>
+                    <CBox checked={calcSeafood} onChange={setCalcSeafood} label={`🦐 Морепродукты ×${calcPax}`} price={`+${(650*calcPax).toLocaleString("ru-RU")} ฿`} avail={hasSeafood}/>
+                    <CBox checked={calcBBQ}     onChange={setCalcBBQ}     label="🍗 BBQ" price="+1 500 ฿" avail={hasBBQ}/>
+                    <CBox checked={calcFishing}  onChange={setCalcFishing}  label="🎣 Удочки" price="+1 000 ฿" avail={hasFishing}/>
+                    <CBox checked={calcCanoe}    onChange={setCalcCanoe}    label={`🛶 Каноэ ×${calcPax}`} price={`+${(500*calcPax).toLocaleString("ru-RU")} ฿`} avail={hasCanoe}/>
+                    {hasMeal&&(
+                      <div style={{marginTop:"8px"}}>
+                        <div style={{fontSize:"10px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"6px"}}>🍽️ Питание (на {calcPax} чел.)</div>
+                        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"6px"}}>
+                          {(["none","A","B","C"] as const).map(cat=>{
+                            const lbs:{[k:string]:string}={none:"Нет",A:`A\n${640*calcPax}฿`,B:`B\n${780*calcPax}฿`,C:`C\n${920*calcPax}฿`}
+                            const active=calcMeal===cat
+                            return(
+                              <button key={cat} onClick={()=>setCalcMeal(cat)}
+                                style={{padding:"8px 4px",borderRadius:"8px",border:`1.5px solid ${active?(m?.color||t.accent):t.cardBorder}`,background:active?(m?.bg||t.header):t.header,color:active?(m?.color||t.accent):t.muted,fontSize:"10px",fontWeight:700,cursor:"pointer",lineHeight:1.4,whiteSpace:"pre-wrap" as any,textAlign:"center" as any}}>
+                                {lbs[cat]}
+                              </button>
+                            )
+                          })}
+                        </div>
+                        <div style={{fontSize:"10px",color:t.muted,marginTop:"4px"}}>A=640 · B=780 · C=920 ฿/чел</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              {boat&&tour?(
+                <div style={{borderTop:`1.5px solid ${m?.border||t.cardBorder}`,background:m?m.bg:t.header,padding:"14px 20px",flexShrink:0,borderRadius:"0 0 18px 18px"}}>
+                  {rows.map((row,i)=>(
+                    <div key={i} style={{display:"flex",justifyContent:"space-between",fontSize:"11px",color:t.text,marginBottom:"3px",opacity:0.8}}>
+                      <span>{row.label}</span>
+                      <span style={{fontWeight:600,flexShrink:0,marginLeft:"8px"}}>{row.amount>0?row.amount.toLocaleString("ru-RU")+" ฿":"—"}</span>
+                    </div>
+                  ))}
+                  <div style={{borderTop:`1px solid ${m?.border||t.cardBorder}`,marginTop:"10px",paddingTop:"10px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div>
+                      <div style={{fontSize:"10px",color:t.muted}}>ИТОГО за {calcPax} чел.</div>
+                      <div style={{fontSize:"26px",fontWeight:900,color:m?.color||t.accent,letterSpacing:"-0.5px"}}>{total.toLocaleString("ru-RU")} ฿</div>
+                    </div>
+                    <div style={{textAlign:"right" as any}}>
+                      <div style={{fontSize:"10px",color:t.muted}}>НА ЧЕЛОВЕКА</div>
+                      <div style={{fontSize:"20px",fontWeight:800,color:m?.color||t.accent}}>{Math.round(total/calcPax).toLocaleString("ru-RU")} ฿</div>
+                    </div>
+                  </div>
+                </div>
+              ):(
+                <div style={{padding:"20px",textAlign:"center" as any,color:t.muted,fontSize:"13px",borderTop:`1px solid ${t.cardBorder}`}}>
+                  👆 Выберите лодку и маршрут
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* WA Modal */}
       {waModal && <WAShareModal dark={dark} title={waModal.title} shortText={waModal.short} fullText={waModal.full} onClose={() => setWaModal(null)}/>}
