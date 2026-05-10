@@ -633,6 +633,225 @@ function generateTransferMessage(v: Voucher): string {
 
 const APP_PASSWORD = "8888"
 
+// ══════════════════════════════════════════════
+// AI UPDATE PANEL — универсальный AI-парсер файлов
+// Требует: npm install mammoth
+// ══════════════════════════════════════════════
+
+async function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((res, rej) => {
+    const r = new FileReader()
+    r.onload = () => res((r.result as string).split(",")[1])
+    r.onerror = rej
+    r.readAsDataURL(file)
+  })
+}
+
+async function readDocxText(file: File): Promise<string> {
+  try {
+    const mammoth = await import("mammoth")
+    const buf = await file.arrayBuffer()
+    const result = await (mammoth as any).extractRawText({ arrayBuffer: buf })
+    return result.value
+  } catch {
+    throw new Error("Не удалось прочитать DOCX. Убедитесь что установлен: npm install mammoth")
+  }
+}
+
+const AI_PROMPTS: Record<string, string> = {
+  boats: `Ты парсишь прайс-лист аренды лодок на Пхукете (Таиланд).
+Извлеки данные о всех лодках и их турах.
+Верни ТОЛЬКО валидный JSON-массив без markdown-блоков, без пояснений.
+Структура каждого объекта:
+{"name":"название лодки","size":"размер (например 46ft)","pier":"пирс отправления","type":"speedboat|catamaran|powercat|yacht|sailboat","maxPax":число,"note":"примечания если есть","tours":[{"name":"тур","price":число,"extra":число или null,"paxIncl":"1–2"}]}
+Если поле неизвестно — пропусти. Верни только JSON-массив.`,
+
+  summer: `Ты парсишь прайс-лист аренды лодок на Пхукете (Таиланд), версия Summer Update.
+Извлеки все лодки и их туры.
+Верни ТОЛЬКО валидный JSON-массив без markdown-блоков, без пояснений.
+Структура каждого объекта:
+{"name":"название","size":"размер","pier":"пирс","type":"speedboat|sailboat|catamaran|powercat|yacht","maxPax":число,"note":"примечания","tours":[{"name":"тур","price":число,"extra":число или null,"incl":"1–2"}]}
+Верни только JSON-массив.`,
+
+  methodichka: `Ты парсишь прайс-лист экскурсий и туров туроператора на Пхукете (Таиланд).
+Извлеки все туры с ценами.
+Верни ТОЛЬКО валидный JSON-массив без markdown-блоков, без пояснений.
+Структура каждого объекта:
+{"name":"название тура на русском","nameEn":"название на английском если есть","cat":"sea|land|show|flight|fishing|diving|other","duration":"продолжительность","price":"строка с ценами","includes":"что включено","restrictions":"ограничения если есть"}
+Верни только JSON-массив.`,
+}
+
+function AIUpdatePanel({ dark, mode, onUpdate, onClose }: {
+  dark: boolean
+  mode: "boats" | "summer" | "methodichka"
+  onUpdate: (data: any[]) => void
+  onClose: () => void
+}) {
+  const t = {
+    bg: dark?"#0b1120":"#f0f4f8", card: dark?"#131d2e":"#ffffff",
+    border: dark?"#1e2f45":"#d1dce8", text: dark?"#e2eaf4":"#1a2636",
+    muted: dark?"#5b7a9a":"#6e8aa8", accent: "#38bdf8",
+    inputBg: dark?"#101c2d":"#ffffff", inputBdr: dark?"#1e3450":"#c5d5e5",
+  }
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [file, setFile] = useState<File|null>(null)
+  const [status, setStatus] = useState<"idle"|"loading"|"done"|"error">("idle")
+  const [progress, setProgress] = useState("")
+  const [parsed, setParsed] = useState<any[]|null>(null)
+  const [errorMsg, setErrorMsg] = useState("")
+
+  const isPDF = file?.name?.toLowerCase().endsWith(".pdf")
+
+  async function handleParse() {
+    if (!file) return
+    setStatus("loading"); setParsed(null); setErrorMsg("")
+    try {
+      let messages: any[]
+      const prompt = AI_PROMPTS[mode]
+      if (isPDF) {
+        setProgress("Читаю PDF...")
+        const b64 = await readFileAsBase64(file)
+        messages = [{ role:"user", content:[
+          { type:"document", source:{ type:"base64", media_type:"application/pdf", data:b64 } },
+          { type:"text", text:prompt }
+        ]}]
+      } else {
+        setProgress("Конвертирую Word-документ...")
+        const text = await readDocxText(file)
+        messages = [{ role:"user", content: prompt + "\n\nТекст документа:\n" + text }]
+      }
+      setProgress("Отправляю в Claude AI...")
+      const resp = await fetch("https://api.anthropic.com/v1/messages", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:4000, messages })
+      })
+      setProgress("Получаю ответ...")
+      const data = await resp.json()
+      if (!resp.ok) throw new Error(data.error?.message || "Ошибка API")
+      const raw = data.content.filter((b:any)=>b.type==="text").map((b:any)=>b.text).join("")
+      const clean = raw.replace(/```json|```/g,"").trim()
+      let result: any[]
+      try { result = JSON.parse(clean) }
+      catch {
+        const m = clean.match(/\[[\s\S]*\]/)
+        if (m) result = JSON.parse(m[0])
+        else throw new Error("Не удалось распознать JSON в ответе")
+      }
+      setParsed(result); setStatus("done"); setProgress("")
+    } catch(e: any) {
+      setStatus("error"); setErrorMsg(e.message||"Неизвестная ошибка"); setProgress("")
+    }
+  }
+
+  function handleApply() {
+    if (parsed) { onUpdate(parsed); onClose() }
+  }
+
+  const modeLabels: Record<string,string> = {
+    boats:"🚢 Лодки (основной прайс)", summer:"☀️ Boat Summer Update", methodichka:"📚 Методичка"
+  }
+
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:500,background:"rgba(0,0,0,0.75)",display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"}}
+      onClick={e=>{if(e.target===e.currentTarget)onClose()}}>
+      <div style={{background:t.card,border:`1.5px solid ${t.border}`,borderRadius:"20px",width:"100%",maxWidth:"460px",maxHeight:"88vh",overflow:"hidden",display:"flex",flexDirection:"column",boxShadow:"0 24px 64px rgba(0,0,0,0.5)"}}>
+
+        {/* Header */}
+        <div style={{padding:"16px 18px 12px",borderBottom:`1px solid ${t.border}`,display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}}>
+          <div>
+            <div style={{fontSize:"15px",fontWeight:800,color:t.accent}}>🤖 AI Обновление прайса</div>
+            <div style={{fontSize:"11px",color:t.muted,marginTop:"2px"}}>{modeLabels[mode]}</div>
+          </div>
+          <button onClick={onClose} style={{background:t.border,border:"none",borderRadius:"8px",width:"30px",height:"30px",cursor:"pointer",fontSize:"14px",color:t.text}}>✕</button>
+        </div>
+
+        <div style={{overflowY:"auto",flex:1,padding:"16px 18px"}}>
+          {/* Drop zone */}
+          <div onClick={()=>fileRef.current?.click()}
+            onDrop={e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f){setFile(f);setStatus("idle");setParsed(null)}}}
+            onDragOver={e=>e.preventDefault()}
+            style={{border:`2px dashed ${file?t.accent:t.border}`,borderRadius:"12px",padding:"22px 16px",textAlign:"center",cursor:"pointer",marginBottom:"14px",background:file?"rgba(56,189,248,0.04)":"transparent",transition:"all 0.2s"}}>
+            <input ref={fileRef} type="file" accept=".pdf,.docx,.doc" style={{display:"none"}}
+              onChange={e=>{const f=e.target.files?.[0];if(f){setFile(f);setStatus("idle");setParsed(null)}}}/>
+            {file ? (
+              <>
+                <div style={{fontSize:"26px",marginBottom:"6px"}}>{isPDF?"📄":"📝"}</div>
+                <div style={{fontSize:"13px",fontWeight:700,color:t.accent}}>{file.name}</div>
+                <div style={{fontSize:"11px",color:t.muted,marginTop:"3px"}}>{(file.size/1024).toFixed(1)} KB · нажми чтобы сменить</div>
+              </>
+            ):(
+              <>
+                <div style={{fontSize:"28px",marginBottom:"8px"}}>📂</div>
+                <div style={{fontSize:"13px",color:t.muted}}>Перетащи файл или нажми</div>
+                <div style={{fontSize:"11px",color:t.border,marginTop:"4px"}}>PDF · DOCX · DOC</div>
+              </>
+            )}
+          </div>
+
+          {/* Parse button */}
+          <button onClick={handleParse} disabled={!file||status==="loading"}
+            style={{width:"100%",padding:"12px",border:"none",borderRadius:"10px",fontSize:"13px",fontWeight:700,cursor:file&&status!=="loading"?"pointer":"not-allowed",background:!file?t.border:status==="loading"?t.card:t.accent,color:!file||status==="loading"?t.muted:"#0b1120",marginBottom:"12px",transition:"all 0.2s"}}>
+            {status==="loading"?`⏳ ${progress||"Обрабатываю..."}`:"🚀 Запустить AI-парсинг"}
+          </button>
+
+          {/* Error */}
+          {status==="error"&&(
+            <div style={{background:"rgba(248,113,113,0.08)",border:"1px solid #f87171",borderRadius:"10px",padding:"10px 12px",marginBottom:"12px"}}>
+              <div style={{fontSize:"12px",fontWeight:700,color:"#f87171",marginBottom:"3px"}}>❌ Ошибка</div>
+              <div style={{fontSize:"11px",color:t.text}}>{errorMsg}</div>
+            </div>
+          )}
+
+          {/* Result preview */}
+          {status==="done"&&parsed&&(
+            <div>
+              <div style={{display:"flex",gap:"8px",marginBottom:"12px"}}>
+                <div style={{flex:1,background:"rgba(74,222,128,0.08)",border:"1px solid #4ade80",borderRadius:"10px",padding:"10px",textAlign:"center"}}>
+                  <div style={{fontSize:"20px",fontWeight:900,color:"#4ade80"}}>{parsed.length}</div>
+                  <div style={{fontSize:"10px",color:t.muted}}>{mode==="methodichka"?"туров":"лодок"} найдено</div>
+                </div>
+                {mode!=="methodichka"&&(
+                  <div style={{flex:1,background:"rgba(56,189,248,0.08)",border:`1px solid ${t.accent}`,borderRadius:"10px",padding:"10px",textAlign:"center"}}>
+                    <div style={{fontSize:"20px",fontWeight:900,color:t.accent}}>{parsed.reduce((a:number,b:any)=>a+(b.tours?.length||0),0)}</div>
+                    <div style={{fontSize:"10px",color:t.muted}}>туров</div>
+                  </div>
+                )}
+              </div>
+              <div style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:"10px",overflow:"hidden",marginBottom:"12px"}}>
+                <div style={{padding:"8px 12px",borderBottom:`1px solid ${t.border}`,fontSize:"10px",color:t.muted,textTransform:"uppercase",letterSpacing:"0.6px"}}>Предпросмотр (первые 3)</div>
+                <div style={{padding:"10px 12px",display:"flex",flexDirection:"column",gap:"6px"}}>
+                  {parsed.slice(0,3).map((item:any,i:number)=>(
+                    <div key={i} style={{fontSize:"11px",color:t.text}}>
+                      <span style={{color:t.accent,fontWeight:700}}>{item.name}</span>
+                      {item.tours&&<span style={{color:t.muted}}> · {item.tours.length} тур(а)</span>}
+                      {item.price&&<span style={{color:"#fbbf24"}}> · {item.price}</span>}
+                    </div>
+                  ))}
+                  {parsed.length>3&&<div style={{fontSize:"10px",color:t.muted}}>...и ещё {parsed.length-3}</div>}
+                </div>
+              </div>
+              <div style={{background:"rgba(74,222,128,0.06)",border:"1px solid #4ade80",borderRadius:"8px",padding:"8px 12px",fontSize:"11px",color:"#4ade80",marginBottom:"4px"}}>
+                ✅ Цены будут обновлены по совпадению названий. Новые записи будут добавлены.
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        {status==="done"&&parsed&&(
+          <div style={{padding:"12px 18px 16px",borderTop:`1px solid ${t.border}`,flexShrink:0,display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
+            <button onClick={onClose} style={{padding:"11px",borderRadius:"10px",border:`1px solid ${t.border}`,background:"transparent",color:t.muted,fontSize:"13px",fontWeight:700,cursor:"pointer"}}>
+              Отмена
+            </button>
+            <button onClick={handleApply} style={{padding:"11px",borderRadius:"10px",border:"none",background:"#4ade80",color:"#0a1f10",fontSize:"13px",fontWeight:800,cursor:"pointer"}}>
+              ✅ Применить
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 // ═══════════ МЕТОДИЧКА ═══════════
 
@@ -1458,23 +1677,59 @@ function MethodichkaTab({dark}:{dark:boolean}) {
   const [tocOpen, setTocOpen] = useState(false)
   const tocRef = useRef<HTMLDivElement>(null)
   const [waModal, setWaModal] = useState<{title:string;short:string;full:string}|null>(null)
+  const [aiOpen, setAiOpen] = useState(false)
+  const [liveTours, setLiveTours] = useState<MTour[]>(MTOURS)
+
+  useEffect(() => {
+    const s = localStorage.getItem("nav_mtours_data")
+    if (s) try { setLiveTours(JSON.parse(s)) } catch {}
+  }, [])
+
+  function handleAIUpdate(incoming: any[]) {
+    setLiveTours(prev => {
+      const result = [...prev]
+      incoming.forEach((nt: any) => {
+        const idx = result.findIndex(t => t.name.toLowerCase() === (nt.name||"").toLowerCase())
+        if (idx >= 0) {
+          result[idx] = {
+            ...result[idx],
+            ...(nt.price && {price: nt.price}),
+            ...(nt.includes && {includes: nt.includes}),
+            ...(nt.restrictions && {restrictions: nt.restrictions}),
+            ...(nt.duration && {duration: nt.duration}),
+          }
+        } else if (nt.name) {
+          result.push({
+            id: Date.now() + Math.random(),
+            slug: (nt.name||"tour").toLowerCase().replace(/\s+/g,"-").slice(0,30),
+            cat: nt.cat || "other",
+            name: nt.name, nameEn: nt.nameEn || "",
+            duration: nt.duration || "", price: nt.price || "",
+            tags: [], includes: nt.includes, restrictions: nt.restrictions, route: [],
+          })
+        }
+      })
+      localStorage.setItem("nav_mtours_data", JSON.stringify(result))
+      return result
+    })
+  }
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim()
-    return MTOURS.filter(tour => {
+    return liveTours.filter(tour => {
       if (activeCat !== "all" && tour.cat !== activeCat) return false
       if (!q) return true
       return tour.name.toLowerCase().includes(q) || tour.nameEn.toLowerCase().includes(q) ||
         tour.tags.some(g => g.toLowerCase().includes(q)) || (tour.operator||"").toLowerCase().includes(q)
     })
-  }, [search, activeCat])
+  }, [search, activeCat, liveTours])
 
   const grouped = MCAT_ORDER.map(cat => ({
     cat, meta: MCAT_META[cat],
     tours: filtered.filter(tour => tour.cat === cat)
   })).filter(g => g.tours.length > 0)
 
-  const catCount = (id: string) => id === "all" ? MTOURS.length : MTOURS.filter(tour => tour.cat === id).length
+  const catCount = (id: string) => id === "all" ? liveTours.length : liveTours.filter(tour => tour.cat === id).length
 
   function scrollToTour(slug: string) {
     setExpandedTour(slug)
@@ -1520,7 +1775,7 @@ function MethodichkaTab({dark}:{dark:boolean}) {
             {tocOpen && (
               <div style={{position:"absolute", top:"calc(100% + 6px)", right:0, width:"280px", maxHeight:"60vh", overflowY:"auto", background:t.card, border:`1px solid ${t.cardBorder}`, borderRadius:"14px", boxShadow:"0 8px 32px rgba(0,0,0,0.4)", zIndex:200, padding:"6px 0"}}>
                 <div style={{padding:"8px 14px 6px", borderBottom:`1px solid ${t.cardBorder}`, fontSize:"10px", fontWeight:700, color:t.muted, textTransform:"uppercase", letterSpacing:"0.8px"}}>
-                  {filtered.length} / {MTOURS.length} туров
+                  {filtered.length} / {liveTours.length} туров
                 </div>
                 {grouped.map(g => (
                   <div key={g.cat}>
@@ -1549,6 +1804,7 @@ function MethodichkaTab({dark}:{dark:boolean}) {
             {key:"rules", label:"📋 Правила бронирования", active:showRules, fn:() => {setShowRules(v=>!v);setShowRooms(false);setShowVip(false)}, color:"#d97706"},
             {key:"rooms", label:"🛏 Типы номеров", active:showRooms, fn:() => {setShowRooms(v=>!v);setShowRules(false);setShowVip(false)}, color:"#0891b2"},
             {key:"vip",   label:"👑 VIP тарифы",  active:showVip,   fn:() => {setShowVip(v=>!v);setShowRules(false);setShowRooms(false)}, color:"#d97706"},
+            {key:"ai",    label:"🤖 AI обновление", active:false, fn:() => setAiOpen(true), color:"#4ade80"},
           ].map(b => (
             <button key={b.key} onClick={b.fn}
               style={{...pill, background:b.active ? b.color : (dark?"#1e2f45":"#dce7f0"), color:b.active?"#fff":(dark?"#94a3b8":"#374151")}}>
@@ -1758,6 +2014,7 @@ function MethodichkaTab({dark}:{dark:boolean}) {
 
       {/* WA Modal */}
       {waModal && <WAShareModal dark={dark} title={waModal.title} shortText={waModal.short} fullText={waModal.full} onClose={() => setWaModal(null)}/>}
+      {aiOpen && <AIUpdatePanel dark={dark} mode="methodichka" onUpdate={handleAIUpdate} onClose={() => setAiOpen(false)}/>}
     </div>
   )
 }
@@ -2096,10 +2353,45 @@ function BoatsTab({dark}:{dark:boolean}) {
   const [calcFishing,  setCalcFishing]  = useState(false)
   const [calcCanoe,    setCalcCanoe]    = useState(false)
 
-  const allPiers = useMemo(()=>Array.from(new Set(BOATS_DATA.map(b=>b.pier))).sort(),[])
+  const [aiOpen, setAiOpen] = useState(false)
+  const [liveBoats, setLiveBoats] = useState<typeof BOATS_DATA>(BOATS_DATA)
+
+  useEffect(() => {
+    const s = localStorage.getItem("nav_boats_data")
+    if (s) try { setLiveBoats(JSON.parse(s)) } catch {}
+  }, [])
+
+  function handleAIUpdate(incoming: any[]) {
+    setLiveBoats(prev => {
+      const result = [...prev] as any[]
+      incoming.forEach((nb: any) => {
+        const idx = result.findIndex(b => b.name.toLowerCase() === (nb.name||"").toLowerCase())
+        if (idx >= 0) {
+          const boat = {...result[idx]}
+          if (nb.tours?.length) {
+            const tours = [...boat.tours] as any[]
+            nb.tours.forEach((nt: any) => {
+              const ti = tours.findIndex((t:any) => t.name.toLowerCase() === nt.name.toLowerCase())
+              if (ti >= 0) tours[ti] = {...tours[ti], price: nt.price ?? tours[ti].price, extra: nt.extra !== undefined ? nt.extra : tours[ti].extra}
+              else tours.push({name: nt.name, price: nt.price, extra: nt.extra ?? null, paxIncl: nt.paxIncl || "1–2"})
+            })
+            boat.tours = tours
+          }
+          if (nb.note) boat.note = nb.note
+          result[idx] = boat
+        } else if (nb.name) {
+          result.push({id: Date.now(), name: nb.name, size: nb.size||"", pier: nb.pier||"", type: nb.type||"speedboat", maxPax: nb.maxPax||20, tours: (nb.tours||[]).map((t:any)=>({name:t.name,price:t.price,extra:t.extra??null,paxIncl:t.paxIncl||"1–2"})), ...(nb.note&&{note:nb.note})})
+        }
+      })
+      localStorage.setItem("nav_boats_data", JSON.stringify(result))
+      return result
+    })
+  }
+
+  const allPiers = useMemo(()=>Array.from(new Set(liveBoats.map(b=>b.pier))).sort(),[liveBoats])
 
   const filtered = useMemo(()=>{
-    return [...BOATS_DATA].filter(b=>{
+    return [...liveBoats].filter(b=>{
       const q = search.toLowerCase().trim()
       const matchQ = !q || b.name.toLowerCase().includes(q) || b.pier.toLowerCase().includes(q) ||
         b.tours.some(tt=>tt.name.toLowerCase().includes(q))
@@ -2117,11 +2409,11 @@ function BoatsTab({dark}:{dark:boolean}) {
       if(sortBy==="pax")  return b2.maxPax - a.maxPax
       return 0
     })
-  },[search,typeF,pierF,sortBy])
+  },[search,typeF,pierF,sortBy,liveBoats])
 
   const typeStats = ["speedboat","catamaran","powercat","yacht"].map(tp=>({
     tp, label:BOAT_TYPE_META[tp]?.label||tp, color:BOAT_TYPE_META[tp]?.color||"#888",
-    count:BOATS_DATA.filter(b=>b.type===tp).length
+    count:liveBoats.filter(b=>b.type===tp).length
   }))
 
   const inputSt:React.CSSProperties={width:"100%",padding:"9px 12px",borderRadius:"10px",border:`1px solid ${t.inputBdr}`,background:t.inputBg,color:t.text,fontSize:"13px",fontWeight:600,outline:"none",boxSizing:"border-box"}
@@ -2136,9 +2428,13 @@ function BoatsTab({dark}:{dark:boolean}) {
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px",flexWrap:"wrap",gap:"6px"}}>
           <div>
             <div style={{fontSize:"14px",fontWeight:800,color:t.accent}}>🚢 Лодки и яхты</div>
-            <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {BOATS_DATA.length} судов · сезон 2025–2026 · все цены ฿</div>
+            <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {liveBoats.length} судов · сезон 2025–2026 · все цены ฿</div>
           </div>
           <div style={{display:"flex",gap:"5px",alignItems:"center",flexWrap:"wrap"}}>
+            <button onClick={()=>setAiOpen(true)}
+              style={{padding:"6px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:"linear-gradient(135deg,#4ade80,#16a34a)",color:"#fff",boxShadow:"0 2px 8px rgba(74,222,128,0.3)"}}>
+              🤖 AI обновление
+            </button>
             <button onClick={()=>{setCalcOpen(true);setCalcBoatId("");setCalcTour(0);setCalcPax(2);setCalcGuide(false);setCalcMeal("none");setCalcPool(false);setCalcSlide(false);setCalcSeafood(false);setCalcBBQ(false);setCalcFishing(false);setCalcCanoe(false)}}
               style={{padding:"6px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#fff",boxShadow:"0 2px 8px rgba(245,158,11,0.3)"}}>
               🧮 Калькулятор
@@ -2173,7 +2469,7 @@ function BoatsTab({dark}:{dark:boolean}) {
             <option value="pax">По PAX ↓</option>
           </select>
         </div>
-        <div style={{fontSize:"11px",color:t.muted,marginTop:"6px"}}>Найдено: {filtered.length} из {BOATS_DATA.length}</div>
+        <div style={{fontSize:"11px",color:t.muted,marginTop:"6px"}}>Найдено: {filtered.length} из {liveBoats.length}</div>
       </div>
 
       {/* ── Boat list ── */}
@@ -2274,7 +2570,7 @@ function BoatsTab({dark}:{dark:boolean}) {
 
       {/* ── Calculator Modal ── */}
       {calcOpen && (()=>{
-        const boat = BOATS_DATA.find(b=>b.id===calcBoatId)
+        const boat = liveBoats.find(b=>b.id===calcBoatId)
         const tour = boat ? boat.tours[calcTour] : null
         const m = boat ? (BOAT_TYPE_META[boat.type]||BOAT_TYPE_META["speedboat"]) : null
         const note:string = (boat as any)?.note||""
@@ -2342,7 +2638,7 @@ function BoatsTab({dark}:{dark:boolean}) {
                   <div style={{fontSize:"10px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"5px"}}>Лодка</div>
                   <select value={String(calcBoatId)} onChange={e=>{setCalcBoatId(Number(e.target.value));setCalcTour(0);setCalcPool(false);setCalcSlide(false);setCalcSeafood(false);setCalcBBQ(false);setCalcFishing(false);setCalcCanoe(false);setCalcMeal("none")}} style={inputSt}>
                     <option value="">— Выберите лодку —</option>
-                    {[...BOATS_DATA].sort((a,b2)=>a.name.localeCompare(b2.name)).map(b=>(
+                    {[...liveBoats].sort((a,b2)=>a.name.localeCompare(b2.name)).map(b=>(
                       <option key={b.id} value={b.id}>{b.name} ({b.size}) · {BOAT_TYPE_META[b.type]?.label||b.type}</option>
                     ))}
                   </select>
@@ -2430,6 +2726,7 @@ function BoatsTab({dark}:{dark:boolean}) {
 
       {/* WA Modal */}
       {waModal && <WAShareModal dark={dark} title={waModal.title} shortText={waModal.short} fullText={waModal.full} onClose={() => setWaModal(null)}/>}
+      {aiOpen && <AIUpdatePanel dark={dark} mode="boats" onUpdate={handleAIUpdate} onClose={() => setAiOpen(false)}/>}
     </div>
   )
 }
@@ -2758,10 +3055,45 @@ function BoatSummerTab({dark}: {dark: boolean}) {
   const [calcFishing, setCalcFishing] = useState(false)
   const [calcCanoe, setCalcCanoe] = useState(false)
 
-  const allPiers = useMemo(()=>Array.from(new Set(BOATS_SUMMER_DATA.map(b=>b.pier))).sort(),[])
+  const [aiOpen, setAiOpen] = useState(false)
+  const [liveBoatsSummer, setLiveBoatsSummer] = useState<typeof BOATS_SUMMER_DATA>(BOATS_SUMMER_DATA)
+
+  useEffect(() => {
+    const s = localStorage.getItem("nav_summer_data")
+    if (s) try { setLiveBoatsSummer(JSON.parse(s)) } catch {}
+  }, [])
+
+  function handleAIUpdate(incoming: any[]) {
+    setLiveBoatsSummer(prev => {
+      const result = [...prev] as any[]
+      incoming.forEach((nb: any) => {
+        const idx = result.findIndex(b => b.name.toLowerCase() === (nb.name||"").toLowerCase())
+        if (idx >= 0) {
+          const boat = {...result[idx]}
+          if (nb.tours?.length) {
+            const tours = [...boat.tours] as any[]
+            nb.tours.forEach((nt: any) => {
+              const ti = tours.findIndex((t:any) => t.name.toLowerCase() === nt.name.toLowerCase())
+              if (ti >= 0) tours[ti] = {...tours[ti], price: nt.price ?? tours[ti].price, extra: nt.extra !== undefined ? nt.extra : tours[ti].extra}
+              else tours.push({name: nt.name, price: nt.price, extra: nt.extra ?? null, incl: nt.incl || nt.paxIncl || "1–2"})
+            })
+            boat.tours = tours
+          }
+          if (nb.note) boat.note = nb.note
+          result[idx] = boat
+        } else if (nb.name) {
+          result.push({id: "bs_"+Date.now(), name: nb.name, size: nb.size||"", pier: nb.pier||"", type: nb.type||"sailboat", maxPax: nb.maxPax||20, tours: (nb.tours||[]).map((t:any)=>({name:t.name,price:t.price,extra:t.extra??null,incl:t.incl||t.paxIncl||"1–2"})), ...(nb.note&&{note:nb.note})})
+        }
+      })
+      localStorage.setItem("nav_summer_data", JSON.stringify(result))
+      return result
+    })
+  }
+
+  const allPiers = useMemo(()=>Array.from(new Set(liveBoatsSummer.map(b=>b.pier))).sort(),[liveBoatsSummer])
 
   const filtered = useMemo(()=>{
-    return [...BOATS_SUMMER_DATA].filter(b=>{
+    return [...liveBoatsSummer].filter(b=>{
       const q = search.toLowerCase()
       const matchQ = !q || b.name.toLowerCase().includes(q) || b.pier.toLowerCase().includes(q) ||
         b.tours.some(tt=>tt.name.toLowerCase().includes(q))
@@ -2775,13 +3107,13 @@ function BoatSummerTab({dark}: {dark: boolean}) {
       if(sortBy==="pax") return b2.maxPax - a.maxPax
       return 0
     })
-  },[search,pierFilter,typeFilter,sortBy])
+  },[search,pierFilter,typeFilter,sortBy,liveBoatsSummer])
 
   function fmtP(n: number) { return n.toLocaleString("ru-RU") + " ฿" }
 
   const typeStats = ["speedboat","sailboat","catamaran","powercat","yacht"].map(tp=>({
     tp, label:BS_TYPE_META[tp].label, color:BS_TYPE_META[tp].color,
-    count: BOATS_SUMMER_DATA.filter(b=>b.type===tp).length
+    count: liveBoatsSummer.filter(b=>b.type===tp).length
   }))
 
   const selStyle = {padding:"8px 10px",fontSize:"12px",borderRadius:"8px",border:`1px solid ${t.inputBdr}`,background:t.inputBg,color:t.text,outline:"none",cursor:"pointer"}
@@ -2796,9 +3128,13 @@ function BoatSummerTab({dark}: {dark: boolean}) {
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px",flexWrap:"wrap",gap:"6px"}}>
           <div>
             <div style={{fontSize:"14px",fontWeight:800,color:t.accent}}>🚤 Boat Summer Update 1.05.26</div>
-            <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {BOATS_SUMMER_DATA.length} судов · сезон 2025–2026 · все цены ฿</div>
+            <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {liveBoatsSummer.length} судов · сезон 2025–2026 · все цены ฿</div>
           </div>
           <div style={{display:"flex",gap:"6px",alignItems:"center",flexWrap:"wrap"}}>
+            <button onClick={()=>setAiOpen(true)}
+              style={{padding:"6px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:"linear-gradient(135deg,#4ade80,#16a34a)",color:"#fff",boxShadow:"0 2px 8px rgba(74,222,128,0.3)"}}>
+              🤖 AI обновление
+            </button>
             <button onClick={()=>{setCalcOpen(true);setCalcBoat("");setCalcTour(0);setCalcPax(2);setCalcGuide(false);setCalcMeal("none");setCalcPool(false);setCalcSlide(false);setCalcSeafood(false);setCalcBBQ(false);setCalcFishing(false);setCalcCanoe(false)}}
               style={{padding:"6px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#fff",boxShadow:"0 2px 8px rgba(245,158,11,0.35)"}}>
               🧮 Калькулятор
@@ -2836,7 +3172,7 @@ function BoatSummerTab({dark}: {dark: boolean}) {
           </select>
         </div>
 
-        <div style={{fontSize:"11px",color:t.muted,marginTop:"6px"}}>Найдено: {filtered.length} из {BOATS_SUMMER_DATA.length}</div>
+        <div style={{fontSize:"11px",color:t.muted,marginTop:"6px"}}>Найдено: {filtered.length} из {liveBoatsSummer.length}</div>
       </div>
 
       {/* ── Boat list ── */}
@@ -2931,7 +3267,7 @@ function BoatSummerTab({dark}: {dark: boolean}) {
 
       {/* ── Calculator Modal ── */}
       {calcOpen && (()=>{
-        const boat = (BOATS_SUMMER_DATA as any[]).find((b:any)=>b.id===calcBoat)
+        const boat = (liveBoatsSummer as any[]).find((b:any)=>b.id===calcBoat)
         const tour = boat ? boat.tours[calcTour] : null
         const m = boat ? (BS_TYPE_META[String(boat.type)] || BS_TYPE_META["speedboat"]) : null
         const note:string = boat?.note||""
@@ -3032,7 +3368,7 @@ function BoatSummerTab({dark}: {dark: boolean}) {
                   <div style={{fontSize:"10px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"5px"}}>Лодка</div>
                   <select value={calcBoat} onChange={e=>{setCalcBoat(e.target.value);setCalcTour(0);setCalcPool(false);setCalcSlide(false);setCalcSeafood(false);setCalcBBQ(false);setCalcFishing(false);setCalcCanoe(false);setCalcMeal("none")}} style={inputSt}>
                     <option value="">— Выберите лодку —</option>
-                    {([...BOATS_SUMMER_DATA] as any[]).sort((a:any,b2:any)=>a.name.localeCompare(b2.name)).map((b:any)=>(
+                    {([...liveBoatsSummer] as any[]).sort((a:any,b2:any)=>a.name.localeCompare(b2.name)).map((b:any)=>(
                       <option key={b.id} value={b.id}>{b.name} ({b.size}) · {BS_TYPE_META[String(b.type)]?.label||b.type}</option>
                     ))}
                   </select>
@@ -3132,6 +3468,7 @@ function BoatSummerTab({dark}: {dark: boolean}) {
 
       {/* WA Modal BoatSummer */}
       {waModal && <WAShareModal dark={dark} title={waModal.title} shortText={waModal.short} fullText={waModal.full} onClose={() => setWaModal(null)}/>}
+      {aiOpen && <AIUpdatePanel dark={dark} mode="summer" onUpdate={handleAIUpdate} onClose={() => setAiOpen(false)}/>}
     </div>
   )
 }
@@ -3469,8 +3806,59 @@ export default function Page() {
         const wb=XLSX.read(bytes,{type:"array"})
         const sheet=wb.Sheets[wb.SheetNames[0]]
         const rows:any[][]=XLSX.utils.sheet_to_json(sheet,{header:1,defval:""})
-        let pickupIdx=24
-        for(const row of rows){let found=false;row.forEach((cell,idx)=>{if(String(cell).toLowerCase().replace(/\s+/g," ").trim()==="dep. time"){pickupIdx=idx;found=true}});if(found)break}
+
+        // ── Умный детектор колонок по заголовкам ──────────────────────────
+        // Находим строку заголовков (содержит "Res No") и строку под-заголовков
+        let hRow1:any[]=[], hRow2:any[]=[]
+        for(let i=0;i<rows.length;i++){
+          if(rows[i].some((c:any)=>String(c).trim()==="Res No")){
+            hRow1=rows[i]; hRow2=rows[i+1]||[]; break
+          }
+        }
+        // Вспомогательная функция поиска индекса по точному совпадению
+        const fc2=(needle:string,inRow:any[],startFrom=0)=>
+          inRow.findIndex((c:any,i:number)=>i>=startFrom&&String(c||"").trim().toLowerCase()===needle.toLowerCase())
+        // Вспомогательная функция поиска по вхождению
+        const fc2inc=(needle:string,inRow:any[],startFrom=0,endAt=999)=>
+          inRow.findIndex((c:any,i:number)=>i>=startFrom&&i<endAt&&String(c||"").toLowerCase().includes(needle.toLowerCase()))
+
+        // Колонки из строки 1 заголовков
+        const cResNo     = fc2("Res No",   hRow1)            // C ≈ 2
+        const cTO        = fc2("TO",       hRow1)            // D ≈ 3
+        const cTourist   = fc2inc("Tourist name", hRow1)     // E ≈ 4
+        const cPhone1    = fc2inc("Tourist phone", hRow1, 0, 15)  // I ≈ 8
+        const cPhone2    = fc2inc("Tourist phone", hRow1, 15)     // Z ≈ 25
+        const cGuide     = fc2inc("Guide",  hRow1)           // R ≈ 17
+
+        // Секции в строке 1
+        const secDepInfo  = fc2inc("Departure info",          hRow1) // ≈ 19
+        const secDepFlt   = fc2inc("Dep. flight",             hRow1) // ≈ 26
+        const secBackFlt  = fc2inc("Back international",      hRow1) // ≈ 28
+
+        // Колонки из строки 2 (под-заголовки), привязаны к секциям
+        const cDepTransfer= fc2("Transfer", hRow2, secDepInfo>=0?secDepInfo:19) // U ≈ 20
+        const cDepDate    = fc2inc("Dep. date",  hRow2, secDepInfo>=0?secDepInfo:19) // V ≈ 21
+        const cDepTime    = fc2inc("Dep. time",  hRow2, secDepInfo>=0?secDepInfo:19) // X ≈ 23
+        const cDepFltNo   = fc2("No",   hRow2, secDepFlt>=0?secDepFlt:26)       // AA ≈ 26
+        const cDepFltTime = fc2("Time", hRow2, cDepFltNo>=0?cDepFltNo+1:27)     // AB ≈ 27
+        const cBackFltNo  = fc2("No",   hRow2, secBackFlt>=0?secBackFlt:28)     // AC ≈ 28
+        const cBackFltDate= fc2("Date", hRow2, cBackFltNo>=0?cBackFltNo+1:29)   // AD ≈ 29
+
+        // Финальные индексы (с фоллбэком на известные позиции)
+        const iResNo   = cResNo>=0       ? cResNo      : 2
+        const iTO      = cTO>=0          ? cTO         : 3
+        const iTitle   = cTourist>=0     ? cTourist    : 4   // MR/MRS/CHD
+        const iName    = cTourist>=0     ? cTourist+1  : 5   // фамилия имя
+        const iPhone1  = cPhone1>=0      ? cPhone1     : 8
+        const iPhone2  = cPhone2>=0      ? cPhone2     : 25
+        const iDepTr   = cDepTransfer>=0 ? cDepTransfer: 20
+        const iDepDate = cDepDate>=0     ? cDepDate    : 21
+        const iPickup  = cDepTime>=0     ? cDepTime    : 23
+        const iFltTime = cDepFltTime>=0  ? cDepFltTime : 27
+        const iFltNo   = cBackFltNo>=0   ? cBackFltNo  : 28
+        const iFltDate = cBackFltDate>=0 ? cBackFltDate: 29
+        // ─────────────────────────────────────────────────────────────────
+
         const vouchers:Record<string,Voucher>={};let currentHotel="Отель не определен",currentGuide="Гид не указан"
         rows.forEach(row=>{
           if(!row||row.length<5)return
@@ -3480,20 +3868,20 @@ export default function Page() {
             const hm=rs.match(/Hotel:\s*(.*?)\s*GUIDE:/i),gm=rs.match(/GUIDE:\s*(.*)/i)
             if(hm)currentHotel=hm[1].trim();if(gm)currentGuide=gm[1].trim();return
           }
-          const vId=String(row[2]||"").trim()
+          const vId=String(row[iResNo]||"").trim()
           if(!vId||vId.length<5||isNaN(Number(vId)))return
-          const pv=formatExcelValue(row[pickupIdx]),fdv=formatExcelValue(row[29]),ddv=formatExcelValue(row[21])
-          const toVal=String(row[3]||"").trim().toUpperCase()
-          const trType=String(row[20]||"").trim()
+          const pv=formatExcelValue(row[iPickup]),fdv=formatExcelValue(row[iFltDate]),ddv=formatExcelValue(row[iDepDate])
+          const toVal=String(row[iTO]||"").trim().toUpperCase()
+          const trType=String(row[iDepTr]||"").trim()
           // Составной ключ: ваучер + отель + гид — чтобы один ваучер с разными отелями не терял данные
           const ck=`${vId}||${currentHotel}||${currentGuide}`
-          if(!vouchers[ck])vouchers[ck]={vId,hotel:currentHotel,guide:currentGuide,pickup:pv||"—",flightDate:fdv||"—",flightTime:formatExcelValue(row[27])||"—",flightNo:String(row[28]||"").trim()||"—",departureDate:ddv||"—",tourists:[],phones:[],touroperator:toVal,transferType:trType}
+          if(!vouchers[ck])vouchers[ck]={vId,hotel:currentHotel,guide:currentGuide,pickup:pv||"—",flightDate:fdv||"—",flightTime:formatExcelValue(row[iFltTime])||"—",flightNo:String(row[iFltNo]||"").trim()||"—",departureDate:ddv||"—",tourists:[],phones:[],touroperator:toVal,transferType:trType}
           if(pv&&vouchers[ck].pickup==="—")vouchers[ck].pickup=pv
           if(fdv&&vouchers[ck].flightDate==="—")vouchers[ck].flightDate=fdv
           if(ddv&&vouchers[ck].departureDate==="—")vouchers[ck].departureDate=ddv
-          const fn=`${row[4]} ${row[5]}`.trim()
+          const fn=`${row[iTitle]} ${row[iName]}`.trim()
           if(fn&&!fn.toLowerCase().includes("tourist")&&!vouchers[ck].tourists.includes(fn))vouchers[ck].tourists.push(fn)
-          const phRaw=String(row[8]||row[25]||"").replace(/[^\d+]/g,"");const phParts=phRaw.split("+").filter((p:string)=>p.length>=7).map((p:string)=>"+"+p);phParts.forEach((p:string)=>{if(!vouchers[ck].phones.includes(p))vouchers[ck].phones.push(p)})
+          const phRaw=String(row[iPhone1]||row[iPhone2]||"").replace(/[^\d+]/g,"");const phParts=phRaw.split("+").filter((p:string)=>p.length>=7).map((p:string)=>"+"+p);phParts.forEach((p:string)=>{if(!vouchers[ck].phones.includes(p))vouchers[ck].phones.push(p)})
         })
         const result=Object.values(vouchers).sort((a,b)=>{if(a.pickup==="—"&&b.pickup!=="—")return 1;if(a.pickup!=="—"&&b.pickup==="—")return -1;return a.pickup.localeCompare(b.pickup)})
         setTransferData(result);setNotifiedVouchers({});setCollapsedDates({});setSelectedGuide("")
