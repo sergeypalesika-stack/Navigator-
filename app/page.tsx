@@ -1679,11 +1679,80 @@ function MethodichkaTab({dark}:{dark:boolean}) {
   const [waModal, setWaModal] = useState<{title:string;short:string;full:string}|null>(null)
   const [aiOpen, setAiOpen] = useState(false)
   const [liveTours, setLiveTours] = useState<MTour[]>(MTOURS)
+  const [excelStatus, setExcelStatus] = useState<string|null>(null)
+  const excelInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const s = localStorage.getItem("nav_mtours_data")
     if (s) try { setLiveTours(JSON.parse(s)) } catch {}
   }, [])
+
+  function handleExcelUpload(file: File) {
+    setExcelStatus("⏳ Читаю файл...")
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const data = new Uint8Array(ev.target!.result as ArrayBuffer)
+        const wb = XLSX.read(data, {type:"array"})
+
+        // Try every sheet, find rows with tour data
+        // Expected columns (any order, by header keyword):
+        // Название / Name / Тур  →  name
+        // Цена / Price           →  price
+        // Продолжительность / Duration → duration
+        // Оператор / Operator    →  operator
+        // Включено / Includes    →  includes
+        // Ограничения / Restrictions → restrictions
+        const incoming: any[] = []
+
+        for (const sheetName of wb.SheetNames) {
+          const ws = wb.Sheets[sheetName]
+          const rows = XLSX.utils.sheet_to_json<any[]>(ws, {header:1, defval:null})
+
+          // Find header row
+          let headerIdx = -1
+          const colMap: Record<string,number> = {}
+          for (let i = 0; i < Math.min(rows.length, 10); i++) {
+            const row = rows[i]
+            let found = false
+            row.forEach((v:any, ci:number) => {
+              const s = String(v||"").toLowerCase()
+              if (s.includes("назван") || s.includes("name") || s.includes("тур")) { colMap.name = ci; found = true }
+              if (s.includes("цена") || s.includes("price")) colMap.price = ci
+              if (s.includes("продолж") || s.includes("duration")) colMap.duration = ci
+              if (s.includes("оператор") || s.includes("operator")) colMap.operator = ci
+              if (s.includes("включ") || s.includes("include")) colMap.includes = ci
+              if (s.includes("огранич") || s.includes("restrict")) colMap.restrictions = ci
+            })
+            if (found) { headerIdx = i; break }
+          }
+          if (headerIdx < 0 || colMap.name === undefined) continue
+
+          for (let i = headerIdx+1; i < rows.length; i++) {
+            const row = rows[i]
+            const nameVal = row[colMap.name]
+            if (!nameVal || String(nameVal).trim() === "") continue
+            const entry: any = {name: String(nameVal).trim()}
+            if (colMap.price !== undefined && row[colMap.price] != null) entry.price = String(row[colMap.price]).trim()
+            if (colMap.duration !== undefined && row[colMap.duration] != null) entry.duration = String(row[colMap.duration]).trim()
+            if (colMap.operator !== undefined && row[colMap.operator] != null) entry.operator = String(row[colMap.operator]).trim()
+            if (colMap.includes !== undefined && row[colMap.includes] != null) entry.includes = String(row[colMap.includes]).trim()
+            if (colMap.restrictions !== undefined && row[colMap.restrictions] != null) entry.restrictions = String(row[colMap.restrictions]).trim()
+            incoming.push(entry)
+          }
+        }
+
+        if (incoming.length === 0) {
+          setExcelStatus("⚠️ Туры не найдены. Нужны колонки: Название, Цена, Оператор...")
+          return
+        }
+
+        handleAIUpdate(incoming)
+        setExcelStatus(`✅ Обновлено туров: обработано ${incoming.length} строк`)
+      } catch(err) { setExcelStatus("❌ Ошибка: " + String(err)) }
+    }
+    reader.readAsArrayBuffer(file)
+  }
 
   function handleAIUpdate(incoming: any[]) {
     setLiveTours(prev => {
@@ -1799,18 +1868,26 @@ function MethodichkaTab({dark}:{dark:boolean}) {
         </div>
 
         {/* Row 2: quick-info buttons */}
-        <div style={{display:"flex", gap:"5px", marginBottom:"8px", flexWrap:"wrap"}}>
+        <div style={{display:"flex", gap:"5px", marginBottom:"8px", flexWrap:"wrap", alignItems:"flex-start"}}>
           {[
             {key:"rules", label:"📋 Правила бронирования", active:showRules, fn:() => {setShowRules(v=>!v);setShowRooms(false);setShowVip(false)}, color:"#d97706"},
             {key:"rooms", label:"🛏 Типы номеров", active:showRooms, fn:() => {setShowRooms(v=>!v);setShowRules(false);setShowVip(false)}, color:"#0891b2"},
             {key:"vip",   label:"👑 VIP тарифы",  active:showVip,   fn:() => {setShowVip(v=>!v);setShowRules(false);setShowRooms(false)}, color:"#d97706"},
-            {key:"ai",    label:"🤖 AI обновление", active:false, fn:() => setAiOpen(true), color:"#4ade80"},
           ].map(b => (
             <button key={b.key} onClick={b.fn}
               style={{...pill, background:b.active ? b.color : (dark?"#1e2f45":"#dce7f0"), color:b.active?"#fff":(dark?"#94a3b8":"#374151")}}>
               {b.label}
             </button>
           ))}
+          <input ref={excelInputRef} type="file" accept=".xlsx,.xls" style={{display:"none"}}
+            onChange={e=>{const f=e.target.files?.[0];if(f)handleExcelUpload(f);e.target.value=""}}/>
+          <div style={{display:"flex",flexDirection:"column",gap:"2px"}}>
+            <button onClick={()=>excelInputRef.current?.click()}
+              style={{...pill, background:"linear-gradient(135deg,#f59e0b,#d97706)", color:"#fff", fontWeight:700, boxShadow:"0 2px 8px rgba(245,158,11,0.3)"}}>
+              📂 Загрузить прайс (Excel)
+            </button>
+            {excelStatus && <div style={{fontSize:"10px",color:excelStatus.startsWith("✅")?"#4ade80":excelStatus.startsWith("❌")?"#f87171":"#fbbf24",fontWeight:600,paddingLeft:"4px"}}>{excelStatus}</div>}
+          </div>
         </div>
 
         {/* Row 3: category filter pills */}
@@ -2355,11 +2432,127 @@ function BoatsTab({dark}:{dark:boolean}) {
 
   const [aiOpen, setAiOpen] = useState(false)
   const [liveBoats, setLiveBoats] = useState<typeof BOATS_DATA>(BOATS_DATA)
+  const [excelStatus, setExcelStatus] = useState<string|null>(null)
+  const excelInputRef = useRef<HTMLInputElement>(null)
+  const [pinnedBoats, setPinnedBoats] = useState<Set<number>>(new Set())
+  const [copiedPrice, setCopiedPrice] = useState<string|null>(null)
 
   useEffect(() => {
     const s = localStorage.getItem("nav_boats_data")
     if (s) try { setLiveBoats(JSON.parse(s)) } catch {}
+    const p = localStorage.getItem("nav_boats_pinned")
+    if (p) try { setPinnedBoats(new Set(JSON.parse(p))) } catch {}
   }, [])
+
+  function togglePin(id: number) {
+    setPinnedBoats(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      localStorage.setItem("nav_boats_pinned", JSON.stringify([...next]))
+      return next
+    })
+  }
+
+  function copyPrice(price: number|string, label: string) {
+    const text = typeof price === "number" ? price.toLocaleString("ru-RU") + " ฿" : String(price)
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedPrice(label); setTimeout(() => setCopiedPrice(null), 1500)
+    })
+  }
+
+  const SHEET_TO_BOAT_BOATS: Record<string,string> = {
+    "Table 1":"Bowie 1","Table 2":"Bowie 2","Table 3":"Sofia","Table 4":"Thaimarine",
+    "Table 5":"Gambit","Table 6":"Yamela","Table 7":"Verona","Table 8":"Romeo",
+    "Table 9":"Lexi","Table 10":"Randezvous","Table 11":"Zoe","Table 12":"Sunny",
+    "Table 13":"Oceanland","Table 14":"Pepper","Table 15":"Senna","Table 16":"Summer",
+    "Table 17":"Coco","Table 18":"Myra","Table 19":"Tahaa","Table 20":"Ocean Dream",
+    "Table 21":"Ameray","Table 22":"Wildcat","Table 23":"White Corn","Table 24":"Black Pearl",
+    "Table 25":"Ella","Table 26":"Calypso","Table 27":"Bohemian","Table 28":"F1",
+    "Table 29":"Whiskey","Table 30":"Tequila","Table 31":"Vodka","Table 32":"Origin",
+    "Table 33":"Lady M","Table 35":"Red Dragon","Table 36":"Solita",
+  }
+
+  function handleExcelUpload(file: File) {
+    setExcelStatus("⏳ Читаю файл...")
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const data = new Uint8Array(ev.target!.result as ArrayBuffer)
+        const wb = XLSX.read(data, {type:"array"})
+        const updates: {name:string; tours:{price:number;extra:number|string|null}[]; maxPax:number|null}[] = []
+
+        for (const [sheetName, boatName] of Object.entries(SHEET_TO_BOAT_BOATS)) {
+          if (!wb.SheetNames.includes(sheetName)) continue
+          const ws = wb.Sheets[sheetName]
+          const rows = XLSX.utils.sheet_to_json<any[]>(ws, {header:1, defval:null})
+
+          let headerIdx = -1, tourCol = -1, priceCol = -1, extraCol = -1
+          for (let i = 0; i < rows.length; i++) {
+            if (rows[i].some((v:any) => String(v||"").toUpperCase().includes("TOUR"))) {
+              headerIdx = i
+              rows[i].forEach((v:any, ci:number) => {
+                const s = String(v||"").toUpperCase()
+                if (s.includes("TOUR") && tourCol<0) tourCol = ci
+                else if (s.includes("PRICE") && priceCol<0) priceCol = ci
+                else if (s.includes("EXTRA") && extraCol<0) extraCol = ci
+              })
+              break
+            }
+          }
+          if (headerIdx < 0 || priceCol < 0) continue
+
+          let maxPax: number|null = null
+          for (const row of rows) {
+            for (const v of row) {
+              const m = String(v||"").match(/MAXIMUM\s*(\d+)/i)
+              if (m) { maxPax = parseInt(m[1]); break }
+            }
+            if (maxPax) break
+          }
+
+          const tours: {price:number;extra:number|string|null}[] = []
+          for (let i = headerIdx+1; i < rows.length; i++) {
+            const row = rows[i]
+            const tourVal = tourCol>=0 ? row[tourCol] : null
+            const priceVal = priceCol>=0 ? row[priceCol] : null
+            if (!tourVal || typeof priceVal !== "number") continue
+            let extra: number|string|null = null
+            if (extraCol>=0 && row[extraCol]!=null && String(row[extraCol]).trim()!==".") {
+              const ev = String(row[extraCol]).trim()
+              const num = parseFloat(ev)
+              extra = isNaN(num) ? ev : num
+            }
+            tours.push({price: Math.round(priceVal), extra})
+          }
+          if (tours.length > 0) updates.push({name: boatName, tours, maxPax})
+        }
+
+        if (updates.length === 0) { setExcelStatus("⚠️ Лодки не найдены. Проверь формат файла."); return }
+
+        setLiveBoats(prev => {
+          const result = [...prev] as any[]
+          let updatedCount = 0
+          updates.forEach(upd => {
+            const idx = result.findIndex(b => b.name === upd.name)
+            if (idx < 0) return
+            const boat = {...result[idx]}
+            const newTours = [...boat.tours]
+            upd.tours.forEach((ut, ti) => {
+              if (ti < newTours.length) newTours[ti] = {...newTours[ti], price: ut.price, ...(ut.extra!==null&&{extra:ut.extra})}
+            })
+            boat.tours = newTours
+            if (upd.maxPax) boat.maxPax = upd.maxPax
+            result[idx] = boat
+            updatedCount++
+          })
+          localStorage.setItem("nav_boats_data", JSON.stringify(result))
+          setExcelStatus(`✅ Обновлено ${updatedCount} лодок из ${updates.length} найденных`)
+          return result
+        })
+      } catch(err) { setExcelStatus("❌ Ошибка: " + String(err)) }
+    }
+    reader.readAsArrayBuffer(file)
+  }
 
   function handleAIUpdate(incoming: any[]) {
     setLiveBoats(prev => {
@@ -2399,6 +2592,9 @@ function BoatsTab({dark}:{dark:boolean}) {
       const matchP = pierF==="all" || b.pier===pierF
       return matchQ && matchT && matchP
     }).sort((a,b2)=>{
+      const aPinned = pinnedBoats.has(a.id) ? 0 : 1
+      const bPinned = pinnedBoats.has(b2.id) ? 0 : 1
+      if (aPinned !== bPinned) return aPinned - bPinned
       if(sortBy==="name") return a.name.localeCompare(b2.name)
       if(sortBy==="price"){
         const pa = Math.min(...a.tours.map(tt=>typeof tt.price==="number"?tt.price:999999))
@@ -2409,7 +2605,7 @@ function BoatsTab({dark}:{dark:boolean}) {
       if(sortBy==="pax")  return b2.maxPax - a.maxPax
       return 0
     })
-  },[search,typeF,pierF,sortBy,liveBoats])
+  },[search,typeF,pierF,sortBy,liveBoats,pinnedBoats])
 
   const typeStats = ["speedboat","catamaran","powercat","yacht"].map(tp=>({
     tp, label:BOAT_TYPE_META[tp]?.label||tp, color:BOAT_TYPE_META[tp]?.color||"#888",
@@ -2431,10 +2627,15 @@ function BoatsTab({dark}:{dark:boolean}) {
             <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {liveBoats.length} судов · сезон 2025–2026 · все цены ฿</div>
           </div>
           <div style={{display:"flex",gap:"5px",alignItems:"center",flexWrap:"wrap"}}>
-            <button onClick={()=>setAiOpen(true)}
-              style={{padding:"6px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:"linear-gradient(135deg,#4ade80,#16a34a)",color:"#fff",boxShadow:"0 2px 8px rgba(74,222,128,0.3)"}}>
-              🤖 AI обновление
-            </button>
+            <input ref={excelInputRef} type="file" accept=".xlsx,.xls" style={{display:"none"}}
+              onChange={e=>{const f=e.target.files?.[0];if(f)handleExcelUpload(f);e.target.value=""}}/>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"2px"}}>
+              <button onClick={()=>excelInputRef.current?.click()}
+                style={{padding:"6px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#fff",boxShadow:"0 2px 8px rgba(245,158,11,0.3)"}}>
+                📂 Загрузить прайс (Excel)
+              </button>
+              {excelStatus && <div style={{fontSize:"10px",color:excelStatus.startsWith("✅")?"#4ade80":excelStatus.startsWith("❌")?"#f87171":"#fbbf24",fontWeight:600}}>{excelStatus}</div>}
+            </div>
             <button onClick={()=>{setCalcOpen(true);setCalcBoatId("");setCalcTour(0);setCalcPax(2);setCalcGuide(false);setCalcMeal("none");setCalcPool(false);setCalcSlide(false);setCalcSeafood(false);setCalcBBQ(false);setCalcFishing(false);setCalcCanoe(false)}}
               style={{padding:"6px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#fff",boxShadow:"0 2px 8px rgba(245,158,11,0.3)"}}>
               🧮 Калькулятор
@@ -2499,7 +2700,14 @@ function BoatsTab({dark}:{dark:boolean}) {
                         <div style={{fontSize:"11px",color:m.color,opacity:0.65,marginTop:"2px"}}>📍 {boat.pier}</div>
                       </div>
                       <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"4px"}}>
-                        <span style={{background:`${m.color}22`,color:m.color,border:`1px solid ${m.border}`,borderRadius:"99px",padding:"2px 9px",fontSize:"11px",fontWeight:700}}>{m.label}</span>
+                        <div style={{display:"flex",gap:"6px",alignItems:"center"}}>
+                          <button onClick={e=>{e.stopPropagation();togglePin(boat.id)}}
+                            title={pinnedBoats.has(boat.id)?"Открепить":"Закрепить наверху"}
+                            style={{background:"none",border:"none",cursor:"pointer",fontSize:"16px",lineHeight:1,padding:"0",opacity:pinnedBoats.has(boat.id)?1:0.3,transition:"opacity 0.2s"}}>
+                            ⭐
+                          </button>
+                          <span style={{background:`${m.color}22`,color:m.color,border:`1px solid ${m.border}`,borderRadius:"99px",padding:"2px 9px",fontSize:"11px",fontWeight:700}}>{m.label}</span>
+                        </div>
                         <span style={{fontSize:"11px",color:m.color,opacity:0.7}}>👥 макс. {boat.maxPax} чел.</span>
                       </div>
                     </div>
@@ -2538,7 +2746,12 @@ function BoatsTab({dark}:{dark:boolean}) {
                       {boat.tours.map((tour,i)=>(
                         <div key={i} style={{display:"grid",gridTemplateColumns:"1fr auto auto auto",padding:"7px 10px",gap:"8px",alignItems:"center",background:i%2===0?t.row0:t.row1,borderTop:i===0?"none":`1px solid ${dark?"rgba(255,255,255,0.05)":"#f0f0f0"}`}}>
                           <div style={{fontSize:"12px",color:t.text,lineHeight:1.4}}>{tour.name}</div>
-                          <div style={{fontSize:"13px",fontWeight:700,color:m.color,textAlign:"right" as any,whiteSpace:"nowrap"}}>{fmtPrice(tour.price)}</div>
+                          <div
+                            onClick={e=>{e.stopPropagation();copyPrice(tour.price, `${boat.name}:${i}`)}}
+                            title="Тап — скопировать цену"
+                            style={{fontSize:"13px",fontWeight:700,color:copiedPrice===`${boat.name}:${i}`?"#4ade80":m.color,textAlign:"right" as any,whiteSpace:"nowrap",cursor:"pointer",transition:"color 0.2s"}}>
+                            {copiedPrice===`${boat.name}:${i}` ? "✅ скопировано" : fmtPrice(tour.price)}
+                          </div>
                           <div style={{fontSize:"11px",color:t.muted,textAlign:"right" as any,whiteSpace:"nowrap"}}>
                             {tour.extra===null?"—":typeof tour.extra==="number"?`${tour.extra.toLocaleString("ru-RU")} ฿`:String(tour.extra)}
                           </div>
@@ -3057,11 +3270,123 @@ function BoatSummerTab({dark}: {dark: boolean}) {
 
   const [aiOpen, setAiOpen] = useState(false)
   const [liveBoatsSummer, setLiveBoatsSummer] = useState<typeof BOATS_SUMMER_DATA>(BOATS_SUMMER_DATA)
+  const [excelStatus, setExcelStatus] = useState<string|null>(null)
+  const excelInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const s = localStorage.getItem("nav_summer_data")
     if (s) try { setLiveBoatsSummer(JSON.parse(s)) } catch {}
   }, [])
+
+  // Excel sheet → boat name mapping (Table 1 = Bowie 1, etc.)
+  const SHEET_TO_BOAT: Record<string,string> = {
+    "Table 1":"Bowie 1","Table 2":"Bowie 2","Table 3":"Sofia","Table 4":"Thaimarine",
+    "Table 5":"Gambit","Table 6":"Yamela","Table 7":"Verona","Table 8":"Romeo",
+    "Table 9":"Lexi","Table 10":"Randezvous","Table 11":"Zoe","Table 12":"Sunny",
+    "Table 13":"Oceanland","Table 14":"Pepper","Table 15":"Senna","Table 16":"Summer",
+    "Table 17":"Coco","Table 18":"Myra","Table 19":"Tahaa","Table 20":"Ocean Dream",
+    "Table 21":"Ameray","Table 22":"Wildcat","Table 23":"White Corn","Table 24":"Black Pearl",
+    "Table 25":"Ella","Table 26":"Calypso","Table 27":"Bohemian","Table 28":"F1",
+    "Table 29":"Whiskey","Table 30":"Tequila","Table 31":"Vodka","Table 32":"Origin",
+    "Table 33":"Lady M","Table 35":"Red Dragon","Table 36":"Solita",
+  }
+
+  function handleExcelUpload(file: File) {
+    setExcelStatus("⏳ Читаю файл...")
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const data = new Uint8Array(ev.target!.result as ArrayBuffer)
+        const wb = XLSX.read(data, {type:"array"})
+        const updates: {name:string; tours:{price:number;extra:number|string|null}[]; maxPax:number|null}[] = []
+
+        for (const [sheetName, boatName] of Object.entries(SHEET_TO_BOAT)) {
+          if (!wb.SheetNames.includes(sheetName)) continue
+          const ws = wb.Sheets[sheetName]
+          const rows = XLSX.utils.sheet_to_json<any[]>(ws, {header:1, defval:null})
+
+          // Find header row with TOUR column
+          let headerIdx = -1, tourCol = -1, priceCol = -1, extraCol = -1
+          for (let i = 0; i < rows.length; i++) {
+            const row = rows[i]
+            const found = row.some(v => String(v||"").toUpperCase().includes("TOUR"))
+            if (found) {
+              headerIdx = i
+              row.forEach((v:any, ci:number) => {
+                const s = String(v||"").toUpperCase()
+                if (s.includes("TOUR") && tourCol<0) tourCol = ci
+                else if (s.includes("PRICE") && priceCol<0) priceCol = ci
+                else if (s.includes("EXTRA") && extraCol<0) extraCol = ci
+              })
+              break
+            }
+          }
+          if (headerIdx < 0 || priceCol < 0) continue
+
+          // Extract maxPax
+          let maxPax: number|null = null
+          for (const row of rows) {
+            for (const v of row) {
+              const m = String(v||"").match(/MAXIMUM\s*(\d+)/i)
+              if (m) { maxPax = parseInt(m[1]); break }
+            }
+            if (maxPax) break
+          }
+
+          // Collect tour rows
+          const tours: {price:number;extra:number|string|null}[] = []
+          for (let i = headerIdx+1; i < rows.length; i++) {
+            const row = rows[i]
+            const tourVal = tourCol>=0 ? row[tourCol] : null
+            const priceVal = priceCol>=0 ? row[priceCol] : null
+            if (!tourVal || typeof priceVal !== "number") continue
+            let extra: number|string|null = null
+            if (extraCol >= 0 && row[extraCol] != null && String(row[extraCol]).trim() !== ".") {
+              const ev = String(row[extraCol]).trim()
+              const num = parseFloat(ev)
+              extra = isNaN(num) ? ev : num  // "1500+lunch" stays as string, 1500 → number
+            }
+            tours.push({price: Math.round(priceVal), extra})
+          }
+
+          if (tours.length > 0) updates.push({name: boatName, tours, maxPax})
+        }
+
+        if (updates.length === 0) {
+          setExcelStatus("⚠️ Лодки не найдены. Проверь формат файла.")
+          return
+        }
+
+        // Apply updates: match by index to preserve tour names from code
+        setLiveBoatsSummer(prev => {
+          const result = [...prev] as any[]
+          let updatedCount = 0
+          updates.forEach(upd => {
+            const idx = result.findIndex(b => b.name === upd.name)
+            if (idx < 0) return
+            const boat = {...result[idx]}
+            const newTours = [...boat.tours]
+            upd.tours.forEach((ut, ti) => {
+              if (ti < newTours.length) {
+                // Update price + extra, preserve name and incl
+                newTours[ti] = {...newTours[ti], price: ut.price, ...(ut.extra !== null && {extra: ut.extra})}
+              }
+            })
+            boat.tours = newTours
+            if (upd.maxPax) boat.maxPax = upd.maxPax
+            result[idx] = boat
+            updatedCount++
+          })
+          localStorage.setItem("nav_summer_data", JSON.stringify(result))
+          setExcelStatus(`✅ Обновлено ${updatedCount} лодок из ${updates.length} найденных`)
+          return result
+        })
+      } catch(err) {
+        setExcelStatus("❌ Ошибка чтения файла: " + String(err))
+      }
+    }
+    reader.readAsArrayBuffer(file)
+  }
 
   function handleAIUpdate(incoming: any[]) {
     setLiveBoatsSummer(prev => {
@@ -3131,10 +3456,15 @@ function BoatSummerTab({dark}: {dark: boolean}) {
             <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {liveBoatsSummer.length} судов · сезон 2025–2026 · все цены ฿</div>
           </div>
           <div style={{display:"flex",gap:"6px",alignItems:"center",flexWrap:"wrap"}}>
-            <button onClick={()=>setAiOpen(true)}
-              style={{padding:"6px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:"linear-gradient(135deg,#4ade80,#16a34a)",color:"#fff",boxShadow:"0 2px 8px rgba(74,222,128,0.3)"}}>
-              🤖 AI обновление
-            </button>
+            <input ref={excelInputRef} type="file" accept=".xlsx,.xls" style={{display:"none"}}
+              onChange={e=>{const f=e.target.files?.[0];if(f)handleExcelUpload(f);e.target.value=""}}/>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"2px"}}>
+              <button onClick={()=>excelInputRef.current?.click()}
+                style={{padding:"6px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#fff",boxShadow:"0 2px 8px rgba(245,158,11,0.3)"}}>
+                📂 Загрузить прайс (Excel)
+              </button>
+              {excelStatus && <div style={{fontSize:"10px",color:excelStatus.startsWith("✅")?"#4ade80":excelStatus.startsWith("❌")?"#f87171":"#fbbf24",fontWeight:600}}>{excelStatus}</div>}
+            </div>
             <button onClick={()=>{setCalcOpen(true);setCalcBoat("");setCalcTour(0);setCalcPax(2);setCalcGuide(false);setCalcMeal("none");setCalcPool(false);setCalcSlide(false);setCalcSeafood(false);setCalcBBQ(false);setCalcFishing(false);setCalcCanoe(false)}}
               style={{padding:"6px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#fff",boxShadow:"0 2px 8px rgba(245,158,11,0.35)"}}>
               🧮 Калькулятор
@@ -3744,6 +4074,31 @@ export default function Page() {
 
   const [dark,setDark]=useState(true)
 
+  // Dark mode schedule: auto-switch after 20:00 and before 07:00
+  useEffect(()=>{
+    const dk=localStorage.getItem("navDark")
+    if(dk!==null){ setDark(dk==="1"); return }
+    const h=new Date().getHours()
+    setDark(h>=20||h<7)
+  },[])
+
+  // Swipe gesture between tabs
+  const TAB_ORDER: Array<"transfers"|"excursions"|"log"|"methodichka"|"boats"|"boatsummer"|"vipcalc"> =
+    ["transfers","excursions","log","methodichka","boats","boatsummer","vipcalc"]
+  const swipeRef = useRef<{x:number;y:number}|null>(null)
+  function onTouchStart(e:React.TouchEvent){ swipeRef.current={x:e.touches[0].clientX,y:e.touches[0].clientY} }
+  function onTouchEnd(e:React.TouchEvent){
+    if(!swipeRef.current)return
+    const dx=e.changedTouches[0].clientX-swipeRef.current.x
+    const dy=e.changedTouches[0].clientY-swipeRef.current.y
+    if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5){
+      const idx=TAB_ORDER.indexOf(tab)
+      if(dx<0&&idx<TAB_ORDER.length-1)setTab(TAB_ORDER[idx+1])
+      if(dx>0&&idx>0)setTab(TAB_ORDER[idx-1])
+    }
+    swipeRef.current=null
+  }
+
   useEffect(() => {
     if (localStorage.getItem("navAuth") === APP_PASSWORD) setUnlocked(true)
   }, [])
@@ -3777,10 +4132,8 @@ export default function Page() {
   useEffect(()=>{
     const d=localStorage.getItem("transferData"),n=localStorage.getItem("notifiedVouchers")
     const e=localStorage.getItem("excursionData"),ne=localStorage.getItem("notifiedExcursions")
-    const dk=localStorage.getItem("navDark")
     if(d)setTransferData(JSON.parse(d));if(n)setNotifiedVouchers(JSON.parse(n))
     if(e)setExcursionData(JSON.parse(e));if(ne)setNotifiedExcursions(JSON.parse(ne))
-    if(dk!==null)setDark(dk==="1")
     const lg=localStorage.getItem("navLog");if(lg)setLog(JSON.parse(lg))
   },[])
 
@@ -4047,7 +4400,7 @@ export default function Page() {
   }
 
   return (
-    <div style={{minHeight:"100vh",background:t.bg,color:t.text,fontFamily:"'IBM Plex Sans','Segoe UI',sans-serif",transition:"background 0.3s,color 0.3s"}}>
+    <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} style={{minHeight:"100vh",background:t.bg,color:t.text,fontFamily:"'IBM Plex Sans','Segoe UI',sans-serif",transition:"background 0.3s,color 0.3s"}}>
 
       <header style={{background:dark?"#080f1e":"#ffffff",borderBottom:`1px solid ${t.cardBorder}`,position:"sticky",top:0,zIndex:50,backdropFilter:"blur(12px)",boxShadow:dark?"0 2px 20px rgba(0,0,0,0.4)":"0 2px 12px rgba(0,0,0,0.08)"}}>
         <div style={{maxWidth:"1200px",margin:"0 auto"}}>
@@ -4138,6 +4491,14 @@ export default function Page() {
           </div>
         </div>
       </header>
+
+      {/* swipe dots */}
+      <div style={{display:"flex",justifyContent:"center",gap:"5px",padding:"4px 0",background:t.header,borderBottom:`1px solid ${t.cardBorder}`}}>
+        {TAB_ORDER.map(key=>(
+          <div key={key} onClick={()=>setTab(key)}
+            style={{width:tab===key?"18px":"6px",height:"6px",borderRadius:"99px",background:tab===key?t.accent:t.muted,opacity:tab===key?1:0.4,cursor:"pointer",transition:"all 0.25s"}}/>
+        ))}
+      </div>
 
       {tab==="transfers"&&(
         <>
