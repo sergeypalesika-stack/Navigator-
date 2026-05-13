@@ -2434,21 +2434,20 @@ function BoatsTab({dark}:{dark:boolean}) {
   const [liveBoats, setLiveBoats] = useState<typeof BOATS_DATA>(BOATS_DATA)
   const [excelStatus, setExcelStatus] = useState<string|null>(null)
   const excelInputRef = useRef<HTMLInputElement>(null)
-  const [pinnedBoats, setPinnedBoats] = useState<Set<number>>(new Set())
+  const [pinnedBoats, setPinnedBoats] = useState<number[]>([])
   const [copiedPrice, setCopiedPrice] = useState<string|null>(null)
 
   useEffect(() => {
     const s = localStorage.getItem("nav_boats_data")
     if (s) try { setLiveBoats(JSON.parse(s)) } catch {}
     const p = localStorage.getItem("nav_boats_pinned")
-    if (p) try { setPinnedBoats(new Set(JSON.parse(p))) } catch {}
+    if (p) try { setPinnedBoats(JSON.parse(p)) } catch {}
   }, [])
 
   function togglePin(id: number) {
     setPinnedBoats(prev => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id); else next.add(id)
-      localStorage.setItem("nav_boats_pinned", JSON.stringify(Array.from(next)))
+      const next = prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id]
+      localStorage.setItem("nav_boats_pinned", JSON.stringify(next))
       return next
     })
   }
@@ -2592,8 +2591,8 @@ function BoatsTab({dark}:{dark:boolean}) {
       const matchP = pierF==="all" || b.pier===pierF
       return matchQ && matchT && matchP
     }).sort((a,b2)=>{
-      const aPinned = pinnedBoats.has(a.id) ? 0 : 1
-      const bPinned = pinnedBoats.has(b2.id) ? 0 : 1
+      const aPinned = pinnedBoats.includes(a.id) ? 0 : 1
+      const bPinned = pinnedBoats.includes(b2.id) ? 0 : 1
       if (aPinned !== bPinned) return aPinned - bPinned
       if(sortBy==="name") return a.name.localeCompare(b2.name)
       if(sortBy==="price"){
@@ -2702,8 +2701,8 @@ function BoatsTab({dark}:{dark:boolean}) {
                       <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"4px"}}>
                         <div style={{display:"flex",gap:"6px",alignItems:"center"}}>
                           <button onClick={e=>{e.stopPropagation();togglePin(boat.id)}}
-                            title={pinnedBoats.has(boat.id)?"Открепить":"Закрепить наверху"}
-                            style={{background:"none",border:"none",cursor:"pointer",fontSize:"16px",lineHeight:1,padding:"0",opacity:pinnedBoats.has(boat.id)?1:0.3,transition:"opacity 0.2s"}}>
+                            title={pinnedBoats.includes(boat.id)?"Открепить":"Закрепить наверху"}
+                            style={{background:"none",border:"none",cursor:"pointer",fontSize:"16px",lineHeight:1,padding:"0",opacity:pinnedBoats.includes(boat.id)?1:0.3,transition:"opacity 0.2s"}}>
                             ⭐
                           </button>
                           <span style={{background:`${m.color}22`,color:m.color,border:`1px solid ${m.border}`,borderRadius:"99px",padding:"2px 9px",fontSize:"11px",fontWeight:700}}>{m.label}</span>
