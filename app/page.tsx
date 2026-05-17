@@ -2686,8 +2686,17 @@ function BoatsTab({dark}:{dark:boolean}) {
             const isOpen = openId===boat.id
             const prices = boat.tours.map(tt=>tt.price).filter((p):p is number=>typeof p==="number")
             const minPrice = prices.length ? Math.min(...prices) : null
+            const isPinned = pinnedBoats.includes(boat.id)
             return (
-              <div key={boat.id} style={{background:t.card,borderRadius:"14px",border:`1.5px solid ${isOpen?m.color:m.border}`,overflow:"hidden",transition:"border-color 0.2s"}}>
+              <div key={boat.id} style={{background:t.card,borderRadius:"14px",border:`1.5px solid ${isOpen||isPinned?m.color:m.border}`,overflow:"hidden",transition:"border-color 0.2s",boxShadow:isPinned?`0 0 0 2px ${m.color}33`:"none"}}>
+
+                {/* Pinned strip */}
+                {isPinned && (
+                  <div style={{background:m.color,padding:"2px 10px",fontSize:"10px",fontWeight:800,color:"#000",letterSpacing:"0.8px"}}>
+                    ⭐ ЗАКРЕПЛЕНО
+                  </div>
+                )}
+
                 <div onClick={()=>setOpenId(isOpen?null:boat.id)} style={{cursor:"pointer",userSelect:"none"}}>
                   <div style={{background:m.bg,borderBottom:`1px solid ${m.border}`,padding:"12px 14px"}}>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
@@ -2701,8 +2710,8 @@ function BoatsTab({dark}:{dark:boolean}) {
                       <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"4px"}}>
                         <div style={{display:"flex",gap:"6px",alignItems:"center"}}>
                           <button onClick={e=>{e.stopPropagation();togglePin(boat.id)}}
-                            title={pinnedBoats.includes(boat.id)?"Открепить":"Закрепить наверху"}
-                            style={{background:"none",border:"none",cursor:"pointer",fontSize:"16px",lineHeight:1,padding:"0",opacity:pinnedBoats.includes(boat.id)?1:0.3,transition:"opacity 0.2s"}}>
+                            title={isPinned?"Открепить":"Закрепить наверху"}
+                            style={{background:"none",border:"none",cursor:"pointer",fontSize:"16px",lineHeight:1,padding:"0",opacity:isPinned?1:0.3,transition:"opacity 0.2s"}}>
                             ⭐
                           </button>
                           <span style={{background:`${m.color}22`,color:m.color,border:`1px solid ${m.border}`,borderRadius:"99px",padding:"2px 9px",fontSize:"11px",fontWeight:700}}>{m.label}</span>
@@ -2712,9 +2721,16 @@ function BoatsTab({dark}:{dark:boolean}) {
                     </div>
                   </div>
                   <div style={{padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                    <div>
-                      {minPrice && <span style={{fontSize:"14px",fontWeight:700,color:m.color}}>от {minPrice.toLocaleString("ru-RU")} ฿</span>}
-                      <span style={{fontSize:"11px",color:t.muted,marginLeft:"8px"}}>{boat.tours.length} {boat.tours.length===1?"маршрут":boat.tours.length<5?"маршрута":"маршрутов"}</span>
+                    <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                      {minPrice && (
+                        <span
+                          onClick={e=>{e.stopPropagation();copyPrice(minPrice,`${boat.name}:min`)}}
+                          title="Тап — скопировать цену"
+                          style={{fontSize:"14px",fontWeight:700,color:copiedPrice===`${boat.name}:min`?"#4ade80":m.color,cursor:"pointer",transition:"color 0.2s"}}>
+                          {copiedPrice===`${boat.name}:min`?"✅ скопировано":`от ${minPrice.toLocaleString("ru-RU")} ฿`}
+                        </span>
+                      )}
+                      <span style={{fontSize:"11px",color:t.muted}}>{boat.tours.length} {boat.tours.length===1?"маршрут":boat.tours.length<5?"маршрута":"маршрутов"}</span>
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
                       {BOATS_DRIVE_LINKS[boat.name] && (
@@ -2746,10 +2762,10 @@ function BoatsTab({dark}:{dark:boolean}) {
                         <div key={i} style={{display:"grid",gridTemplateColumns:"1fr auto auto auto",padding:"7px 10px",gap:"8px",alignItems:"center",background:i%2===0?t.row0:t.row1,borderTop:i===0?"none":`1px solid ${dark?"rgba(255,255,255,0.05)":"#f0f0f0"}`}}>
                           <div style={{fontSize:"12px",color:t.text,lineHeight:1.4}}>{tour.name}</div>
                           <div
-                            onClick={e=>{e.stopPropagation();copyPrice(tour.price, `${boat.name}:${i}`)}}
+                            onClick={e=>{e.stopPropagation();copyPrice(tour.price,`${boat.name}:${i}`)}}
                             title="Тап — скопировать цену"
                             style={{fontSize:"13px",fontWeight:700,color:copiedPrice===`${boat.name}:${i}`?"#4ade80":m.color,textAlign:"right" as any,whiteSpace:"nowrap",cursor:"pointer",transition:"color 0.2s"}}>
-                            {copiedPrice===`${boat.name}:${i}` ? "✅ скопировано" : fmtPrice(tour.price)}
+                            {copiedPrice===`${boat.name}:${i}`?"✅ скопировано":fmtPrice(tour.price)}
                           </div>
                           <div style={{fontSize:"11px",color:t.muted,textAlign:"right" as any,whiteSpace:"nowrap"}}>
                             {tour.extra===null?"—":typeof tour.extra==="number"?`${tour.extra.toLocaleString("ru-RU")} ฿`:String(tour.extra)}
@@ -2758,16 +2774,14 @@ function BoatsTab({dark}:{dark:boolean}) {
                         </div>
                       ))}
                     </div>
-                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px",marginTop:"8px"}}>
-                      <button onClick={e=>{e.stopPropagation();setCalcBoatId(boat.id);setCalcTour(0);setCalcPax(2);setCalcGuide(false);setCalcMeal("none");setCalcPool(false);setCalcSlide(false);setCalcSeafood(false);setCalcBBQ(false);setCalcFishing(false);setCalcCanoe(false);setCalcOpen(true)}}
-                        style={{padding:"8px",borderRadius:"8px",border:"none",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#fff",fontSize:"12px",fontWeight:700,cursor:"pointer"}}>
-                        🧮 Калькулятор
-                      </button>
-                      <button onClick={e=>{e.stopPropagation();setWaModal({title:boat.name,short:buildBoatWAShort(boat),full:buildBoatWAFull(boat)})}}
-                        style={{padding:"8px",borderRadius:"8px",border:"none",background:"#25d366",color:"#fff",fontSize:"12px",fontWeight:700,cursor:"pointer"}}>
-                        📤 WhatsApp
-                      </button>
-                    </div>
+                    <button onClick={e=>{e.stopPropagation();setWaModal({title:boat.name,short:buildBoatWAShort(boat),full:buildBoatWAFull(boat)})}}
+                      style={{marginTop:"8px",width:"100%",background:"#25d366",color:"#fff",border:"none",borderRadius:"8px",padding:"8px",fontSize:"13px",fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"6px"}}>
+                      <span>📤</span> Отправить в WhatsApp
+                    </button>
+                    <button onClick={e=>{e.stopPropagation();setCalcBoatId(boat.id);setCalcTour(0);setCalcPax(2);setCalcGuide(false);setCalcMeal("none");setCalcPool(false);setCalcSlide(false);setCalcSeafood(false);setCalcBBQ(false);setCalcFishing(false);setCalcCanoe(false);setCalcOpen(true)}}
+                      style={{marginTop:"6px",width:"100%",padding:"8px",borderRadius:"8px",border:"none",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#fff",fontSize:"12px",fontWeight:700,cursor:"pointer"}}>
+                      🧮 Калькулятор
+                    </button>
                     <button onClick={()=>setOpenId(null)}
                       style={{marginTop:"6px",width:"100%",background:"transparent",border:`1px solid ${m.border}`,borderRadius:"8px",padding:"7px",fontSize:"12px",color:m.color,cursor:"pointer",fontWeight:600}}>
                       Свернуть ▲
@@ -3823,6 +3837,221 @@ const VIP_ATTRACTIONS = [
   {id:"transfer_ap",  label:"✈️ Инд. трансфер в аэропорт",        adultPrice:2400, childPrice:0,    hasChild:false, fixed:true},
 ]
 
+// ─────────────────────────────────────────────
+// PRIVATE TOURS TAB
+// ─────────────────────────────────────────────
+
+interface PrivateTour {
+  id: string
+  name: string
+  basePrice: number      // за 1–2 человека (гид + трансфер включены)
+  extraAdult: number     // доп. взрослый
+  extraChild: number     // доп. ребёнок
+  maxPax?: number
+  note?: string
+  duration?: string
+}
+
+const PRIVATE_TOURS: PrivateTour[] = [
+  { id:"pt1",  name:"Amazing Phang Nga 1-day",            basePrice:19000, extraAdult:1500,  extraChild:1500, duration:"1 день" },
+  { id:"pt2",  name:"Cheow Lan Overnight",                basePrice:38000, extraAdult:5000,  extraChild:5000, duration:"2 дня/1 ночь" },
+  { id:"pt3",  name:"Rafting Individual",                 basePrice:18000, extraAdult:1500,  extraChild:1500, duration:"1 день" },
+  { id:"pt4",  name:"Asia Safari 1-day",                  basePrice:17000, extraAdult:1100,  extraChild:1100, duration:"1 день" },
+  { id:"pt5",  name:"Avatar Individual",                  basePrice:20000, extraAdult:3500,  extraChild:3000, duration:"1 день" },
+  { id:"pt6",  name:"Mantra Individual",                  basePrice:20000, extraAdult:4200,  extraChild:3800, duration:"1 день" },
+  { id:"pt7",  name:"Mantra Forest Spa – Day Pass",       basePrice:10800, extraAdult:1400,  extraChild:1400, maxPax:12, duration:"1 день", note:"Максимум 12 человек" },
+  { id:"pt8",  name:"Jungle Escape 2/1",                  basePrice:38500, extraAdult:6000,  extraChild:6000, duration:"2 дня/1 ночь", note:"Single room +1500 ฿" },
+  { id:"pt9",  name:"Moonlight",                          basePrice:20000, extraAdult:3900,  extraChild:3500, duration:"1 день" },
+]
+
+function PrivateTab({dark}:{dark:boolean}) {
+  const t = {
+    bg:dark?"#0b1120":"#f0f4f8", card:dark?"#131d2e":"#ffffff",
+    cardBorder:dark?"#1e2f45":"#d1dce8", text:dark?"#e2eaf4":"#1a2636",
+    muted:dark?"#5b7a9a":"#6e8aa8", accent:dark?"#a78bfa":"#7c3aed",
+    header:dark?"#0d1929":"#e2ecf7", inputBg:dark?"#101c2d":"#ffffff",
+    inputBdr:dark?"#1e3450":"#c5d5e5", row0:dark?"transparent":"#fafafa",
+    row1:dark?"rgba(255,255,255,0.02)":"#f0f4f8",
+  }
+
+  const [adults, setAdults] = useState(2)
+  const [children, setChildren] = useState(0)
+  const [selectedId, setSelectedId] = useState<string|null>(null)
+  const [copiedId, setCopiedId] = useState<string|null>(null)
+  const [search, setSearch] = useState("")
+
+  const selectedTour = PRIVATE_TOURS.find(t=>t.id===selectedId)
+
+  function calcTotal(tour: PrivateTour, ad: number, ch: number) {
+    const baseIncludes = 2
+    const extraAd = Math.max(0, ad - baseIncludes)
+    const totalAdultExtra = extraAd * tour.extraAdult
+    const totalChildExtra = ch * tour.extraChild
+    return tour.basePrice + totalAdultExtra + totalChildExtra
+  }
+
+  function buildWA(tour: PrivateTour, ad: number, ch: number) {
+    const total = calcTotal(tour, ad, ch)
+    const totalPax = ad + ch
+    const lines = [
+      `🏝 *${tour.name}*`,
+      `${tour.duration ? "⏱ " + tour.duration : ""}`,
+      ``,
+      `👥 Взрослых: ${ad}${ch>0?" | Детей: "+ch:""}`,
+      ``,
+      `💰 *Итого: ${total.toLocaleString("ru-RU")} ฿*`,
+      totalPax > 0 ? `📊 На человека: ~${Math.round(total/totalPax).toLocaleString("ru-RU")} ฿` : "",
+      ``,
+      `✅ Гид включён`,
+      `✅ Трансфер включён`,
+      tour.note ? `ℹ️ ${tour.note}` : "",
+    ].filter(Boolean).join("\n")
+    return lines
+  }
+
+  function copyWA(tour: PrivateTour) {
+    navigator.clipboard.writeText(buildWA(tour, adults, children)).then(()=>{
+      setCopiedId(tour.id); setTimeout(()=>setCopiedId(null), 1800)
+    })
+  }
+
+  const filtered = PRIVATE_TOURS.filter(t=>
+    !search || t.name.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const inp: React.CSSProperties = {
+    padding:"9px 12px", borderRadius:"10px", border:`1px solid ${t.inputBdr}`,
+    background:t.inputBg, color:t.text, fontSize:"13px", fontWeight:600,
+    outline:"none", width:"100%", boxSizing:"border-box"
+  }
+
+  const totalPax = adults + children
+  const accentColor = "#a78bfa"
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 110px)",overflow:"hidden"}}>
+
+      {/* Toolbar */}
+      <div style={{background:t.header,borderBottom:`1px solid ${t.cardBorder}`,padding:"10px 12px",flexShrink:0}}>
+        <div style={{fontSize:"14px",fontWeight:800,color:accentColor,marginBottom:"2px"}}>🏝 Приватные туры</div>
+        <div style={{fontSize:"11px",color:t.muted,marginBottom:"10px"}}>Цена за 1–2 чел. · гид включён · трансфер включён</div>
+
+        {/* PAX counter */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginBottom:"10px"}}>
+          {[
+            {label:"👤 Взрослые", value:adults, set:setAdults, min:1},
+            {label:"👶 Дети",    value:children, set:setChildren, min:0},
+          ].map(({label,value,set,min})=>(
+            <div key={label} style={{background:t.card,borderRadius:"10px",border:`1px solid ${t.cardBorder}`,padding:"8px 12px"}}>
+              <div style={{fontSize:"11px",color:t.muted,marginBottom:"6px"}}>{label}</div>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                <button onClick={()=>set(Math.max(min,value-1))}
+                  style={{width:"30px",height:"30px",borderRadius:"8px",border:"none",background:accentColor+"22",color:accentColor,fontSize:"18px",fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>−</button>
+                <span style={{fontSize:"20px",fontWeight:800,color:t.text}}>{value}</span>
+                <button onClick={()=>set(value+1)}
+                  style={{width:"30px",height:"30px",borderRadius:"8px",border:"none",background:accentColor+"22",color:accentColor,fontSize:"18px",fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <input value={search} onChange={e=>setSearch(e.target.value)}
+          placeholder="🔍 Поиск по туру..."
+          style={{...inp}}/>
+      </div>
+
+      {/* Tour list */}
+      <div style={{overflowY:"auto",flex:1,padding:"12px 14px"}}>
+        <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+          {filtered.map(tour=>{
+            const total = calcTotal(tour, adults, children)
+            const isSelected = selectedId === tour.id
+            const extraAd = Math.max(0, adults-2)
+            const isCopied = copiedId === tour.id
+
+            return (
+              <div key={tour.id}
+                style={{background:t.card,borderRadius:"14px",border:`1.5px solid ${isSelected?accentColor:t.cardBorder}`,overflow:"hidden",transition:"border-color 0.2s",boxShadow:isSelected?`0 0 0 2px ${accentColor}33`:"none"}}>
+
+                {/* Card header — always visible */}
+                <div onClick={()=>setSelectedId(isSelected?null:tour.id)}
+                  style={{cursor:"pointer",padding:"12px 14px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                  <div style={{flex:1,paddingRight:"8px"}}>
+                    <div style={{fontSize:"14px",fontWeight:800,color:isSelected?accentColor:t.text,lineHeight:1.3}}>{tour.name}</div>
+                    <div style={{display:"flex",gap:"8px",marginTop:"4px",flexWrap:"wrap"}}>
+                      {tour.duration && <span style={{fontSize:"10px",color:t.muted}}>⏱ {tour.duration}</span>}
+                      {tour.maxPax && <span style={{fontSize:"10px",color:"#f59e0b"}}>👥 макс. {tour.maxPax}</span>}
+                    </div>
+                    {tour.note && (
+                      <div style={{fontSize:"10px",color:"#f59e0b",marginTop:"3px"}}>ℹ️ {tour.note}</div>
+                    )}
+                  </div>
+                  <div style={{textAlign:"right" as any,flexShrink:0}}>
+                    <div style={{fontSize:"18px",fontWeight:800,color:accentColor}}>{total.toLocaleString("ru-RU")} ฿</div>
+                    {totalPax>0 && <div style={{fontSize:"10px",color:t.muted}}>~{Math.round(total/totalPax).toLocaleString("ru-RU")} ฿/чел</div>}
+                  </div>
+                </div>
+
+                {/* Expanded */}
+                {isSelected && (
+                  <div style={{borderTop:`1px solid ${t.cardBorder}`,padding:"10px 14px",background:dark?"rgba(0,0,0,0.15)":"rgba(0,0,0,0.02)"}}>
+
+                    {/* Breakdown */}
+                    <div style={{borderRadius:"8px",overflow:"hidden",border:`1px solid ${accentColor}33`,marginBottom:"10px"}}>
+                      <div style={{background:accentColor+"18",padding:"6px 10px",fontSize:"10px",fontWeight:800,color:accentColor,textTransform:"uppercase" as any,letterSpacing:"0.5px"}}>
+                        Расчёт
+                      </div>
+                      {[
+                        {label:`🏝 База (1–2 чел.)`, amount: tour.basePrice},
+                        ...(extraAd>0 ? [{label:`👤 Доп. взрослых: ${extraAd} × ${tour.extraAdult.toLocaleString("ru-RU")} ฿`, amount: extraAd*tour.extraAdult}] : []),
+                        ...(children>0 ? [{label:`👶 Детей: ${children} × ${tour.extraChild.toLocaleString("ru-RU")} ฿`, amount: children*tour.extraChild}] : []),
+                      ].map((row,i)=>(
+                        <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"7px 10px",background:i%2===0?t.row0:t.row1,borderTop:i===0?"none":`1px solid ${dark?"rgba(255,255,255,0.05)":"#f0f0f0"}`}}>
+                          <span style={{fontSize:"12px",color:t.text}}>{row.label}</span>
+                          <span style={{fontSize:"12px",fontWeight:700,color:accentColor}}>{row.amount.toLocaleString("ru-RU")} ฿</span>
+                        </div>
+                      ))}
+                      <div style={{display:"flex",justifyContent:"space-between",padding:"8px 10px",background:accentColor+"18",borderTop:`1px solid ${accentColor}44`}}>
+                        <span style={{fontSize:"13px",fontWeight:800,color:accentColor}}>ИТОГО</span>
+                        <span style={{fontSize:"16px",fontWeight:800,color:accentColor}}>{total.toLocaleString("ru-RU")} ฿</span>
+                      </div>
+                    </div>
+
+                    {/* Included */}
+                    <div style={{display:"flex",gap:"6px",flexWrap:"wrap",marginBottom:"10px"}}>
+                      {["✅ Гид включён","✅ Трансфер включён"].map(s=>(
+                        <span key={s} style={{fontSize:"11px",color:"#4ade80",background:"#4ade8018",padding:"3px 8px",borderRadius:"6px",border:"1px solid #4ade8044"}}>{s}</span>
+                      ))}
+                    </div>
+
+                    {/* Extra info */}
+                    <div style={{background:t.header,borderRadius:"8px",padding:"8px 10px",marginBottom:"10px",fontSize:"11px",color:t.muted}}>
+                      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"4px"}}>
+                        <span>👤 Доп. взрослый:</span><span style={{color:t.text,fontWeight:700}}>{tour.extraAdult.toLocaleString("ru-RU")} ฿</span>
+                        <span>👶 Доп. ребёнок:</span><span style={{color:t.text,fontWeight:700}}>{tour.extraChild.toLocaleString("ru-RU")} ฿</span>
+                      </div>
+                    </div>
+
+                    <button onClick={()=>copyWA(tour)}
+                      style={{width:"100%",background:isCopied?"#16a34a":"#25d366",color:"#fff",border:"none",borderRadius:"8px",padding:"10px",fontSize:"13px",fontWeight:700,cursor:"pointer",transition:"background 0.2s",display:"flex",alignItems:"center",justifyContent:"center",gap:"6px"}}>
+                      {isCopied ? "✅ Скопировано!" : <><span>📤</span> Скопировать для WhatsApp</>}
+                    </button>
+
+                    <button onClick={()=>setSelectedId(null)}
+                      style={{marginTop:"6px",width:"100%",background:"transparent",border:`1px solid ${t.cardBorder}`,borderRadius:"8px",padding:"7px",fontSize:"12px",color:t.muted,cursor:"pointer",fontWeight:600}}>
+                      Свернуть ▲
+                    </button>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function VIPCalcTab({dark}: {dark:boolean}) {
   const t = {
     bg:    dark?"#0b1120":"#f0f4f8",
@@ -4054,7 +4283,7 @@ export default function Page() {
   const [unlocked, setUnlocked] = useState(false)
   const [pwInput, setPwInput] = useState("")
   const [pwError, setPwError] = useState(false)
-  const [tab,setTab]=useState<"transfers"|"excursions"|"log"|"methodichka"|"boats"|"boatsummer"|"vipcalc">("transfers")
+  const [tab,setTab]=useState<"transfers"|"excursions"|"log"|"methodichka"|"boats"|"boatsummer"|"vipcalc"|"private">("transfers")
   const [log,setLog]=useState<LogEntry[]>([])
   const [transferData,setTransferData]=useState<Voucher[]>([])
   const [notifiedVouchers,setNotifiedVouchers]=useState<Record<string,boolean>>({})
@@ -4082,8 +4311,8 @@ export default function Page() {
   },[])
 
   // Swipe gesture between tabs
-  const TAB_ORDER: Array<"transfers"|"excursions"|"log"|"methodichka"|"boats"|"boatsummer"|"vipcalc"> =
-    ["transfers","excursions","log","methodichka","boats","boatsummer","vipcalc"]
+  const TAB_ORDER: Array<"transfers"|"excursions"|"log"|"methodichka"|"boats"|"boatsummer"|"vipcalc"|"private"> =
+    ["transfers","excursions","log","methodichka","boats","boatsummer","vipcalc","private"]
   const swipeRef = useRef<{x:number;y:number}|null>(null)
   function onTouchStart(e:React.TouchEvent){ swipeRef.current={x:e.touches[0].clientX,y:e.touches[0].clientY} }
   function onTouchEnd(e:React.TouchEvent){
@@ -4469,6 +4698,7 @@ export default function Page() {
               {key:"boats",        label:"Лодки",      icon:"🚢", color:"#0891b2"},
               {key:"boatsummer",   label:"Summer 1.05",icon:"🚤", color:"#06b6d4"},
               {key:"vipcalc",      label:"VIP тур",    icon:"👑", color:"#f59e0b"},
+              {key:"private",      label:"Приватные",  icon:"🏝", color:"#a78bfa"},
             ].map(({key,label,icon,color})=>{
               const active = tab===key
               return (
@@ -4675,6 +4905,9 @@ export default function Page() {
 
       {/* ── VIP CALCULATOR TAB ── */}
       {tab==="vipcalc" && <VIPCalcTab dark={dark}/>}
+
+      {/* ── PRIVATE TOURS TAB ── */}
+      {tab==="private" && <PrivateTab dark={dark}/>}
 
       {/* ── METHODICHKA TAB ── */}
       {tab==="methodichka" && <MethodichkaTab dark={dark}/>}
