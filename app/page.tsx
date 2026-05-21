@@ -3915,8 +3915,9 @@ function CurrencyStrip({dark}:{dark:boolean}) {
         <div style={{fontSize:"11px",color:"#f87171"}}>⚠️ нет данных</div>
       )}
       {!state.loading && !state.error && CURRENCIES.map(({code,flag,label})=>{
-        const rate = state.rates[code]
-        if (!rate) return null
+        const rawRate = state.rates[code]
+        if (!rawRate) return null
+        const rate = Math.round(rawRate * (1 - 0.0105) * 10000) / 10000
         return (
           <div key={code} style={{display:"flex",alignItems:"center",gap:"3px",flexShrink:0,background:dark?"rgba(255,255,255,0.04)":"rgba(0,0,0,0.04)",borderRadius:"6px",padding:"2px 7px",border:`1px solid ${border}`}}>
             <span style={{fontSize:"12px"}}>{flag}</span>
