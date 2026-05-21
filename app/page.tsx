@@ -2888,7 +2888,7 @@ function BoatsTab({dark}:{dark:boolean}) {
                     <div style={{fontSize:"10px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"5px"}}>
                       Количество человек: <span style={{color:m?.color||t.accent,fontSize:"13px"}}>{calcPax}</span> <span style={{fontWeight:400}}>/ макс. {boat.maxPax}</span>
                     </div>
-                    <input type="range" min={1} max={boat.maxPax} value={calcPax} onChange={e=>setCalcPax(Number(e.target.value))} style={{width:"100%",accentColor:m?.color||"#38bdf8",cursor:"pointer"}}/>
+                    <div onTouchStart={e=>e.stopPropagation()} onTouchMove={e=>e.stopPropagation()} onTouchEnd={e=>e.stopPropagation()}><input type="range" min={1} max={boat.maxPax} value={calcPax} onChange={e=>setCalcPax(Number(e.target.value))} style={{width:"100%",accentColor:m?.color||"#38bdf8",cursor:"pointer"}}/></div>
                     <div style={{display:"flex",justifyContent:"space-between",fontSize:"10px",color:t.muted,marginTop:"1px"}}>
                       <span>1</span><span>{boat.maxPax}</span>
                     </div>
@@ -3739,7 +3739,7 @@ function BoatSummerTab({dark}: {dark: boolean}) {
                     <div style={{fontSize:"10px",fontWeight:700,color:t.muted,textTransform:"uppercase" as any,letterSpacing:"0.6px",marginBottom:"5px"}}>
                       Человек: <span style={{color:m?.color||t.accent,fontSize:"13px"}}>{calcPax}</span> <span style={{fontWeight:400}}>/ макс. {boat.maxPax}</span>
                     </div>
-                    <input type="range" min={1} max={boat.maxPax} value={calcPax} onChange={e=>setCalcPax(Number(e.target.value))} style={{width:"100%",accentColor:m?.color||"#38bdf8",cursor:"pointer"}}/>
+                    <div onTouchStart={e=>e.stopPropagation()} onTouchMove={e=>e.stopPropagation()} onTouchEnd={e=>e.stopPropagation()}><input type="range" min={1} max={boat.maxPax} value={calcPax} onChange={e=>setCalcPax(Number(e.target.value))} style={{width:"100%",accentColor:m?.color||"#38bdf8",cursor:"pointer"}}/></div>
                     <div style={{display:"flex",justifyContent:"space-between",fontSize:"10px",color:t.muted,marginTop:"1px"}}>
                       <span>1</span><span>{boat.maxPax}</span>
                     </div>
