@@ -1984,7 +1984,6 @@ function MethodichkaTab({dark}:{dark:boolean}) {
                           </div>
                         </div>
                         <div style={{display:"flex", alignItems:"center", gap:"6px", flexShrink:0}}>
-                          {tour.hotel && <span style={{fontSize:"10px", color:m.color, background:m.bg, border:`1px solid ${m.border}`, borderRadius:"6px", padding:"2px 6px", fontWeight:600}}>🏨</span>}
                           <span style={{fontSize:"11px", color:t.muted}}>#{tour.id}</span>
                           <span style={{fontSize:"14px", color:m.color, transition:"transform 0.2s", transform:isOpen?"rotate(180deg)":"rotate(0)"}}>▾</span>
                         </div>
@@ -2002,10 +2001,9 @@ function MethodichkaTab({dark}:{dark:boolean}) {
                     <div style={{borderTop:`1px solid ${m.border}`, padding:"12px", background:dark?"rgba(0,0,0,0.2)":"rgba(0,0,0,0.02)", display:"flex", flexDirection:"column", gap:"10px"}}>
                       <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px"}}>
                         {[
-                          tour.price     && {icon:"💰", label:"Цена",      val:tour.price},
-                          tour.groupSize && {icon:"👥", label:"Группа",    val:tour.groupSize},
-                          tour.minAge    && {icon:"🔞", label:"Возраст",   val:tour.minAge},
-                          tour.hotel     && {icon:"🏨", label:"Отель",     val:tour.hotel},
+                          tour.price    && {icon:"💰", label:"Цена",      val:tour.price},
+                          tour.duration && {icon:"⏱", label:"Длительность", val:tour.duration},
+                          tour.operator && {icon:"🏢", label:"Оператор",  val:tour.operator},
                         ].filter(Boolean).map((row:any, i) => (
                           <div key={i} style={{background:m.bg, borderRadius:"8px", padding:"7px 10px", border:`1px solid ${m.border}`}}>
                             <div style={{fontSize:"10px", color:m.color, fontWeight:700}}>{row.icon} {row.label}</div>
