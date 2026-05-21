@@ -1898,7 +1898,11 @@ function MethodichkaTab({dark}:{dark:boolean}) {
         </div>
 
         {/* Row 3: category filter pills — horizontal scroll, compact */}
-        <div style={{display:"flex", gap:"5px", overflowX:"auto", paddingBottom:"4px", WebkitOverflowScrolling:"touch", scrollbarWidth:"none", msOverflowStyle:"none"}}>
+        <div
+          onTouchStart={e=>e.stopPropagation()}
+          onTouchMove={e=>e.stopPropagation()}
+          onTouchEnd={e=>e.stopPropagation()}
+          style={{display:"flex", gap:"5px", overflowX:"auto", paddingBottom:"4px", WebkitOverflowScrolling:"touch", scrollbarWidth:"none", msOverflowStyle:"none"}}>
           {ALL_MCATS.map(cat => {
             const meta = cat.id !== "all" ? MCAT_META[cat.id] : null
             const active = activeCat === cat.id
