@@ -1671,6 +1671,13 @@ function MethodichkaTab({dark}:{dark:boolean}) {
   const [search, setSearch] = useState("")
   const [activeCat, setActiveCat] = useState("all")
   const [expandedTour, setExpandedTour] = useState<string|null>(null)
+  const [openCats, setOpenCats] = useState<Record<string,boolean>>(
+    Object.fromEntries(MCAT_ORDER.map(c=>[c,true]))
+  )
+
+  function toggleCat(cat: string) {
+    setOpenCats(prev=>({...prev,[cat]:!prev[cat]}))
+  }
   const [showRules, setShowRules] = useState(false)
   const [showRooms, setShowRooms] = useState(false)
   const [showVip, setShowVip] = useState(false)
@@ -1890,15 +1897,20 @@ function MethodichkaTab({dark}:{dark:boolean}) {
           </div>
         </div>
 
-        {/* Row 3: category filter pills */}
-        <div style={{display:"flex", gap:"5px", overflowX:"auto", paddingBottom:"2px"}}>
+        {/* Row 3: category filter pills — horizontal scroll, compact */}
+        <div style={{display:"flex", gap:"5px", overflowX:"auto", paddingBottom:"4px", WebkitOverflowScrolling:"touch", scrollbarWidth:"none", msOverflowStyle:"none"}}>
           {ALL_MCATS.map(cat => {
             const meta = cat.id !== "all" ? MCAT_META[cat.id] : null
             const active = activeCat === cat.id
+            const count = catCount(cat.id)
             return (
               <button key={cat.id} onClick={() => setActiveCat(cat.id)}
-                style={{...pill, background:active?(meta?meta.color:(dark?"#38bdf8":"#0369a1")):(dark?"#1e2f45":"#dce7f0"), color:active?"#fff":(dark?"#94a3b8":"#374151")}}>
-                {cat.icon} {cat.label} ({catCount(cat.id)})
+                style={{...pill, flexShrink:0, whiteSpace:"nowrap", padding:"5px 10px", fontSize:"11px",
+                  background:active?(meta?meta.color:(dark?"#38bdf8":"#0369a1")):(dark?"#1e2f45":"#dce7f0"),
+                  color:active?"#fff":(dark?"#94a3b8":"#374151"),
+                  border:active?`1px solid transparent`:`1px solid ${dark?"#2a3f5a":"#c5d5e5"}`}}>
+                {cat.icon} {cat.id==="all"?"Все":cat.label.split(" ")[0]}
+                <span style={{marginLeft:"4px", fontSize:"10px", opacity:0.75}}>({count})</span>
               </button>
             )
           })}
@@ -1958,14 +1970,10 @@ function MethodichkaTab({dark}:{dark:boolean}) {
                 <div id={"mt-" + tour.slug} key={tour.id}
                   style={{background:t.card, borderRadius:"14px", border:`1.5px solid ${isOpen ? m.color : m.border}`, overflow:"hidden", transition:"border-color 0.2s"}}>
 
-                  {/* ── Card header — always visible, click to expand ── */}
+                  {/* Card header */}
                   <div onClick={() => toggleTour(tour.slug)}
                     style={{display:"flex", alignItems:"stretch", cursor:"pointer", userSelect:"none"}}>
-
-                    {/* Color stripe */}
                     <div style={{width:"4px", background:m.color, flexShrink:0}}/>
-
-                    {/* Main info */}
                     <div style={{flex:1, padding:"11px 12px", minWidth:0}}>
                       <div style={{display:"flex", alignItems:"center", justifyContent:"space-between", gap:"8px"}}>
                         <div style={{display:"flex", alignItems:"center", gap:"8px", minWidth:0}}>
@@ -1981,7 +1989,6 @@ function MethodichkaTab({dark}:{dark:boolean}) {
                           <span style={{fontSize:"14px", color:m.color, transition:"transform 0.2s", transform:isOpen?"rotate(180deg)":"rotate(0)"}}>▾</span>
                         </div>
                       </div>
-                      {/* Tags row */}
                       <div style={{display:"flex", flexWrap:"wrap", gap:"4px", marginTop:"6px"}}>
                         {tour.tags.slice(0,5).map(tag => (
                           <span key={tag} style={{fontSize:"10px", background:m.bg, color:m.color, border:`1px solid ${m.border}`, borderRadius:"99px", padding:"1px 7px", fontWeight:600}}>{tag}</span>
@@ -1990,42 +1997,41 @@ function MethodichkaTab({dark}:{dark:boolean}) {
                     </div>
                   </div>
 
-                  {/* ── Expanded content ── */}
+                  {/* Expanded content */}
                   {isOpen && (
-                    <div style={{borderTop:`1px solid ${m.border}`, padding:"14px 16px", display:"flex", flexDirection:"column", gap:"10px", background:dark?"rgba(0,0,0,0.15)":"rgba(0,0,0,0.02)"}}>
-
-                      {/* Info chips row */}
-                      <div style={{display:"flex", flexWrap:"wrap", gap:"8px", fontSize:"12px", color:t.muted}}>
-                        <span>⏱ <b style={{color:t.text}}>{tour.duration}</b></span>
-                        {tour.operator && <span>🏢 <b style={{color:t.text}}>{tour.operator}</b></span>}
-                        {tour.hotel && <span>🏨 <b style={{color:t.text}}>{tour.hotel}</b>{tour.single ? <span style={{color:"#fbbf24"}}> · single +{tour.single}฿</span> : ""}</span>}
+                    <div style={{borderTop:`1px solid ${m.border}`, padding:"12px", background:dark?"rgba(0,0,0,0.2)":"rgba(0,0,0,0.02)", display:"flex", flexDirection:"column", gap:"10px"}}>
+                      <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px"}}>
+                        {[
+                          tour.price     && {icon:"💰", label:"Цена",      val:tour.price},
+                          tour.groupSize && {icon:"👥", label:"Группа",    val:tour.groupSize},
+                          tour.minAge    && {icon:"🔞", label:"Возраст",   val:tour.minAge},
+                          tour.hotel     && {icon:"🏨", label:"Отель",     val:tour.hotel},
+                        ].filter(Boolean).map((row:any, i) => (
+                          <div key={i} style={{background:m.bg, borderRadius:"8px", padding:"7px 10px", border:`1px solid ${m.border}`}}>
+                            <div style={{fontSize:"10px", color:m.color, fontWeight:700}}>{row.icon} {row.label}</div>
+                            <div style={{fontSize:"12px", color:t.text, marginTop:"2px", fontWeight:600}}>{row.val}</div>
+                          </div>
+                        ))}
                       </div>
-
-                      {/* Price block */}
-                      {tour.price && (
-                        <div style={{background:dark?"#2d1f00":"#fffbeb", border:"1px solid #d97706", borderRadius:"10px", padding:"10px 12px"}}>
-                          <div style={{fontSize:"10px", fontWeight:700, color:"#d97706", marginBottom:"5px", textTransform:"uppercase", letterSpacing:"0.6px"}}>💰 Цены</div>
-                          <div style={{fontSize:"12px", color:dark?"#fde68a":"#92400e", lineHeight:1.6}}>{tour.price}</div>
+                      {tour.tags.length > 0 && (
+                        <div style={{display:"flex", flexWrap:"wrap", gap:"5px"}}>
+                          {tour.tags.map(tag => (
+                            <span key={tag} style={{fontSize:"11px", padding:"3px 9px", borderRadius:"99px", background:m.bg, color:m.color, border:`1px solid ${m.border}`, fontWeight:600}}>{tag}</span>
+                          ))}
                         </div>
                       )}
-
-                      {/* Includes block */}
                       {tour.includes && (
-                        <div style={{background:dark?"#0d2010":"#f0fdf4", border:"1px solid #16a34a", borderRadius:"10px", padding:"10px 12px"}}>
-                          <div style={{fontSize:"10px", fontWeight:700, color:"#16a34a", marginBottom:"5px", textTransform:"uppercase", letterSpacing:"0.6px"}}>✅ Включено в стоимость</div>
-                          <div style={{fontSize:"12px", color:dark?"#86efac":"#14532d", lineHeight:1.6}}>{tour.includes}</div>
+                        <div style={{background:dark?"#0a2010":"#f0fdf4", border:"1px solid #4ade80", borderRadius:"10px", padding:"10px 12px"}}>
+                          <div style={{fontSize:"10px", fontWeight:700, color:"#4ade80", marginBottom:"5px", textTransform:"uppercase", letterSpacing:"0.6px"}}>✅ Включено</div>
+                          <div style={{fontSize:"12px", color:dark?"#86efac":"#166534", lineHeight:1.6}}>{tour.includes}</div>
                         </div>
                       )}
-
-                      {/* Restrictions block */}
                       {tour.restrictions && (
                         <div style={{background:dark?"#2d0a0a":"#fff1f2", border:"1px solid #ef4444", borderRadius:"10px", padding:"10px 12px"}}>
                           <div style={{fontSize:"10px", fontWeight:700, color:"#ef4444", marginBottom:"5px", textTransform:"uppercase", letterSpacing:"0.6px"}}>⚠️ Важно / Ограничения</div>
                           <div style={{fontSize:"12px", color:dark?"#fca5a5":"#991b1b", lineHeight:1.6}}>{tour.restrictions}</div>
                         </div>
                       )}
-
-                      {/* Route — days */}
                       <div style={{border:`1px solid ${m.border}`, borderRadius:"10px", overflow:"hidden"}}>
                         <div style={{background:m.bg, padding:"8px 12px", fontSize:"10px", fontWeight:700, color:m.color, textTransform:"uppercase", letterSpacing:"0.6px"}}>
                           🗺️ Маршрут / Программа
@@ -2034,7 +2040,7 @@ function MethodichkaTab({dark}:{dark:boolean}) {
                           {tour.route.map((block, bi) => (
                             <div key={bi}>
                               {(block.day || block.label) && (
-                                <div style={{fontSize:"12px", fontWeight:700, color:m.color, marginBottom:"6px", display:"flex", alignItems:"center", gap:"6px"}}>
+                                <div style={{fontSize:"12px", fontWeight:700, color:m.color, marginBottom:"6px"}}>
                                   <span style={{background:m.color, color:m.bg, borderRadius:"6px", padding:"1px 8px", fontSize:"11px"}}>
                                     {block.label ?? `День ${block.day}`}
                                   </span>
@@ -2068,14 +2074,10 @@ function MethodichkaTab({dark}:{dark:boolean}) {
                           ))}
                         </div>
                       </div>
-
-                      {/* WA share button */}
                       <button onClick={e => { e.stopPropagation(); setWaModal({title:tour.name, short:buildTourWAShort(tour), full:buildTourWAFull(tour)}) }}
                         style={{width:"100%",padding:"9px",background:"#25d366",color:"#fff",border:"none",borderRadius:"8px",fontSize:"13px",fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"6px"}}>
                         <span>📤</span> Отправить в WhatsApp
                       </button>
-
-                      {/* Collapse button */}
                       <button onClick={() => setExpandedTour(null)}
                         style={{background:"transparent", border:`1px solid ${m.border}`, borderRadius:"8px", padding:"7px", fontSize:"12px", color:m.color, cursor:"pointer", fontWeight:600}}>
                         Свернуть ▲
@@ -3838,6 +3840,110 @@ const VIP_ATTRACTIONS = [
 ]
 
 // ─────────────────────────────────────────────
+// CURRENCY STRIP
+// ─────────────────────────────────────────────
+interface RatesState {
+  rates: Record<string,number>
+  updated: string
+  loading: boolean
+  error: boolean
+  isVP?: boolean
+}
+
+function CurrencyStrip({dark}:{dark:boolean}) {
+  const [state, setState] = useState<RatesState>({rates:{},updated:"",loading:true,error:false,isVP:false})
+  const [lastFetch, setLastFetch] = useState(0)
+
+  useEffect(()=>{
+    const cached = localStorage.getItem("nav_fx")
+    if (cached) {
+      try {
+        const obj = JSON.parse(cached)
+        const age = Date.now() - obj.ts
+        if (age < 30*60*1000) {
+          setState({rates:obj.rates, updated:obj.updated, loading:false, error:false, isVP:obj.source?.includes("valueplus")})
+          setLastFetch(obj.ts)
+          return
+        }
+      } catch {}
+    }
+    fetchRates()
+  },[])
+
+  function fetchRates() {
+    setState(s=>({...s,loading:true,error:false}))
+    // Use our server-side proxy — avoids CORS, tries valueplusexchange.com first
+    fetch("/api/fx")
+      .then(r=>r.json())
+      .then(data=>{
+        if (!data.success || !data.rates) throw new Error("no rates")
+        const updated = new Date().toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})
+        const ts = Date.now()
+        const isVP = data.source?.includes("valueplus")
+        localStorage.setItem("nav_fx", JSON.stringify({rates:data.rates, updated, ts, source:data.source}))
+        setState({rates:data.rates, updated, loading:false, error:false, isVP})
+        setLastFetch(ts)
+      })
+      .catch(()=>{
+        setState(s=>({...s,loading:false,error:true}))
+      })
+  }
+
+  const CURRENCIES = [
+    {code:"RUB", flag:"🇷🇺", label:"RUB"},
+    {code:"USD", flag:"🇺🇸", label:"USD"},
+    {code:"EUR", flag:"🇪🇺", label:"EUR"},
+    {code:"CNY", flag:"🇨🇳", label:"CNY"},
+  ]
+
+  const bg = dark ? "#0d1929" : "#e8f0f8"
+  const border = dark ? "#1e3450" : "#c5d5e5"
+  const textColor = dark ? "#94a3b8" : "#5b7a9a"
+  const valColor = dark ? "#e2eaf4" : "#1a2636"
+  const accentColor = dark ? "#38bdf8" : "#0369a1"
+
+  return (
+    <div style={{background:bg,borderBottom:`1px solid ${border}`,padding:"5px 12px",display:"flex",alignItems:"center",gap:"8px",overflowX:"auto",flexShrink:0}}>
+      {/* Label */}
+      <div style={{fontSize:"9px",fontWeight:800,color:textColor,letterSpacing:"0.8px",flexShrink:0,textTransform:"uppercase" as any}}>
+        {state.isVP ? "ValuePlus ฿" : "THB курс"}
+      </div>
+
+      {/* Rates */}
+      {state.loading && (
+        <div style={{fontSize:"11px",color:textColor}}>⏳ загрузка...</div>
+      )}
+      {state.error && (
+        <div style={{fontSize:"11px",color:"#f87171"}}>⚠️ нет данных</div>
+      )}
+      {!state.loading && !state.error && CURRENCIES.map(({code,flag,label})=>{
+        const rate = state.rates[code]
+        if (!rate) return null
+        return (
+          <div key={code} style={{display:"flex",alignItems:"center",gap:"3px",flexShrink:0,background:dark?"rgba(255,255,255,0.04)":"rgba(0,0,0,0.04)",borderRadius:"6px",padding:"2px 7px",border:`1px solid ${border}`}}>
+            <span style={{fontSize:"12px"}}>{flag}</span>
+            <span style={{fontSize:"10px",color:textColor}}>{label}</span>
+            <span style={{fontSize:"12px",fontWeight:800,color:valColor}}>= {rate.toFixed(2)}</span>
+            <span style={{fontSize:"9px",color:textColor}}>฿</span>
+          </div>
+        )
+      })}
+
+      {/* Refresh button + time */}
+      <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:"6px",flexShrink:0}}>
+        {state.updated && (
+          <span style={{fontSize:"9px",color:textColor}}>{state.updated}</span>
+        )}
+        <button onClick={fetchRates} title="Обновить курс"
+          style={{background:"none",border:"none",cursor:"pointer",fontSize:"13px",padding:"0",lineHeight:1,opacity:state.loading?0.4:1}}>
+          🔄
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
 // PRIVATE TOURS TAB
 // ─────────────────────────────────────────────
 
@@ -4728,6 +4834,9 @@ export default function Page() {
             style={{width:tab===key?"18px":"6px",height:"6px",borderRadius:"99px",background:tab===key?t.accent:t.muted,opacity:tab===key?1:0.4,cursor:"pointer",transition:"all 0.25s"}}/>
         ))}
       </div>
+
+      {/* ── CURRENCY STRIP ── */}
+      <CurrencyStrip dark={dark}/>
 
       {tab==="transfers"&&(
         <>
