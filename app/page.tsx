@@ -3848,9 +3848,9 @@ interface RatesState {
   isVP?: boolean
 }
 
-function CurrencyStrip({dark}:{dark:boolean}) {
+function CurrencyButton({dark}:{dark:boolean}) {
   const [state, setState] = useState<RatesState>({rates:{},updated:"",loading:true,error:false,isVP:false})
-  const [lastFetch, setLastFetch] = useState(0)
+  const [open, setOpen] = useState(false)
 
   useEffect(()=>{
     const cached = localStorage.getItem("nav_fx")
@@ -3860,7 +3860,6 @@ function CurrencyStrip({dark}:{dark:boolean}) {
         const age = Date.now() - obj.ts
         if (age < 30*60*1000) {
           setState({rates:obj.rates, updated:obj.updated, loading:false, error:false, isVP:obj.source?.includes("valueplus")})
-          setLastFetch(obj.ts)
           return
         }
       } catch {}
@@ -3870,7 +3869,6 @@ function CurrencyStrip({dark}:{dark:boolean}) {
 
   function fetchRates() {
     setState(s=>({...s,loading:true,error:false}))
-    // Use our server-side proxy — avoids CORS, tries valueplusexchange.com first
     fetch("/api/fx")
       .then(r=>r.json())
       .then(data=>{
@@ -3880,65 +3878,105 @@ function CurrencyStrip({dark}:{dark:boolean}) {
         const isVP = data.source?.includes("valueplus")
         localStorage.setItem("nav_fx", JSON.stringify({rates:data.rates, updated, ts, source:data.source}))
         setState({rates:data.rates, updated, loading:false, error:false, isVP})
-        setLastFetch(ts)
       })
-      .catch(()=>{
-        setState(s=>({...s,loading:false,error:true}))
-      })
+      .catch(()=>setState(s=>({...s,loading:false,error:true})))
   }
 
   const CURRENCIES = [
-    {code:"RUB", flag:"🇷🇺", label:"RUB"},
-    {code:"USD", flag:"🇺🇸", label:"USD"},
-    {code:"EUR", flag:"🇪🇺", label:"EUR"},
-    {code:"CNY", flag:"🇨🇳", label:"CNY"},
+    {code:"RUB", flag:"🇷🇺", label:"Рубль",    full:"RUB → THB"},
+    {code:"USD", flag:"🇺🇸", label:"Доллар",   full:"USD → THB"},
+    {code:"EUR", flag:"🇪🇺", label:"Евро",     full:"EUR → THB"},
+    {code:"CNY", flag:"🇨🇳", label:"Юань",     full:"CNY → THB"},
   ]
 
-  const bg = dark ? "#0d1929" : "#e8f0f8"
-  const border = dark ? "#1e3450" : "#c5d5e5"
-  const textColor = dark ? "#94a3b8" : "#5b7a9a"
-  const valColor = dark ? "#e2eaf4" : "#1a2636"
-  const accentColor = dark ? "#38bdf8" : "#0369a1"
+  const t = {
+    bg:   dark?"#0d1929":"#f0f4f8",
+    card: dark?"#131d2e":"#ffffff",
+    border: dark?"#1e3450":"#c5d5e5",
+    text: dark?"#e2eaf4":"#1a2636",
+    muted:dark?"#5b7a9a":"#6e8aa8",
+    accent:dark?"#38bdf8":"#0369a1",
+  }
 
   return (
-    <div style={{background:bg,borderBottom:`1px solid ${border}`,padding:"5px 12px",display:"flex",alignItems:"center",gap:"8px",overflowX:"auto",flexShrink:0}}>
-      {/* Label */}
-      <div style={{fontSize:"9px",fontWeight:800,color:textColor,letterSpacing:"0.8px",flexShrink:0,textTransform:"uppercase" as any}}>
-        {state.isVP ? "ValuePlus ฿" : "THB курс"}
-      </div>
+    <>
+      {/* Small button in header */}
+      <button onClick={()=>setOpen(true)}
+        title="Курс валют"
+        style={{width:"36px",height:"36px",borderRadius:"10px",border:`1px solid ${t.border}`,
+          background:t.card,cursor:"pointer",fontSize:"18px",display:"flex",
+          alignItems:"center",justifyContent:"center",flexShrink:0,
+          boxShadow:state.error?"0 0 0 2px #f87171":open?`0 0 0 2px ${t.accent}`:"none"}}>
+        💱
+      </button>
 
-      {/* Rates */}
-      {state.loading && (
-        <div style={{fontSize:"11px",color:textColor}}>⏳ загрузка...</div>
-      )}
-      {state.error && (
-        <div style={{fontSize:"11px",color:"#f87171"}}>⚠️ нет данных</div>
-      )}
-      {!state.loading && !state.error && CURRENCIES.map(({code,flag,label})=>{
-        const rawRate = state.rates[code]
-        if (!rawRate) return null
-        const rate = Math.round(rawRate * (1 - 0.0105) * 10000) / 10000
-        return (
-          <div key={code} style={{display:"flex",alignItems:"center",gap:"3px",flexShrink:0,background:dark?"rgba(255,255,255,0.04)":"rgba(0,0,0,0.04)",borderRadius:"6px",padding:"2px 7px",border:`1px solid ${border}`}}>
-            <span style={{fontSize:"12px"}}>{flag}</span>
-            <span style={{fontSize:"10px",color:textColor}}>{label}</span>
-            <span style={{fontSize:"12px",fontWeight:800,color:valColor}}>= {rate.toFixed(2)}</span>
-            <span style={{fontSize:"9px",color:textColor}}>฿</span>
+      {/* Modal overlay */}
+      {open && (
+        <div onClick={()=>setOpen(false)}
+          style={{position:"fixed",inset:0,zIndex:1000,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"flex-start",justifyContent:"flex-end",paddingTop:"70px",paddingRight:"12px"}}>
+          <div onClick={e=>e.stopPropagation()}
+            style={{background:t.card,borderRadius:"16px",border:`1px solid ${t.border}`,
+              width:"260px",boxShadow:"0 20px 60px rgba(0,0,0,0.4)",overflow:"hidden"}}>
+
+            {/* Modal header */}
+            <div style={{background:t.bg,borderBottom:`1px solid ${t.border}`,padding:"12px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div>
+                <div style={{fontSize:"13px",fontWeight:800,color:t.accent}}>💱 Курс валют к бату</div>
+                <div style={{fontSize:"10px",color:t.muted,marginTop:"2px"}}>
+                  {state.isVP?"ValuePlus":"Открытый курс"} · курс покупки −1.05%
+                  {state.updated && ` · ${state.updated}`}
+                </div>
+              </div>
+              <button onClick={()=>setOpen(false)}
+                style={{background:"none",border:"none",cursor:"pointer",fontSize:"18px",color:t.muted,padding:"0",lineHeight:1}}>✕</button>
+            </div>
+
+            {/* Rates */}
+            <div style={{padding:"8px"}}>
+              {state.loading && (
+                <div style={{textAlign:"center",padding:"20px",color:t.muted,fontSize:"13px"}}>⏳ Загрузка...</div>
+              )}
+              {state.error && (
+                <div style={{textAlign:"center",padding:"20px",color:"#f87171",fontSize:"13px"}}>⚠️ Нет данных</div>
+              )}
+              {!state.loading && !state.error && CURRENCIES.map(({code,flag,label})=>{
+                const rawRate = state.rates[code]
+                if (!rawRate) return null
+                const rate = Math.round(rawRate * (1-0.0105) * 10000) / 10000
+                return (
+                  <div key={code} style={{display:"flex",alignItems:"center",justifyContent:"space-between",
+                    padding:"10px 10px",borderRadius:"10px",marginBottom:"4px",
+                    background:dark?"rgba(255,255,255,0.04)":"rgba(0,0,0,0.03)",
+                    border:`1px solid ${t.border}`}}>
+                    <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                      <span style={{fontSize:"22px"}}>{flag}</span>
+                      <div>
+                        <div style={{fontSize:"12px",fontWeight:700,color:t.text}}>{label}</div>
+                        <div style={{fontSize:"10px",color:t.muted}}>{code}</div>
+                      </div>
+                    </div>
+                    <div style={{textAlign:"right" as any}}>
+                      <div style={{fontSize:"18px",fontWeight:800,color:t.accent}}>{rate.toFixed(2)}</div>
+                      <div style={{fontSize:"10px",color:t.muted}}>฿</div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Refresh */}
+            <div style={{padding:"8px 8px 12px"}}>
+              <button onClick={fetchRates} disabled={state.loading}
+                style={{width:"100%",padding:"8px",borderRadius:"10px",border:`1px solid ${t.border}`,
+                  background:"none",color:t.accent,fontSize:"12px",fontWeight:700,cursor:"pointer",
+                  opacity:state.loading?0.5:1}}>
+                {state.loading?"⏳ Обновляем...":"🔄 Обновить курс"}
+              </button>
+            </div>
           </div>
-        )
-      })}
-
-      {/* Refresh button + time */}
-      <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:"6px",flexShrink:0}}>
-        {state.updated && (
-          <span style={{fontSize:"9px",color:textColor}}>{state.updated}</span>
-        )}
-        <button onClick={fetchRates} title="Обновить курс"
-          style={{background:"none",border:"none",cursor:"pointer",fontSize:"13px",padding:"0",lineHeight:1,opacity:state.loading?0.4:1}}>
-          🔄
-        </button>
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   )
 }
 
@@ -4766,6 +4804,7 @@ export default function Page() {
               <button onClick={()=>setDark(d=>!d)} style={{width:"36px",height:"36px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"16px",background:t.cardBorder,border:"none",borderRadius:"10px",cursor:"pointer",flexShrink:0}}>
                 {dark?"☀️":"🌙"}
               </button>
+              <CurrencyButton dark={dark}/>
             </div>
           </div>
 
@@ -4833,9 +4872,6 @@ export default function Page() {
             style={{width:tab===key?"18px":"6px",height:"6px",borderRadius:"99px",background:tab===key?t.accent:t.muted,opacity:tab===key?1:0.4,cursor:"pointer",transition:"all 0.25s"}}/>
         ))}
       </div>
-
-      {/* ── CURRENCY STRIP ── */}
-      <CurrencyStrip dark={dark}/>
 
       {tab==="transfers"&&(
         <>
