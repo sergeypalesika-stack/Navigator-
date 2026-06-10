@@ -879,7 +879,7 @@ const MTOURS: MTour[] = [
     restrictions:"Беременные, дети до 1 года, лица старше 70 лет — НЕ ДОПУСКАЮТСЯ",
     includes:"Транспорт (автобус + лодка), вход в нац. парки, прохладительные напитки, чай/кофе, страховка, рус. гид, спас. жилеты, маски/трубки, питание, размещение в отеле",
     route:[
-      {day:1,items:["06:30 Выезд из отелей","07:30 Савану Лаундж — регистрация","08:10 Пирс — отправление","08:50 Остров Панак","09:20 Остров Джеймса Бонда","10:10 Остров Талу — каноэ","11:00 Остров Паньи (осмотр с катера)","11:10 Обед на острове Паньи","13:20 Резиденция Его Величества Короля Таиланда в Краби (осмотр с катера)","13:35 Пляж Пра Нанг (Райлэй) — пляж и пещера плодородия","14:30 Куриный остров (с катера)","15:10 Пхи-Пхи Дон — снорклинг","16:00 Заселение в отель","18:00 Ужин со смотровой площадкой","20:00 Файер-шоу и бар на пляже"]},
+      {day:1,items:["06:30 Выезд из отелей","07:30 Савану Лаундж — регистрация","08:10 Пирс — отправление","08:50 Остров Панак","09:20 Остров Джеймса Бонда","10:10 Остров Талу — каноэ","11:10 Обед на острове Паньи","13:35 Пляж Пра Нанг (Райлэй) — пляж и пещера плодородия","14:30 Куриный остров (с катера)","15:10 Пхи-Пхи Дон — снорклинг","16:00 Заселение в отель","18:00 Ужин со смотровой площадкой","20:00 Файер-шоу и бар на пляже"]},
       {day:2,items:["07:30 Завтрак","09:00 Майя Бэй — пляж","10:00 Лагуна Пиле — купание с лодки","11:00 Пещера Викингов","11:15 Бухта Обезьян (с катера)","11:30 Пхи-Пхи Дон — снорклинг","12:20 Обед на Пхи-Пхи Дон","13:40 Остров Бамбу — пляж + снорклинг","15:00 Возвращение на Пхукет","16:00 Пристань"]},
     ],
   },
@@ -1015,15 +1015,8 @@ const MTOURS: MTour[] = [
     includes:"Транспорт (автобус + катамаран Turan или Irbis), нац. парки, маски и ласты, страховка, рус. гид. ПИТАНИЕ: завтрак (яйца, картофель фри, сосиски, тосты с джемом), обед (жареный рис, курица с кешью, рыба, салат), ужин (пад тай, сом там, чай/кофе), 2× фрукты + сэндвичи с тунцом",
     route:[{items:["05:30–06:30 Пикап из отеля","08:00 Тапламу — завтрак на борту","08:30 Старт на Симиланы","10:30 Прибытие — первый снорклинг","11:30 Остров №8 — смотровая «Парус», пляж","13:00 Ланч на лодке. Переход ко второй точке снорклинга","13:40 Второй снорклинг","15:00 Старт обратно","17:00 Тапламу — перекус, трансфер по отелям","19:30–20:00 Отель"]}],
   },
-  { id:19, slug:"wild-island", cat:"sea", name:"Wild Island (Рача Ной, катамаран)", nameEn:"Wild Island",
-    operator:"Dolce Vita", duration:"1 день",
-    tags:["Рача Ной","катамаран","снорклинг","горка","рыбалка","пляж"],
-    restrictions:"Беременные, дети до 1 года, лица старше 70 лет — НЕ ДОПУСКАЮТСЯ",
-    includes:"Гид, трансфер, страховка, обед на борту, напитки, фрукты, снаряжение для снорклинга, полотенца. Водные игры + горка + бассейн включены",
-    route:[{items:["07:30–08:30 Выезд из отелей","09:15 Встреча на пирсе","09:30 Отплытие катамарана","11:00 Остров Рача Ной — снорклинг","12:00–13:30 Пляжный отдых (по желанию — рыбалка)","13:30 Обед на борту катамарана","14:30–16:30 Свободное время: пляж или катамаран, водные игры, горка, бассейн (шаттл на пляж каждые 20 мин)","16:40 Отправление обратно","18:00 Прибытие в порт","18:30–19:30 Трансфер в отели"]}],
-  },
   // ── ДАЙВИНГ ──────────────────────────────────
-  { id:101, slug:"diving-phi-phi", cat:"diving", name:"Дайвинг на Пхи-Пхи", nameEn:"Diving Phi Phi",
+  { id:19, slug:"diving-phi-phi", cat:"diving", name:"Дайвинг на Пхи-Пхи", nameEn:"Diving Phi Phi",
     duration:"1 день",
     price:"Дайвер: 5500 + 600 бат нац. парк. No Dive (снорклинг): 2900 + 400 бат нац. парк. Дети: 5500/2500 + нац. парк",
     tags:["дайвинг","Пхи-Пхи","сертификат","снорклинг","Open Water"],
@@ -1132,30 +1125,6 @@ const MTOURS: MTour[] = [
     tags:["Ват Чалонг","Simon Cabaret","Ханумана","Моринга","латекс"],
     route:[{items:["10:00/11:20 Пикап (Big C) — или — 10:40/11:40 (Ката Хилл)","11:40/12:00 Quatex (музей сна, шоппинг) — ИЛИ — Змеиная ферма BSP/Thaiko (шоу 15 мин + шоппинг 45 мин)","13:00 Обед в Hanuman World (1 час)","14:00/14:40 Serpentarium — ИЛИ — Sanbada Latex (презентация + шоппинг 40 мин)","15:40 Moringa / Renala (презентация 20 мин + шоппинг 40 мин)","17:40 Simon Cabaret: 20 мин отдых + 1 ч шоу + 15 мин фото после шоу","19:15 Трансфер в отель (или остаться в Патонге)"]}],
   },
-  { id:56, slug:"city-big-buddha", cat:"land", name:"City Tour — Big Buddha (Group)", nameEn:"City Tour Big Buddha",
-    duration:"1 день",
-    tags:["Ват Чалонг","Большой Будда","латекс","змеиная ферма","Моринга"],
-    route:[
-      {label:"🅐 Маршрут Big C (пикап 07:30–09:30)",items:["09:50–10:50 Quatex (музей сна 10 мин + презентация 20 мин + шоппинг 30 мин)","11:20–12:10 Ват Чалонг (50 мин)","12:20–13:20 BSP / Thaiko Snake Farm (шоу 10 мин + презентация 25 мин + шоппинг 25 мин)","13:40–14:30 Moringa / Renala (презентация 20 мин + шоппинг 30 мин)","14:50–15:40 Большой Будда (50 мин)","15:40 Трансфер в отель"]},
-      {label:"🅑 Маршрут Ката Хилл (пикап 08:00–09:30)",items:["09:50–10:40 Ват Чалонг (50 мин)","10:50–11:50 BSP / Thaiko Snake Farm","12:10–13:00 Sanbada Latex (презентация 20 мин + шоппинг 30 мин)","13:20–14:10 Moringa / Renala","14:30–15:20 Большой Будда (50 мин)","15:20 Трансфер в отель"]},
-    ],
-  },
-  { id:57, slug:"city-discovery", cat:"land", name:"City Tour — Discovery Phuket (Group)", nameEn:"City Tour Discovery Phuket",
-    duration:"1 день",
-    tags:["Ват Чалонг","крокодилы","латекс","Моринга","змеиная ферма"],
-    route:[
-      {label:"🅐 Маршрут Big C (пикап 07:30–09:00)",items:["09:20–10:20 Quatex (музей сна 10 мин + презентация 20 мин + шоппинг 30 мин)","10:50–11:40 Ват Чалонг (50 мин)","12:00–13:00 BSP / Thaiko Snake Farm (шоу 10 мин + презентация 25 мин + шоппинг 25 мин)","13:20–14:10 Moringa / Renala (50 мин)","14:30–15:30 Phuket Crocodile: шоу с крокодилами 20 мин + свободное время 40 мин (кафе, фотозоны, кормление, минизоопарк)","15:30 Трансфер в отель"]},
-      {label:"🅑 Маршрут Ката Хилл (пикап 08:00–09:00)",items:["09:20–10:10 Ват Чалонг (50 мин)","10:20–11:20 BSP / Thaiko Snake Farm","11:40–12:30 Sanbada Latex (50 мин)","12:50–13:40 Moringa / Renala (50 мин)","14:00–15:00 Phuket Crocodile","15:00 Трансфер в отель"]},
-    ],
-  },
-  { id:58, slug:"city-family", cat:"land", name:"City Tour — Family Phuket (Group)", nameEn:"City Tour Family Phuket",
-    duration:"1 день",
-    tags:["Ват Чалонг","Tiger Park","латекс","змеиная ферма","Моринга","семейное"],
-    route:[
-      {label:"🅐 Маршрут Big C (пикап 07:30–09:00)",items:["09:20–10:20 Quatex (музей сна 10 мин + презентация 20 мин + шоппинг 30 мин)","10:50–11:40 Ват Чалонг (50 мин)","12:00–13:00 BSP / Thaiko Snake Farm","13:20–14:10 Moringa / Renala (50 мин)","14:30–15:30 Tiger Park (клетка с тигром + свободное время)","15:30 Трансфер в отель"]},
-      {label:"🅑 Маршрут Ката Хилл (пикап 08:00–09:00)",items:["09:20–10:10 Ват Чалонг (50 мин)","10:20–11:20 BSP / Thaiko Snake Farm","11:40–12:30 Sanbada Latex (50 мин)","12:50–13:40 Moringa / Renala (50 мин)","14:00–15:00 Tiger Park","15:00 Трансфер в отель"]},
-    ],
-  },
   { id:26, slug:"asia-safari", cat:"land", name:"Asia Safari 1 день (Каолак)", nameEn:"Asia Safari 1 Day",
     duration:"1 день",
     tags:["слоны","рафтинг","пещера","купание со слонами","водопад"],
@@ -1176,14 +1145,6 @@ const MTOURS: MTour[] = [
     restrictions:"Программа на минивэнах по 12 чел. 1 гид на 2 вэна. Взять: купальник, полотенце, палантин/рубашку (рассвет — прохладно)",
     includes:"Трансфер, VIP Longtail (Джеймс Бонд + каноэ), Mantra Forest Spa (онсэн, грязевые + фруктовые ванны, ледяная купель, минеральный водопад, сауна), обед. ⚠️ С высадкой на Острове Джеймса Бонда!",
     route:[{items:["03:50–05:00 Сбор гостей из отелей","06:00–07:30 Стеклянный мост + смотровая Самет Нангши — рассвет над заливом Пхангнга, панорама островов. Завтрак с видом на море","07:45–09:00 Морская прогулка VIP Longtail: остров Джеймса Бонда + каноэ по лагунам и гротам","09:30–12:00 Mantra Forest Spa: онсэн, грязевые и фруктовые ванны, ледяная купель, озеро с кувшинками, минеральный водопад, сауна, зоны отдыха","12:00–12:30 Обед в окружении тропической природы","14:00 Возвращение в отель"]}],
-  },
-  { id:59, slug:"mantra-day-pass", cat:"land", name:"Мантра Спа — Day Pass (индивидуальный)", nameEn:"Mantra Forest Spa Day Pass",
-    duration:"Полдня",
-    price:"10800 бат. Доп. 1 pax: +1400 бат. Макс. 12 чел",
-    tags:["спа","онсэн","день","индивидуально","грязевые ванны","ледяная купель"],
-    restrictions:"Максимум 12 человек. Программа без Джеймс Бонда (только Spa)",
-    includes:"Mantra Forest Spa: онсэн, грязевые и фруктовые ванны, ледяная купель, озеро с кувшинками, минеральный водопад, сауна, зоны отдыха",
-    route:[{items:["Посещение Mantra Forest Spa","Онсэн с горячими источниками","Грязевые и фруктовые ванны","Освежающая ледяная купель","Озеро с кувшинками и минеральный водопад","Сауна и уютные зоны для отдыха","Обед включён"]}],
   },
   { id:29, slug:"cheow-lan", cat:"land", name:"Чео Лан 2д/1н", nameEn:"Cheow Lan 2/1 Group",
     duration:"2 дня / 1 ночь", hotel:"PHUTAWAN", single:2500,
@@ -1282,7 +1243,7 @@ const MTOURS: MTour[] = [
   },
   { id:41, slug:"andamanda", cat:"show", name:"Аквапарк Andamanda", nameEn:"Andamanda Water Park",
     duration:"Полный день",
-    price:"Билет: взр.1750 / дет.(91–122 см) 1150 / 60+ 1200 бат. +Обед: 2100/1500/1550. +Трансфер: 2150/1550/1550. Билет+Трансфер+Обед: 2500/1900/1950 бат",
+    price:"Билет (от 122 см): 1750. Дети 91–122 см: 1150. 60+: 1200. +Обед: +350. +Трансфер: +400. Комплект всё: 2500/1900/1950 бат",
     tags:["аквапарк","семейное","дети","горки"],
     restrictions:"⚠️ Arrival: 10:00 или 13:00. Departure: 15:00 или 18:30. Варианты с обедом нет у уличных агентств — продавать с трансфером",
     route:[{items:["Прибытие 10:00 или 13:00","Полный день в аквапарке Andamanda Phuket","Обед A: Chicken Burger + Soft Drink","Обед B: Phat Thai + Salad + Soft Drink","Детский обед: Chicken Nugget + French Fries + Soft Drink","Отбытие 15:00 или 18:30"]}],
@@ -2073,47 +2034,54 @@ function MethodichkaTab({dark}:{dark:boolean}) {
                           <div style={{fontSize:"12px", color:dark?"#fca5a5":"#991b1b", lineHeight:1.6}}>{tour.restrictions}</div>
                         </div>
                       )}
-                      <div style={{border:`1px solid ${m.border}`, borderRadius:"10px", overflow:"hidden"}}>
-                        <div style={{background:m.bg, padding:"8px 12px", fontSize:"10px", fontWeight:700, color:m.color, textTransform:"uppercase", letterSpacing:"0.6px"}}>
-                          🗺️ Маршрут / Программа
+                      <div style={{border:`1px solid ${m.border}`, borderRadius:"14px", overflow:"hidden"}}>
+                        <div style={{background:m.bg, padding:"10px 14px", display:"flex", alignItems:"center", gap:"8px"}}>
+                          <span style={{fontSize:"14px"}}>🗺️</span>
+                          <span style={{fontSize:"11px", fontWeight:700, color:m.color, textTransform:"uppercase", letterSpacing:"1px"}}>Маршрут / Программа</span>
                         </div>
-                        <div style={{padding:"10px 12px", display:"flex", flexDirection:"column", gap:"12px"}}>
-                          {tour.route.map((block, bi) => (
+                        <div style={{padding:"14px 14px 6px", display:"flex", flexDirection:"column", gap:"16px"}}>{tour.route.map((block, bi) => (
                             <div key={bi}>
                               {(block.day || block.label) && (
-                                <div style={{fontSize:"12px", fontWeight:700, color:m.color, marginBottom:"6px"}}>
-                                  <span style={{background:m.color, color:m.bg, borderRadius:"6px", padding:"1px 8px", fontSize:"11px"}}>
-                                    {block.label ?? `День ${block.day}`}
+                                <div style={{display:"flex", alignItems:"center", gap:"8px", marginBottom:"12px"}}>
+                                  <div style={{height:"1px", flex:1, background:m.border}}/>
+                                  <span style={{background:m.color, color:m.bg, borderRadius:"99px", padding:"2px 12px", fontSize:"10px", fontWeight:800, letterSpacing:"0.5px", flexShrink:0}}>
+                                    {block.label ?? `ДЕНЬ ${block.day}`}
                                   </span>
+                                  <div style={{height:"1px", flex:1, background:m.border}}/>
                                 </div>
                               )}
-                              <div style={{display:"flex", flexDirection:"column", gap:"3px"}}>
-                                {block.items.map((item, ii) => {
-                                  if (item === "") return <div key={ii} style={{height:"4px"}}/>
-                                  const isSection = item.startsWith("===") || (item.endsWith(":") && item.length < 40)
-                                  const timePart = item.match(/^(\d{1,2}[:\.]\d{2}(?:–\d{1,2}[:\.]\d{2})?)\s+(.+)/)
-                                  return (
-                                    <div key={ii} style={{display:"flex", gap:"8px", alignItems:"flex-start"}}>
-                                      {timePart ? (
-                                        <>
-                                          <span style={{fontSize:"11px", fontWeight:700, color:m.color, flexShrink:0, minWidth:"52px", paddingTop:"1px"}}>{timePart[1]}</span>
-                                          <span style={{fontSize:"12px", color:t.text, lineHeight:1.5, flex:1}}>{timePart[2]}</span>
-                                        </>
-                                      ) : isSection ? (
-                                        <span style={{fontSize:"11px", fontWeight:700, color:m.color, paddingLeft:"2px"}}>{item}</span>
-                                      ) : (
-                                        <>
-                                          <span style={{color:m.color, flexShrink:0, paddingTop:"4px", fontSize:"8px"}}>●</span>
-                                          <span style={{fontSize:"12px", color:t.text, lineHeight:1.5, flex:1}}>{item}</span>
-                                        </>
-                                      )}
-                                    </div>
-                                  )
-                                })}
+                              <div style={{position:"relative", paddingLeft:"28px"}}>
+                                <div style={{position:"absolute", left:"7px", top:"6px", bottom:"6px", width:"1.5px", background:`linear-gradient(to bottom, ${m.color}88, ${m.color}22)`}}/>
+                                <div style={{display:"flex", flexDirection:"column", gap:"10px"}}>
+                                  {block.items.map((item, ii) => {
+                                    if (item === "") return <div key={ii} style={{height:"2px"}}/>
+                                    const isSection = item.startsWith("===") || (item.endsWith(":") && item.length < 40 && !item.match(/^\d/))
+                                    const timePart = item.match(/^(\d{1,2}[:\.]\d{2}(?:[–-]\d{1,2}[:\.]\d{2})?)\s+(.+)/)
+                                    const isAlert = item.includes("❌") || item.includes("⚠️") || item.includes("ЗАПРЕЩЕНО")
+                                    const isFood = item.toLowerCase().includes("обед") || item.toLowerCase().includes("ужин") || item.toLowerCase().includes("завтрак")
+                                    if (isSection) return <div key={ii} style={{fontSize:"10px", fontWeight:700, color:m.color, letterSpacing:"1px", textTransform:"uppercase", paddingLeft:"4px", marginTop:"4px"}}>{item}</div>
+                                    return (
+                                      <div key={ii} style={{display:"flex", alignItems:"flex-start", gap:"10px", position:"relative"}}>
+                                        <div style={{position:"absolute", left:"-22px", top:"4px", width:"10px", height:"10px", borderRadius:"50%", background:isAlert?"#f87171":isFood?"#fbbf24":timePart?m.color:m.border+"88", border:`2px solid ${isAlert?"#f87171":isFood?"#fbbf24":timePart?m.color+"66":m.border}`, boxShadow:timePart?`0 0 6px ${m.color}44`:"none", flexShrink:0}}/>
+                                        <div style={{flex:1}}>
+                                          {timePart ? (
+                                            <div style={{display:"flex", flexWrap:"wrap", alignItems:"baseline", gap:"6px"}}>
+                                              <span style={{fontSize:"10px", fontWeight:800, color:m.color, background:m.bg, borderRadius:"5px", padding:"1px 6px", flexShrink:0, fontFamily:"monospace"}}>{timePart[1]}</span>
+                                              <span style={{fontSize:"12px", color:isAlert?"#f87171":t.text, lineHeight:1.5, flex:1}}>{timePart[2]}</span>
+                                            </div>
+                                          ) : (
+                                            <span style={{fontSize:"12px", color:isAlert?"#f87171":t.text, lineHeight:1.5}}>{item}</span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
                               </div>
                             </div>
                           ))}
                         </div>
+                        <div style={{height:"10px"}}/>
                       </div>
                       <button onClick={e => { e.stopPropagation(); setWaModal({title:tour.name, short:buildTourWAShort(tour), full:buildTourWAFull(tour)}) }}
                         style={{width:"100%",padding:"9px",background:"#25d366",color:"#fff",border:"none",borderRadius:"8px",fontSize:"13px",fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"6px"}}>
@@ -3942,14 +3910,18 @@ function CurrencyButton({dark}:{dark:boolean}) {
 
   return (
     <>
-      {/* Small button in header */}
+      {/* Combined Weather + Currency pill */}
       <button onClick={()=>setOpen(true)}
         title="Курс валют"
-        style={{width:"36px",height:"36px",borderRadius:"10px",border:`1px solid ${t.border}`,
-          background:t.card,cursor:"pointer",fontSize:"18px",display:"flex",
-          alignItems:"center",justifyContent:"center",flexShrink:0,
-          boxShadow:state.error?"0 0 0 2px #f87171":open?`0 0 0 2px ${t.accent}`:"none"}}>
-        💱
+        style={{
+          display:"flex",alignItems:"center",gap:"6px",
+          height:"36px",padding:"0 12px",
+          borderRadius:"10px",border:`1px solid ${t.border}`,
+          background:t.card,cursor:"pointer",flexShrink:0,
+          boxShadow:state.error?"0 0 0 2px #f87171":open?`0 0 0 2px ${t.accent}`:"none",
+          transition:"all 0.2s",
+        }}>
+        <span style={{fontSize:"16px",lineHeight:1}}>💱</span>
       </button>
 
       {/* Modal overlay */}
@@ -4023,6 +3995,140 @@ function CurrencyButton({dark}:{dark:boolean}) {
 }
 
 // ─────────────────────────────────────────────
+// ── WEATHER TAB ──────────────────────────────────────────────────────────
+function WeatherButton({dark}:{dark:boolean}) {
+  const t = {
+    bg: dark?"#09172a":"#f0f5fa", card:dark?"#0e1d31":"#ffffff",
+    border:dark?"#1a2e46":"#ccd9e8", text:dark?"#ddeaf7":"#1a2636",
+    muted:dark?"#527490":"#6e8aa8", accent:"#06b6d4",
+  }
+  const [open, setOpen] = React.useState(false)
+  const [weather, setWeather] = React.useState<any>(null)
+  const [marine, setMarine] = React.useState<any>(null)
+  const [loading, setLoading] = React.useState(false)
+  const [updated, setUpdated] = React.useState("")
+
+  const WMO: Record<number,{label:string;icon:string}> = {
+    0:{label:"Ясно",icon:"☀️"},1:{label:"Почти ясно",icon:"🌤"},2:{label:"Переменная облачность",icon:"⛅"},3:{label:"Пасмурно",icon:"☁️"},
+    45:{label:"Туман",icon:"🌫"},48:{label:"Туман",icon:"🌫"},51:{label:"Морось",icon:"🌦"},53:{label:"Морось",icon:"🌦"},55:{label:"Дождь",icon:"🌧"},
+    61:{label:"Лёгкий дождь",icon:"🌧"},63:{label:"Дождь",icon:"🌧"},65:{label:"Сильный дождь",icon:"⛈"},
+    80:{label:"Ливень",icon:"🌩"},81:{label:"Ливень",icon:"⛈"},82:{label:"Шторм",icon:"⛈"},95:{label:"Гроза",icon:"⛈"},96:{label:"Гроза",icon:"⛈"},99:{label:"Гроза",icon:"⛈"},
+  }
+
+  function fetchData() {
+    setLoading(true)
+    Promise.all([
+      fetch("https://api.open-meteo.com/v1/forecast?latitude=7.88&longitude=98.38&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,relative_humidity_2m,precipitation&timezone=Asia%2FBangkok"),
+      fetch("https://marine-api.open-meteo.com/v1/marine?latitude=7.88&longitude=98.38&current=wave_height,wave_period&timezone=Asia%2FBangkok")
+    ]).then(([w,m])=>Promise.all([w.json(),m.json()]))
+      .then(([wd,md])=>{
+        setWeather(wd.current); setMarine(md.current)
+        const now = new Date()
+        setUpdated(`${now.getHours().toString().padStart(2,"0")}:${now.getMinutes().toString().padStart(2,"0")}`)
+      }).finally(()=>setLoading(false))
+  }
+
+  function handleOpen() { setOpen(true); if(!weather) fetchData() }
+
+  const wInfo = weather ? (WMO[weather.weather_code]??{label:"—",icon:"🌡"}) : null
+  const wave = marine?.wave_height ?? null
+  const seaSt = wave===null ? null : wave<0.5?{label:"Спокойное",color:"#4ade80"}:wave<1.2?{label:"Умеренное",color:"#fbbf24"}:wave<2.5?{label:"Волнение",color:"#f97316"}:{label:"Шторм",color:"#f87171"}
+
+  return (
+    <>
+      <button onClick={handleOpen} title="Погода Пхукет"
+        style={{height:"36px",padding:"0 10px",borderRadius:"10px",border:`1px solid ${t.border}`,
+          background:t.card,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",gap:"5px",
+          boxShadow:open?`0 0 0 2px ${t.accent}`:"none",transition:"all 0.2s"}}>
+        <span style={{fontSize:"16px",lineHeight:1}}>{wInfo?.icon??"🌤"}</span>
+        {weather && <span style={{fontSize:"13px",fontWeight:800,color:dark?"#7dd3fc":"#0369a1",fontFamily:"monospace"}}>{Math.round(weather.temperature_2m)}°</span>}
+      </button>
+
+      {open && (
+        <div onClick={()=>setOpen(false)}
+          style={{position:"fixed",inset:0,zIndex:1000,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"flex-start",justifyContent:"flex-end",paddingTop:"70px",paddingRight:"12px"}}>
+          <div onClick={e=>e.stopPropagation()}
+            style={{background:t.card,borderRadius:"16px",border:`1px solid ${t.border}`,width:"280px",boxShadow:"0 20px 60px rgba(0,0,0,0.4)",overflow:"hidden"}}>
+
+            {/* Header */}
+            <div style={{background:t.bg,borderBottom:`1px solid ${t.border}`,padding:"12px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{fontSize:"13px",fontWeight:800,color:t.accent}}>🌤 Погода — Пхукет</div>
+              <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                {updated && <span style={{fontSize:"10px",color:t.muted}}>{updated}</span>}
+                <button onClick={()=>setOpen(false)} style={{background:"none",border:"none",cursor:"pointer",fontSize:"18px",color:t.muted,padding:0,lineHeight:1}}>✕</button>
+              </div>
+            </div>
+
+            {loading && <div style={{textAlign:"center",padding:"32px",color:t.muted,fontSize:"13px"}}>⏳ Загрузка...</div>}
+
+            {!loading && weather && wInfo && (
+              <>
+                {/* Main temp */}
+                <div style={{display:"flex",alignItems:"center",gap:"14px",padding:"16px 14px 10px"}}>
+                  <div style={{fontSize:"52px",lineHeight:1}}>{wInfo.icon}</div>
+                  <div>
+                    <div style={{fontSize:"42px",fontWeight:900,color:t.text,lineHeight:1,fontFamily:"monospace"}}>{Math.round(weather.temperature_2m)}°</div>
+                    <div style={{fontSize:"12px",color:t.muted,marginTop:"2px"}}>{wInfo.label} · ощущается {Math.round(weather.apparent_temperature)}°</div>
+                  </div>
+                </div>
+
+                {/* Grid */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px",padding:"0 10px 10px"}}>
+                  {[
+                    {icon:"💧",label:"Влажность",val:`${weather.relative_humidity_2m}%`},
+                    {icon:"💨",label:"Ветер",val:`${Math.round(weather.wind_speed_10m)} км/ч`},
+                    {icon:"🌧",label:"Осадки",val:`${weather.precipitation} мм`},
+                    {icon:"🌊",label:"Волны",val:wave!==null?`${wave.toFixed(1)} м`:"—"},
+                  ].map(({icon,label,val})=>(
+                    <div key={label} style={{background:dark?"rgba(255,255,255,0.04)":"rgba(0,0,0,0.03)",border:`1px solid ${t.border}`,borderRadius:"10px",padding:"8px 10px",display:"flex",alignItems:"center",gap:"8px"}}>
+                      <span style={{fontSize:"18px"}}>{icon}</span>
+                      <div>
+                        <div style={{fontSize:"14px",fontWeight:800,color:t.text}}>{val}</div>
+                        <div style={{fontSize:"10px",color:t.muted}}>{label}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Sea status */}
+                {seaSt && (
+                  <div style={{margin:"0 10px 10px",padding:"10px 12px",background:dark?"rgba(255,255,255,0.03)":"rgba(0,0,0,0.02)",border:`1px solid ${t.border}`,borderRadius:"10px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                      <span style={{fontSize:"20px"}}>🚢</span>
+                      <div>
+                        <div style={{fontSize:"10px",color:t.muted,fontWeight:600}}>СОСТОЯНИЕ МОРЯ</div>
+                        <div style={{fontSize:"15px",fontWeight:800,color:seaSt.color}}>{seaSt.label}</div>
+                      </div>
+                    </div>
+                    <div style={{width:"10px",height:"10px",borderRadius:"50%",background:seaSt.color,boxShadow:`0 0 8px ${seaSt.color}`}}/>
+                  </div>
+                )}
+
+                {wave!==null && wave>=1.5 && (
+                  <div style={{margin:"0 10px 10px",padding:"10px 12px",background:dark?"#2d1a0e":"#fff7ed",border:"1.5px solid #f97316",borderRadius:"10px",display:"flex",gap:"8px",alignItems:"flex-start"}}>
+                    <span style={{fontSize:"18px"}}>⚠️</span>
+                    <div style={{fontSize:"11px",color:dark?"#fed7aa":"#92400e",lineHeight:1.5}}>Волны {wave.toFixed(1)} м — уточни статус морских туров у оперейшна</div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Refresh */}
+            <div style={{padding:"8px 10px 12px"}}>
+              <button onClick={fetchData} disabled={loading}
+                style={{width:"100%",padding:"8px",borderRadius:"10px",border:`1px solid ${t.border}`,background:"none",color:t.accent,fontSize:"12px",fontWeight:700,cursor:"pointer",opacity:loading?0.5:1}}>
+                {loading?"⏳ Загрузка...":"🔄 Обновить"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
+
+// ── CONTACTS TAB ─────────────────────────────────────────────────────────
 // PRIVATE TOURS TAB
 // ─────────────────────────────────────────────
 
@@ -4486,6 +4592,16 @@ export default function Page() {
   const [collapsedTypes,setCollapsedTypes]=useState<Record<string,boolean>>({})
 
   const [dark,setDark]=useState(true)
+  const [miniWeather,setMiniWeather]=useState<{temp:number;icon:string}|null>(null)
+  useEffect(()=>{
+    fetch("https://api.open-meteo.com/v1/forecast?latitude=7.88&longitude=98.38&current=temperature_2m,weather_code&timezone=Asia%2FBangkok")
+      .then(r=>r.json()).then(d=>{
+        const code=d.current?.weather_code??0
+        const icons:Record<number,string>={0:"☀️",1:"🌤",2:"⛅",3:"☁️",45:"🌫",48:"🌫",51:"🌦",53:"🌦",55:"🌧",61:"🌧",63:"🌧",65:"⛈",80:"🌩",81:"⛈",82:"⛈",95:"⛈",96:"⛈",99:"⛈"}
+        const icon=icons[code]??(code<=2?"☀️":code<=3?"⛅":code<=55?"🌦":"🌧")
+        setMiniWeather({temp:Math.round(d.current.temperature_2m),icon})
+      }).catch(()=>{})
+  },[])
 
   // Dark mode schedule: auto-switch after 20:00 and before 07:00
   useEffect(()=>{
@@ -4843,9 +4959,11 @@ export default function Page() {
                   <input type="file" onChange={handleExcursionFile} accept=".xlsx,.xls" style={{display:"none"}}/>
                 </label>
               )}
-              <button onClick={()=>setDark(d=>!d)} style={{width:"36px",height:"36px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"16px",background:t.cardBorder,border:"none",borderRadius:"10px",cursor:"pointer",flexShrink:0}}>
-                {dark?"☀️":"🌙"}
+              <button onClick={()=>setDark(d=>!d)} title={dark?"Светлая тема":"Тёмная тема"}
+                style={{width:"36px",height:"36px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"18px",background:t.cardBorder,border:"none",borderRadius:"10px",cursor:"pointer",flexShrink:0}}>
+                {dark?"◑":"◐"}
               </button>
+              <WeatherButton dark={dark}/>
               <CurrencyButton dark={dark}/>
             </div>
           </div>
@@ -4875,34 +4993,37 @@ export default function Page() {
           )}
 
           {/* ── Tab bar ── */}
-          <div style={{display:"flex",gap:"2px",padding:"8px 16px 10px",overflowX:"auto"}}>
+          <div style={{padding:"6px 12px 10px",overflowX:"auto",WebkitOverflowScrolling:"touch",scrollbarWidth:"none"}}>
+            <div style={{display:"flex",gap:"4px",minWidth:"max-content"}}>
             {[
-              {key:"transfers",    label:"Трансферы", icon:"✈️", color:"#38bdf8"},
+              {key:"transfers",    label:"Трансферы", icon:"✈️", color:"#06b6d4"},
               {key:"excursions",   label:"Экскурсии",  icon:"🗺️", color:"#a855f7"},
-              {key:"log",          label:"Журнал",     icon:"📋", color:"#38bdf8"},
+              {key:"log",          label:"Журнал",     icon:"📋", color:"#64748b"},
               {key:"methodichka",  label:"Методичка",  icon:"📚", color:"#0d9488"},
               {key:"boats",        label:"Лодки",      icon:"🚢", color:"#0891b2"},
-              {key:"boatsummer",   label:"Summer 1.05",icon:"🚤", color:"#06b6d4"},
-              {key:"vipcalc",      label:"VIP тур",    icon:"👑", color:"#f59e0b"},
-              {key:"private",      label:"Приватные",  icon:"🏝", color:"#a78bfa"},
+              {key:"boatsummer",   label:"Summer",     icon:"🚤", color:"#0e7490"},
+              {key:"vipcalc",      label:"VIP",        icon:"👑", color:"#d97706"},
+              {key:"private",      label:"Приватные",  icon:"🏝", color:"#7c3aed"},
             ].map(({key,label,icon,color})=>{
               const active = tab===key
               return (
                 <button key={key} onClick={()=>setTab(key as any)}
                   style={{
-                    display:"flex",flexDirection:"column",alignItems:"center",gap:"3px",
-                    padding:"7px 12px",fontSize:"10px",fontWeight:700,borderRadius:"12px",
-                    border:"none",cursor:"pointer",flexShrink:0,whiteSpace:"nowrap",
-                    background:active?color+"22":t.cardBorder,
-                    color:active?color:t.muted,
-                    transition:"all 0.2s",
-                    outline:active?`1.5px solid ${color}44`:"none",
+                    display:"flex",alignItems:"center",gap:"5px",
+                    padding:"6px 11px",fontSize:"11px",fontWeight:700,
+                    borderRadius:"99px",border:"none",cursor:"pointer",flexShrink:0,
+                    whiteSpace:"nowrap",transition:"all 0.2s",
+                    background:active?`linear-gradient(135deg,${color},${color}cc)`:"transparent",
+                    color:active?"#fff":t.muted,
+                    boxShadow:active?`0 2px 10px ${color}55`:"none",
+                    outline:"none",
                   }}>
-                  <span style={{fontSize:"16px",lineHeight:1}}>{icon}</span>
+                  <span style={{fontSize:"14px",lineHeight:1}}>{icon}</span>
                   <span>{label}</span>
                 </button>
               )
             })}
+            </div>
           </div>
         </div>
       </header>
@@ -4956,40 +5077,69 @@ export default function Page() {
                       {vouchers.map((v,i)=>{
                         const isDone=!!notifiedVouchers[v.vId],isProblem=v.pickup==="—",b=transferBadge(v)
                         return(
-                          <div key={i} style={{background:t.card,borderRadius:"14px",border:`1.5px solid ${b.border}`,overflow:"hidden",opacity:isDone?0.72:1,transition:"opacity 0.3s",display:"flex",flexDirection:"column"}}>
-                            <div style={{display:"flex",alignItems:"center",gap:"8px",padding:"10px 12px",background:b.bg,borderBottom:`1px solid ${b.border}`}}>
-                              <div style={{flex:1}}>
-                                <div style={{fontSize:"11px",color:b.color,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.8px"}}>{isProblem?"⚠ УТОЧНИТЬ ВРЕМЯ":"PICK UP"}</div>
-                                {!isProblem&&<div style={{fontSize:"22px",fontWeight:900,color:b.color,lineHeight:1.1}}>{v.pickup}</div>}
-                                <div style={{fontSize:"11px",color:b.color,opacity:0.75,marginTop:"3px",fontWeight:600}}>🎫 {v.vId}</div>
+                          <div key={i} style={{background:t.card,borderRadius:"18px",border:`1.5px solid ${b.border}`,overflow:"hidden",opacity:isDone?0.6:1,transition:"all 0.3s",display:"flex",flexDirection:"column",boxShadow:dark?"0 4px 24px rgba(0,0,0,0.35)":"0 4px 16px rgba(0,0,0,0.08)"}}>
+                            {/* ── BOARDING PASS TOP ── */}
+                            <div style={{background:`linear-gradient(135deg,${b.bg},${b.bg}ee)`,padding:"14px 14px 0"}}>
+                              <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:"8px",marginBottom:"10px"}}>
+                                {/* Left: time */}
+                                <div>
+                                  <div style={{fontSize:"9px",fontWeight:800,color:b.color,letterSpacing:"2.5px",textTransform:"uppercase",opacity:0.7,marginBottom:"2px"}}>{isProblem?"⚠ УТОЧНИТЬ":"PICK UP"}</div>
+                                  {!isProblem&&<div style={{fontSize:"40px",fontWeight:900,color:b.color,lineHeight:1,fontFamily:"'IBM Plex Mono',monospace",letterSpacing:"-2px"}}>{v.pickup}</div>}
+                                  {isProblem&&<div style={{fontSize:"15px",fontWeight:800,color:"#f87171",marginTop:"4px"}}>Уточнить</div>}
+                                </div>
+                                {/* Right: flight + status */}
+                                <div style={{textAlign:"right",display:"flex",flexDirection:"column",gap:"4px",alignItems:"flex-end"}}>
+                                  <span style={{fontSize:"10px",fontWeight:800,background:isDone?"rgba(74,222,128,0.12)":"rgba(251,191,36,0.12)",color:isDone?"#4ade80":"#fbbf24",border:`1px solid ${isDone?"rgba(74,222,128,0.4)":"rgba(251,191,36,0.4)"}`,borderRadius:"6px",padding:"2px 8px",whiteSpace:"nowrap"}}>{isDone?"✓ Отправлено":"⏳ Ожидает"}</span>
+                                  <div style={{fontSize:"9px",color:b.color,opacity:0.6,fontWeight:700,letterSpacing:"1.5px"}}>FLIGHT</div>
+                                  <div style={{fontSize:"14px",fontWeight:800,color:b.color,fontFamily:"monospace",letterSpacing:"0.5px"}}>{v.flightNo}</div>
+                                  <div style={{fontSize:"10px",color:b.color,opacity:0.55,fontFamily:"monospace"}}>{v.flightDate} {v.flightTime}</div>
+                                </div>
                               </div>
-                              <span style={{fontSize:"11px",background:"rgba(0,0,0,0.2)",color:b.color,borderRadius:"6px",padding:"3px 8px",fontWeight:700,whiteSpace:"nowrap"}}>{b.label}</span>
-                              {!isProblem&&<input type="checkbox" checked={isDone} onChange={()=>setNotifiedVouchers(prev=>({...prev,[v.vId]:!prev[v.vId]}))} style={{width:"20px",height:"20px",cursor:"pointer",flexShrink:0}}/>}
+                              {/* Badges row */}
+                              <div style={{display:"flex",alignItems:"center",gap:"5px",paddingBottom:"10px",flexWrap:"wrap"}}>
+                                {v.touroperator&&<span style={{fontSize:"9px",fontWeight:800,background:v.touroperator==="BIG"?"#1e3f6a":"#2d1b0e",color:v.touroperator==="BIG"?"#38bdf8":"#fb923c",borderRadius:"5px",padding:"2px 7px",letterSpacing:"0.5px"}}>{v.touroperator}</span>}
+                                {v.transferType&&<span style={{fontSize:"9px",fontWeight:700,background:v.transferType.startsWith("G")?"#0d2010":"#1e1040",color:v.transferType.startsWith("G")?"#4ade80":"#c084fc",borderRadius:"5px",padding:"2px 7px"}}>{v.transferType.startsWith("G")?"🚌 Группа":"👤 Инд."}</span>}
+                                <span style={{marginLeft:"auto",fontSize:"9px",color:b.color,opacity:0.55,fontFamily:"monospace",fontWeight:700}}>{v.vId}</span>
+                                {!isProblem&&<input type="checkbox" checked={isDone} onChange={()=>setNotifiedVouchers(prev=>({...prev,[v.vId]:!prev[v.vId]}))} style={{width:"18px",height:"18px",cursor:"pointer",accentColor:b.color,flexShrink:0}}/>}
+                              </div>
                             </div>
-                            <div style={{padding:"12px",flex:1}}>
-                              <div style={{color:t.accent,fontWeight:700,fontSize:"15px",marginBottom:"2px"}}>🏨 {v.hotel}</div>
-                              <div style={{color:"#fbbf24",fontSize:"12px",fontWeight:600,marginBottom:"2px"}}>👤 {v.guide}</div>
-                              {v.touroperator&&<div style={{display:"inline-block",fontSize:"10px",background:v.touroperator==="BIG"?"#1e3f6a":"#2d1b0e",color:v.touroperator==="BIG"?"#38bdf8":"#fb923c",borderRadius:"4px",padding:"1px 6px",marginBottom:"4px",fontWeight:700}}>{v.touroperator}</div>}
-                              {v.transferType&&<div style={{display:"inline-block",fontSize:"10px",background:v.transferType.startsWith("G")?"#1a2e1a":"#2d1b4e",color:v.transferType.startsWith("G")?"#4ade80":"#c084fc",borderRadius:"4px",padding:"1px 6px",marginBottom:"4px",fontWeight:700,marginLeft:"4px"}}>{v.transferType.startsWith("G")?"🚌 Групповой":"👤 Индивидуальный"}</div>}
-                              <div style={{color:t.muted,fontSize:"12px",marginBottom:"8px"}}>🗓 Выезд из отеля: <span style={{color:t.text,fontWeight:600}}>{v.departureDate}</span></div>
-                              <ul style={{margin:"0 0 10px 0",paddingLeft:"16px",fontSize:"13px",color:t.text}}>{v.tourists.map((tt,idx)=><li key={idx} style={{marginBottom:"2px"}}>{tt}</li>)}</ul>
+                            {/* ── PERFORATION ── */}
+                            <div style={{display:"flex",alignItems:"center",margin:"0"}}>
+                              <div style={{width:"12px",height:"12px",borderRadius:"50%",background:dark?"#07101f":"#f0f5fa",flexShrink:0,marginLeft:"-6px"}}/>
+                              <div style={{flex:1,height:"1px",background:`repeating-linear-gradient(90deg,${b.border} 0,${b.border} 5px,transparent 5px,transparent 10px)`}}/>
+                              <div style={{width:"12px",height:"12px",borderRadius:"50%",background:dark?"#07101f":"#f0f5fa",flexShrink:0,marginRight:"-6px"}}/>
                             </div>
-                            <div style={{padding:"0 12px 12px",borderTop:`1px solid ${t.cardBorder}`,paddingTop:"10px"}}>
-                              {v.phones.length===0&&<div style={{fontSize:"12px",color:t.muted}}>📵 Телефон не указан</div>}
+                            {/* ── PASSENGER INFO ── */}
+                            <div style={{padding:"12px 14px",flex:1}}>
+                              <div style={{display:"flex",alignItems:"flex-start",gap:"10px",marginBottom:"10px"}}>
+                                <div style={{fontSize:"28px",lineHeight:1,flexShrink:0}}>🏨</div>
+                                <div>
+                                  <div style={{fontSize:"15px",fontWeight:800,color:t.text,lineHeight:1.2}}>{v.hotel}</div>
+                                  <div style={{fontSize:"11px",color:t.muted,marginTop:"3px"}}>👤 {v.guide} · 🗓 Выезд: {v.departureDate}</div>
+                                </div>
+                              </div>
+                              <div style={{display:"flex",flexDirection:"column",gap:"3px",marginBottom:"8px"}}>
+                                {v.tourists.map((tt,idx)=>(
+                                  <div key={idx} style={{fontSize:"13px",color:t.text,display:"flex",alignItems:"center",gap:"7px"}}>
+                                    <span style={{width:"5px",height:"5px",borderRadius:"50%",background:b.color,flexShrink:0,display:"inline-block"}}/>
+                                    {tt}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            {/* ── ACTION BUTTONS ── */}
+                            <div style={{padding:"10px 14px 14px",borderTop:`1px solid ${t.border}`}}>
+                              {v.phones.length===0&&<div style={{fontSize:"12px",color:t.muted,textAlign:"center",padding:"6px 0"}}>📵 Телефон не указан</div>}
                               {v.phones.map((ph,idx)=>(
-                                <div key={idx} style={{marginBottom:"8px"}}>
-                                  <div style={{fontSize:"12px",color:t.muted,marginBottom:"4px"}}>📱 {ph}</div>
-                                  <div style={{display:"flex",gap:"6px"}}>
-                                    <a href={isProblem?undefined:`https://wa.me/${ph.replace(/\D/g,"")}?text=${generateTransferMessage(v)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isProblem){if(!isDone)setNotifiedVouchers(prev=>({...prev,[v.vId]:true}));addLog("transfer",v.tourists[0]||"",ph,v.hotel,v.vId)}}} style={{flex:1,background:isProblem?t.cardBorder:"#15803d",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700,pointerEvents:isProblem?"none":"auto"}}>WhatsApp</a>
-                                    <a href={isProblem?undefined:`https://t.me/+${ph.replace(/[^\d]/g,"")}`} target="_blank" rel="noreferrer" style={{flex:1,background:isProblem?t.cardBorder:"#0088cc",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700,pointerEvents:isProblem?"none":"auto"}}>Telegram</a>
-                                    <a href={`tel:${ph}`} style={{flex:1,background:t.cardBorder,color:t.text,textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700}}>Позвонить</a>
+                                <div key={idx} style={{marginBottom:idx<v.phones.length-1?"10px":0}}>
+                                  <div style={{fontSize:"11px",color:t.muted,marginBottom:"7px",fontFamily:"monospace",fontWeight:600,letterSpacing:"0.3px"}}>📱 {ph}</div>
+                                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 44px",gap:"6px"}}>
+                                    <a href={isProblem?undefined:`https://wa.me/${ph.replace(/\D/g,"")}?text=${generateTransferMessage(v)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isProblem){if(!isDone)setNotifiedVouchers(prev=>({...prev,[v.vId]:true}));addLog("transfer",v.tourists[0]||"",ph,v.hotel,v.vId)}}} style={{background:isProblem?t.border:"linear-gradient(135deg,#16a34a,#15803d)",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,pointerEvents:isProblem?"none":"auto",display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>💬 WA</a>
+                                    <a href={isProblem?undefined:`https://t.me/+${ph.replace(/[^\d]/g,"")}`} target="_blank" rel="noreferrer" style={{background:isProblem?t.border:"linear-gradient(135deg,#0088cc,#006aaa)",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,pointerEvents:isProblem?"none":"auto",display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>✈ TG</a>
+                                    <a href={`tel:${ph}`} style={{background:t.border,color:t.text,textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"18px",display:"flex",alignItems:"center",justifyContent:"center"}}>📞</a>
                                   </div>
                                 </div>
                               ))}
-                            </div>
-                            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",fontWeight:600,borderTop:`1px solid ${t.cardBorder}`}}>
-                              <span style={{color:dark?"#7dd3fc":"#1d4ed8"}}>✈️ {v.flightNo}</span>
-                              <span style={{color:t.muted}}>📅 {v.flightDate} · {v.flightTime}</span>
                             </div>
                           </div>
                         )
@@ -5035,36 +5185,60 @@ export default function Page() {
                       {excursions.map(e=>{
                         const isDone=!!notifiedExcursions[e.key],hasPhones=e.tourists.some(tt=>tt.phone)
                         return(
-                          <div key={e.key} style={{background:t.card,borderRadius:"14px",border:`1.5px solid ${meta.border}`,overflow:"hidden",opacity:isDone?0.72:1,transition:"opacity 0.3s",display:"flex",flexDirection:"column"}}>
-                            <div style={{display:"flex",alignItems:"center",gap:"8px",padding:"10px 12px",background:meta.bg,borderBottom:`1px solid ${meta.border}`}}>
-                              <div style={{flex:1}}>
-                                {!meta.noTransfer&&<><div style={{fontSize:"11px",color:meta.color,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.8px"}}>PICK UP</div><div style={{fontSize:"22px",fontWeight:900,color:meta.color,lineHeight:1.1}}>{e.pickup}</div></>}
-                                {meta.noTransfer&&<div style={{fontSize:"12px",color:meta.color,fontWeight:700}}>🚖 Самостоятельный выезд</div>}
-                                <div style={{fontSize:"11px",color:meta.color,opacity:0.75,marginTop:"3px",fontWeight:600}}>🎫 {e.vId}</div>
+                          <div key={e.key} style={{background:t.card,borderRadius:"18px",border:`1.5px solid ${meta.border}`,overflow:"hidden",opacity:isDone?0.6:1,transition:"all 0.3s",display:"flex",flexDirection:"column",boxShadow:dark?"0 4px 24px rgba(0,0,0,0.35)":"0 4px 16px rgba(0,0,0,0.08)"}}>
+                            <div style={{background:`linear-gradient(135deg,${meta.bg},${meta.bg}ee)`,padding:"14px 14px 0"}}>
+                              <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:"8px",marginBottom:"10px"}}>
+                                <div>
+                                  <div style={{fontSize:"9px",fontWeight:800,color:meta.color,letterSpacing:"2.5px",textTransform:"uppercase",opacity:0.7,marginBottom:"2px"}}>{meta.noTransfer?"САМОВЫВОЗ":"PICK UP"}</div>
+                                  {!meta.noTransfer&&<div style={{fontSize:"40px",fontWeight:900,color:meta.color,lineHeight:1,fontFamily:"'IBM Plex Mono',monospace",letterSpacing:"-2px"}}>{e.pickup}</div>}
+                                  {meta.noTransfer&&<div style={{fontSize:"14px",fontWeight:800,color:meta.color,marginTop:"4px"}}>🚖 Самостоятельно</div>}
+                                </div>
+                                <div style={{textAlign:"right",display:"flex",flexDirection:"column",gap:"4px",alignItems:"flex-end"}}>
+                                  <span style={{fontSize:"10px",fontWeight:800,background:isDone?"rgba(74,222,128,0.12)":"rgba(251,191,36,0.12)",color:isDone?"#4ade80":"#fbbf24",border:`1px solid ${isDone?"rgba(74,222,128,0.4)":"rgba(251,191,36,0.4)"}`,borderRadius:"6px",padding:"2px 8px",whiteSpace:"nowrap"}}>{isDone?"✓ Отправлено":"⏳ Ожидает"}</span>
+                                  <div style={{fontSize:"9px",color:meta.color,opacity:0.6,fontWeight:700,letterSpacing:"1.5px"}}>EXCURSION</div>
+                                  <div style={{fontSize:"11px",fontWeight:800,color:meta.color}}>{meta.icon} {meta.label}</div>
+                                  <div style={{fontSize:"10px",color:meta.color,opacity:0.55}}>{e.date} · {e.adl}взр{e.chd>0?`+${e.chd}д`:""}{ e.inf>0?`+${e.inf}мл`:""}</div>
+                                </div>
                               </div>
-                              <div style={{textAlign:"right"}}>
-                                <span style={{fontSize:"11px",background:"rgba(0,0,0,0.2)",color:meta.color,borderRadius:"6px",padding:"3px 8px",fontWeight:700,whiteSpace:"nowrap",display:"block",marginBottom:"4px"}}>{isDone?"✅ Отправлено":"⏳ Ожидает"}</span>
-                                <input type="checkbox" checked={isDone} onChange={()=>setNotifiedExcursions(prev=>({...prev,[e.key]:!prev[e.key]}))} style={{width:"20px",height:"20px",cursor:"pointer"}}/>
+                              <div style={{display:"flex",alignItems:"center",gap:"5px",paddingBottom:"10px",flexWrap:"wrap"}}>
+                                {e.touroperator&&<span style={{fontSize:"9px",fontWeight:800,background:(e.touroperator||"").toLowerCase().includes("bg asia")?"#1e3f6a":"#2d1b0e",color:(e.touroperator||"").toLowerCase().includes("bg asia")?"#38bdf8":"#fb923c",borderRadius:"5px",padding:"2px 7px",letterSpacing:"0.5px"}}>{(e.touroperator||"").toLowerCase().includes("bg asia")?"BIG":e.touroperator.split(" ")[0]}</span>}
+                                {e.cooperateStaff&&<span style={{fontSize:"9px",fontWeight:700,background:"#1a2e0a",color:"#a3e635",borderRadius:"5px",padding:"2px 7px"}}>🤝 {e.cooperateStaff}</span>}
+                                <span style={{marginLeft:"auto",fontSize:"9px",color:meta.color,opacity:0.55,fontFamily:"monospace",fontWeight:700}}>{e.vId}</span>
+                                <input type="checkbox" checked={isDone} onChange={()=>setNotifiedExcursions(prev=>({...prev,[e.key]:!prev[e.key]}))} style={{width:"18px",height:"18px",cursor:"pointer",accentColor:meta.color,flexShrink:0}}/>
                               </div>
                             </div>
-                            <div style={{padding:"12px",flex:1}}>
-                              <div style={{color:meta.color,fontWeight:700,fontSize:"13px",marginBottom:"4px"}}>{meta.icon} {e.excursionName}</div>
-                              <div style={{color:t.accent,fontWeight:700,fontSize:"14px",marginBottom:"2px"}}>🏨 {e.hotel}{e.room?` · №${e.room}`:""}</div>
-                              <div style={{color:"#fbbf24",fontSize:"12px",fontWeight:600,marginBottom:"2px"}}>👤 {e.guide}</div>
-                              {e.touroperator&&<div style={{display:"inline-block",fontSize:"10px",background:(e.touroperator||"").toLowerCase().includes("bg asia")?"#1e3f6a":"#2d1b0e",color:(e.touroperator||"").toLowerCase().includes("bg asia")?"#38bdf8":"#fb923c",borderRadius:"4px",padding:"1px 6px",marginBottom:"4px",fontWeight:700}}>{(e.touroperator||"").toLowerCase().includes("bg asia")?"BIG":e.touroperator.split(" ")[0]}</div>}
-                              {e.cooperateStaff&&<div style={{color:"#a3e635",fontSize:"12px",marginBottom:"4px"}}>🤝 {e.cooperateStaff}</div>}
-                              <div style={{color:t.muted,fontSize:"12px",marginBottom:"8px"}}>📅 {e.date} · 👥 {e.adl} взр{e.chd>0?` · ${e.chd} дет`:""}{e.inf>0?` · ${e.inf} мл`:""}</div>
-                              <ul style={{margin:"0 0 6px 0",paddingLeft:"16px",fontSize:"13px",color:t.text}}>{e.tourists.map((tt,idx)=><li key={idx} style={{marginBottom:"2px"}}>{tt.name}</li>)}</ul>
+                            <div style={{display:"flex",alignItems:"center"}}>
+                              <div style={{width:"12px",height:"12px",borderRadius:"50%",background:dark?"#07101f":"#f0f5fa",flexShrink:0,marginLeft:"-6px"}}/>
+                              <div style={{flex:1,height:"1px",background:`repeating-linear-gradient(90deg,${meta.border} 0,${meta.border} 5px,transparent 5px,transparent 10px)`}}/>
+                              <div style={{width:"12px",height:"12px",borderRadius:"50%",background:dark?"#07101f":"#f0f5fa",flexShrink:0,marginRight:"-6px"}}/>
                             </div>
-                            <div style={{padding:"0 12px 12px",borderTop:`1px solid ${t.cardBorder}`,paddingTop:"10px"}}>
-                              {!hasPhones&&<div style={{fontSize:"12px",color:t.muted}}>📵 Телефон не указан</div>}
+                            <div style={{padding:"12px 14px",flex:1}}>
+                              <div style={{fontSize:"14px",fontWeight:800,color:meta.color,marginBottom:"8px",lineHeight:1.3}}>{e.excursionName}</div>
+                              <div style={{display:"flex",alignItems:"flex-start",gap:"10px",marginBottom:"8px"}}>
+                                <div style={{fontSize:"24px",lineHeight:1,flexShrink:0}}>🏨</div>
+                                <div>
+                                  <div style={{fontSize:"14px",fontWeight:800,color:t.text,lineHeight:1.2}}>{e.hotel}{e.room?` · №${e.room}`:""}</div>
+                                  <div style={{fontSize:"11px",color:"#fbbf24",fontWeight:600,marginTop:"2px"}}>👤 {e.guide}</div>
+                                </div>
+                              </div>
+                              <div style={{display:"flex",flexDirection:"column",gap:"3px"}}>
+                                {e.tourists.map((tt,idx)=>(
+                                  <div key={idx} style={{fontSize:"13px",color:t.text,display:"flex",alignItems:"center",gap:"7px"}}>
+                                    <span style={{width:"5px",height:"5px",borderRadius:"50%",background:meta.color,flexShrink:0,display:"inline-block"}}/>
+                                    {tt.name}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            <div style={{padding:"10px 14px 14px",borderTop:`1px solid ${t.border}`}}>
+                              {!hasPhones&&<div style={{fontSize:"12px",color:t.muted,textAlign:"center",padding:"6px 0"}}>📵 Телефон не указан</div>}
                               {e.tourists.filter(tt=>tt.phone).map((tt,idx)=>(
                                 <div key={idx} style={{marginBottom:"8px"}}>
-                                  <div style={{fontSize:"12px",color:t.muted,marginBottom:"4px"}}>📱 {tt.phone}</div>
-                                  <div style={{display:"flex",gap:"6px"}}>
-                                    <a href={`https://wa.me/${tt.phone.replace(/\D/g,"")}?text=${generateExcursionMessage(e)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isDone)setNotifiedExcursions(prev=>({...prev,[e.key]:true}));addLog("excursion",tt.name,tt.phone,e.hotel,e.vId)}} style={{flex:1,background:"#15803d",color:"#fff",textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700}}>WhatsApp</a>
-                                    <a href={`https://t.me/+${tt.phone.replace(/[^\d]/g,"")}`} target="_blank" rel="noreferrer" style={{flex:1,background:"#0088cc",color:"#fff",textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700}}>Telegram</a>
-                                    <a href={`tel:${tt.phone}`} style={{flex:1,background:t.cardBorder,color:t.text,textAlign:"center",padding:"9px 4px",borderRadius:"8px",textDecoration:"none",fontSize:"12px",fontWeight:700}}>Позвонить</a>
+                                  <div style={{fontSize:"11px",color:t.muted,marginBottom:"7px",fontFamily:"monospace",fontWeight:600}}>📱 {tt.phone}</div>
+                                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 44px",gap:"6px"}}>
+                                    <a href={`https://wa.me/${tt.phone.replace(/\D/g,"")}?text=${generateExcursionMessage(e)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isDone)setNotifiedExcursions(prev=>({...prev,[e.key]:true}));addLog("excursion",tt.name,tt.phone,e.hotel,e.vId)}} style={{background:"linear-gradient(135deg,#16a34a,#15803d)",color:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>💬 WA</a>
+                                    <a href={`https://t.me/+${tt.phone.replace(/[^\d]/g,"")}`} target="_blank" rel="noreferrer" style={{background:"linear-gradient(135deg,#0088cc,#006aaa)",color:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>✈ TG</a>
+                                    <a href={`tel:${tt.phone}`} style={{background:t.border,color:t.text,textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"18px",display:"flex",alignItems:"center",justifyContent:"center"}}>📞</a>
                                   </div>
                                 </div>
                               ))}
@@ -5094,6 +5268,10 @@ export default function Page() {
 
       {/* ── PRIVATE TOURS TAB ── */}
       {tab==="private" && <PrivateTab dark={dark}/>}
+
+      {/* ── CONTACTS TAB ── */}
+
+      {/* ── WEATHER TAB ── */}
 
       {/* ── METHODICHKA TAB ── */}
       {tab==="methodichka" && <MethodichkaTab dark={dark}/>}
