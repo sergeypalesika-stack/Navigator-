@@ -5118,15 +5118,15 @@ export default function Page() {
                               </div>
                             </div>
                             {/* ── ACTION BUTTONS ── */}
-                            <div style={{padding:"10px 14px 14px",borderTop:`1px solid ${t.border}`}}>
+                            <div style={{padding:"10px 14px 14px",borderTop:`1px solid ${t.cardBorder}`}}>
                               {v.phones.length===0&&<div style={{fontSize:"12px",color:t.muted,textAlign:"center",padding:"6px 0"}}>📵 Телефон не указан</div>}
                               {v.phones.map((ph,idx)=>(
                                 <div key={idx} style={{marginBottom:idx<v.phones.length-1?"10px":0}}>
                                   <div style={{fontSize:"11px",color:t.muted,marginBottom:"7px",fontFamily:"monospace",fontWeight:600,letterSpacing:"0.3px"}}>📱 {ph}</div>
                                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 44px",gap:"6px"}}>
-                                    <a href={isProblem?undefined:`https://wa.me/${ph.replace(/\D/g,"")}?text=${generateTransferMessage(v)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isProblem){if(!isDone)setNotifiedVouchers(prev=>({...prev,[v.vId]:true}));addLog("transfer",v.tourists[0]||"",ph,v.hotel,v.vId)}}} style={{background:isProblem?t.border:"linear-gradient(135deg,#16a34a,#15803d)",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,pointerEvents:isProblem?"none":"auto",display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>💬 WA</a>
-                                    <a href={isProblem?undefined:`https://t.me/+${ph.replace(/[^\d]/g,"")}`} target="_blank" rel="noreferrer" style={{background:isProblem?t.border:"linear-gradient(135deg,#0088cc,#006aaa)",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,pointerEvents:isProblem?"none":"auto",display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>✈ TG</a>
-                                    <a href={`tel:${ph}`} style={{background:t.border,color:t.text,textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"18px",display:"flex",alignItems:"center",justifyContent:"center"}}>📞</a>
+                                    <a href={isProblem?undefined:`https://wa.me/${ph.replace(/\D/g,"")}?text=${generateTransferMessage(v)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isProblem){if(!isDone)setNotifiedVouchers(prev=>({...prev,[v.vId]:true}));addLog("transfer",v.tourists[0]||"",ph,v.hotel,v.vId)}}} style={{background:isProblem?t.cardBorder:"linear-gradient(135deg,#16a34a,#15803d)",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,pointerEvents:isProblem?"none":"auto",display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>💬 WA</a>
+                                    <a href={isProblem?undefined:`https://t.me/+${ph.replace(/[^\d]/g,"")}`} target="_blank" rel="noreferrer" style={{background:isProblem?t.cardBorder:"linear-gradient(135deg,#0088cc,#006aaa)",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,pointerEvents:isProblem?"none":"auto",display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>✈ TG</a>
+                                    <a href={`tel:${ph}`} style={{background:t.cardBorder,color:t.text,textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"18px",display:"flex",alignItems:"center",justifyContent:"center"}}>📞</a>
                                   </div>
                                 </div>
                               ))}
@@ -5220,7 +5220,7 @@ export default function Page() {
                                 ))}
                               </div>
                             </div>
-                            <div style={{padding:"10px 14px 14px",borderTop:`1px solid ${t.border}`}}>
+                            <div style={{padding:"10px 14px 14px",borderTop:`1px solid ${t.cardBorder}`}}>
                               {!hasPhones&&<div style={{fontSize:"12px",color:t.muted,textAlign:"center",padding:"6px 0"}}>📵 Телефон не указан</div>}
                               {e.tourists.filter(tt=>tt.phone).map((tt,idx)=>(
                                 <div key={idx} style={{marginBottom:"8px"}}>
@@ -5228,7 +5228,7 @@ export default function Page() {
                                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 44px",gap:"6px"}}>
                                     <a href={`https://wa.me/${tt.phone.replace(/\D/g,"")}?text=${generateExcursionMessage(e)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isDone)setNotifiedExcursions(prev=>({...prev,[e.key]:true}));addLog("excursion",tt.name,tt.phone,e.hotel,e.vId)}} style={{background:"linear-gradient(135deg,#16a34a,#15803d)",color:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>💬 WA</a>
                                     <a href={`https://t.me/+${tt.phone.replace(/[^\d]/g,"")}`} target="_blank" rel="noreferrer" style={{background:"linear-gradient(135deg,#0088cc,#006aaa)",color:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>✈ TG</a>
-                                    <a href={`tel:${tt.phone}`} style={{background:t.border,color:t.text,textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"18px",display:"flex",alignItems:"center",justifyContent:"center"}}>📞</a>
+                                    <a href={`tel:${tt.phone}`} style={{background:t.cardBorder,color:t.text,textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"18px",display:"flex",alignItems:"center",justifyContent:"center"}}>📞</a>
                                   </div>
                                 </div>
                               ))}
