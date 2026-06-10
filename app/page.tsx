@@ -4002,11 +4002,11 @@ function WeatherButton({dark}:{dark:boolean}) {
     border:dark?"#1a2e46":"#ccd9e8", text:dark?"#ddeaf7":"#1a2636",
     muted:dark?"#527490":"#6e8aa8", accent:"#06b6d4",
   }
-  const [open, setOpen] = React.useState(false)
-  const [weather, setWeather] = React.useState<any>(null)
-  const [marine, setMarine] = React.useState<any>(null)
-  const [loading, setLoading] = React.useState(false)
-  const [updated, setUpdated] = React.useState("")
+  const [open, setOpen] = useState(false)
+  const [weather, setWeather] = useState<any>(null)
+  const [marine, setMarine] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
+  const [updated, setUpdated] = useState("")
 
   const WMO: Record<number,{label:string;icon:string}> = {
     0:{label:"Ясно",icon:"☀️"},1:{label:"Почти ясно",icon:"🌤"},2:{label:"Переменная облачность",icon:"⛅"},3:{label:"Пасмурно",icon:"☁️"},
