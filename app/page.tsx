@@ -4592,16 +4592,6 @@ export default function Page() {
   const [collapsedTypes,setCollapsedTypes]=useState<Record<string,boolean>>({})
 
   const [dark,setDark]=useState(true)
-  const [miniWeather,setMiniWeather]=useState<{temp:number;icon:string}|null>(null)
-  useEffect(()=>{
-    fetch("https://api.open-meteo.com/v1/forecast?latitude=7.88&longitude=98.38&current=temperature_2m,weather_code&timezone=Asia%2FBangkok")
-      .then(r=>r.json()).then(d=>{
-        const code=d.current?.weather_code??0
-        const icons:Record<number,string>={0:"☀️",1:"🌤",2:"⛅",3:"☁️",45:"🌫",48:"🌫",51:"🌦",53:"🌦",55:"🌧",61:"🌧",63:"🌧",65:"⛈",80:"🌩",81:"⛈",82:"⛈",95:"⛈",96:"⛈",99:"⛈"}
-        const icon=icons[code]??(code<=2?"☀️":code<=3?"⛅":code<=55?"🌦":"🌧")
-        setMiniWeather({temp:Math.round(d.current.temperature_2m),icon})
-      }).catch(()=>{})
-  },[])
 
   // Dark mode schedule: auto-switch after 20:00 and before 07:00
   useEffect(()=>{
