@@ -1927,7 +1927,6 @@ function MethodichkaTab({dark}:{dark:boolean}) {
             )
           })}
         </div>
-      </div>
 
         {/* Row 4: operator filter pills */}
         {ALL_OPS.length > 2 && (
