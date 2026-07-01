@@ -5495,6 +5495,7 @@ export default function Page() {
                                 ))}
                               </div>
                             </div>
+                            <div style={{padding:"10px 14px 14px",borderTop:`1px solid ${t.cardBorder}`}}>
                               {!hasPhones&&<div style={{fontSize:"12px",color:t.muted,textAlign:"center",padding:"6px 0"}}>📵 Телефон не указан</div>}
                               {e.tourists.filter(tt=>tt.phone).map((tt,idx)=>(
                                 <div key={idx} style={{marginBottom:"8px"}}>
