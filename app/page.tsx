@@ -632,6 +632,7 @@ function generateTransferMessage(v: Voucher): string {
 }
 
 const APP_PASSWORD = "8888"
+const APP_VERSION = "2.1"
 
 // ══════════════════════════════════════════════
 // AI UPDATE PANEL — универсальный AI-парсер файлов
@@ -2101,7 +2102,7 @@ function MethodichkaTab({dark}:{dark:boolean}) {
                                         <div style={{flex:1}}>
                                           {timePart ? (
                                             <div style={{display:"flex", flexWrap:"wrap", alignItems:"baseline", gap:"6px"}}>
-                                              <span style={{fontSize:"10px", fontWeight:800, color:m.color, background:m.bg, borderRadius:"5px", padding:"1px 6px", flexShrink:0, fontFamily:"monospace"}}>{timePart[1]}</span>
+                                              <span style={{fontSize:"10px", fontWeight:800, color:m.color, background:m.bg, borderRadius:"6px", padding:"1px 6px", flexShrink:0, fontFamily:"monospace"}}>{timePart[1]}</span>
                                               <span style={{fontSize:"12px", color:isAlert?"#f87171":t.text, lineHeight:1.5, flex:1}}>{timePart[2]}</span>
                                             </div>
                                           ) : (
@@ -2886,7 +2887,7 @@ function BoatsTab({dark}:{dark:boolean}) {
           if(!avail)return null
           return(
             <label style={{display:"flex",alignItems:"center",gap:"10px",padding:"8px 10px",borderRadius:"8px",cursor:"pointer",border:`1px solid ${checked?(m?.border||t.cardBorder):t.cardBorder}`,background:checked?(m?.bg||t.header):t.header,marginBottom:"6px",transition:"all 0.15s"}}>
-              <div style={{width:"18px",height:"18px",borderRadius:"5px",border:`2px solid ${checked?(m?.color||t.accent):t.muted}`,background:checked?(m?.color||t.accent):"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} onClick={()=>onChange(!checked)}>
+              <div style={{width:"18px",height:"18px",borderRadius:"6px",border:`2px solid ${checked?(m?.color||t.accent):t.muted}`,background:checked?(m?.color||t.accent):"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} onClick={()=>onChange(!checked)}>
                 {checked&&<span style={{color:"#fff",fontSize:"11px",fontWeight:900}}>✓</span>}
               </div>
               <span style={{flex:1,fontSize:"12px",color:t.text,fontWeight:500}}>{label}</span>
@@ -3724,7 +3725,7 @@ function BoatSummerTab({dark}: {dark: boolean}) {
           if(!available) return null
           return (
             <label style={{display:"flex",alignItems:"center",gap:"10px",padding:"8px 10px",borderRadius:"8px",cursor:"pointer",border:`1px solid ${checked?(m?.border||t.cardBorder):t.cardBorder}`,background:checked?(m?.bg||t.header):t.header,marginBottom:"6px",transition:"all 0.15s"}}>
-              <div style={{width:"18px",height:"18px",borderRadius:"5px",border:`2px solid ${checked?(m?.color||t.accent):t.muted}`,background:checked?(m?.color||t.accent):"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all 0.15s"}}
+              <div style={{width:"18px",height:"18px",borderRadius:"6px",border:`2px solid ${checked?(m?.color||t.accent):t.muted}`,background:checked?(m?.color||t.accent):"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all 0.15s"}}
                 onClick={()=>onChange(!checked)}>
                 {checked && <span style={{color:"#fff",fontSize:"11px",fontWeight:900}}>✓</span>}
               </div>
@@ -4650,6 +4651,14 @@ export default function Page() {
   const [copiedMsg,setCopiedMsg]=useState("")
   const [logSearch,setLogSearch]=useState("")
   const [logType,setLogType]=useState<"all"|"transfer"|"excursion">("all")
+  const [showSettings,setShowSettings]=useState(false)
+  const [guideName,setGuideName]=useState<string>(()=>{
+    try{return localStorage.getItem("navGuideName")||""}catch{return ""}
+  })
+  function saveGuideName(name:string){
+    setGuideName(name)
+    localStorage.setItem("navGuideName",name)
+  }
   function copyMessage(text:string,id:string){
     navigator.clipboard?.writeText(decodeURIComponent(text)).then(()=>{
       setCopiedMsg(id);setTimeout(()=>setCopiedMsg(""),1500)
@@ -4700,7 +4709,7 @@ export default function Page() {
 
   // Swipe gesture between tabs
   const TAB_ORDER: Array<"transfers"|"excursions"|"log"|"methodichka"|"boats"|"boatsummer"|"vipcalc"|"private"> =
-    ["transfers","excursions","log","methodichka","boats","boatsummer","vipcalc","private"]
+    ["transfers","excursions","methodichka","boats","boatsummer","vipcalc","private","log"]
   const swipeRef = useRef<{x:number;y:number}|null>(null)
   function onTouchStart(e:React.TouchEvent){ swipeRef.current={x:e.touches[0].clientX,y:e.touches[0].clientY} }
   function onTouchEnd(e:React.TouchEvent){
@@ -4970,7 +4979,12 @@ export default function Page() {
 
           {/* Logo block */}
           <div style={{ textAlign: "center", marginBottom: "32px" }}>
-            <div style={{ width: "72px", height: "72px", borderRadius: "20px", background: "linear-gradient(135deg,#38bdf8,#0369a1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "36px", margin: "0 auto 16px", boxShadow: "0 8px 32px rgba(56,189,248,0.35)" }}>🚐</div>
+            <div style={{ width: "72px", height: "72px", borderRadius: "20px", background: "linear-gradient(135deg,#38bdf8,#0369a1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", boxShadow: "0 8px 32px rgba(56,189,248,0.35)" }}>
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="#fff" stroke="none"/>
+              </svg>
+            </div>
             <div style={{ fontSize: "24px", fontWeight: 800, color: "#f0f6ff", letterSpacing: "-0.5px" }}>Navigator</div>
             <div style={{ fontSize: "11px", fontWeight: 700, color: "#38bdf8", letterSpacing: "2px", marginTop: "2px" }}>SAYAMA TRAVEL</div>
           </div>
@@ -4993,7 +5007,11 @@ export default function Page() {
             </button>
           </div>
 
-          <div style={{ textAlign: "center", marginTop: "20px", fontSize: "11px", color: "#3a5a7a" }}>Phuket · Thailand 🌴</div>
+          <div style={{ textAlign: "center", marginTop: "20px", fontSize: "11px", color: "#3a5a7a", letterSpacing: "0.5px" }}>
+            Phuket · Thailand
+            <span style={{margin:"0 8px",opacity:0.4}}>|</span>
+            v{APP_VERSION}
+          </div>
         </div>
       </div>
     )
@@ -5017,11 +5035,81 @@ export default function Page() {
 
   return (
     <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} style={{minHeight:"100vh",background:t.bg,color:t.text,fontFamily:"'IBM Plex Sans','Segoe UI',sans-serif",transition:"background 0.3s,color 0.3s",position:"relative"}}>
+      <style>{`
+        @keyframes navFadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes navFadeIn { from { opacity:0; } to { opacity:1; } }
+        .nav-card { animation: navFadeUp 0.3s ease both; }
+        .nav-fade { animation: navFadeIn 0.25s ease both; }
+        input:focus, textarea:focus, select:focus { border-color: ${t.accent} !important; box-shadow: 0 0 0 3px ${t.accent}22; }
+        button { -webkit-tap-highlight-color: transparent; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: ${dark?"#1e3450":"#c5d5e5"}; border-radius: 99px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+      `}</style>
       {showTop&&(
         <button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})}
           style={{position:"fixed",bottom:"80px",right:"16px",zIndex:200,width:"40px",height:"40px",borderRadius:"50%",background:t.accent,border:"none",cursor:"pointer",fontSize:"20px",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,0.35)",color:"#fff"}}>
           ↑
         </button>
+      )}
+
+      {/* ── SETTINGS MODAL ── */}
+      {showSettings&&(
+        <div className="nav-fade" onClick={()=>setShowSettings(false)}
+          style={{position:"fixed",inset:0,zIndex:1000,background:"rgba(0,0,0,0.55)",display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}}>
+          <div onClick={ev=>ev.stopPropagation()}
+            style={{background:t.card,borderRadius:"18px",border:`1px solid ${t.cardBorder}`,width:"100%",maxWidth:"380px",maxHeight:"85vh",overflow:"auto",boxShadow:"0 24px 80px rgba(0,0,0,0.5)"}}>
+
+            {/* Header */}
+            <div style={{padding:"16px 18px",borderBottom:`1px solid ${t.cardBorder}`,display:"flex",justifyContent:"space-between",alignItems:"center",position:"sticky",top:0,background:t.card,zIndex:2}}>
+              <div style={{fontSize:"15px",fontWeight:800,color:t.text}}>Настройки</div>
+              <button onClick={()=>setShowSettings(false)} style={{background:"none",border:"none",cursor:"pointer",fontSize:"18px",color:t.muted,padding:0,lineHeight:1}}>✕</button>
+            </div>
+
+            {/* Guide name */}
+            <div style={{padding:"16px 18px",borderBottom:`1px solid ${t.cardBorder}`}}>
+              <div style={{fontSize:"11px",fontWeight:700,color:t.muted,letterSpacing:"1px",textTransform:"uppercase" as const,marginBottom:"8px"}}>Имя гида</div>
+              <input
+                value={guideName}
+                onChange={ev=>saveGuideName(ev.target.value)}
+                placeholder="Например: Сергей"
+                style={{width:"100%",padding:"10px 12px",fontSize:"14px",borderRadius:"10px",border:`1px solid ${t.inputBdr}`,background:t.inputBg,color:t.text,outline:"none",boxSizing:"border-box"}}
+              />
+              <div style={{fontSize:"11px",color:t.muted,marginTop:"6px",lineHeight:1.5}}>Отображается в шапке приложения</div>
+            </div>
+
+            {/* Theme */}
+            <div style={{padding:"16px 18px",borderBottom:`1px solid ${t.cardBorder}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div>
+                <div style={{fontSize:"13px",fontWeight:700,color:t.text}}>Тёмная тема</div>
+                <div style={{fontSize:"11px",color:t.muted,marginTop:"2px"}}>Автовключение с 20:00 до 7:00</div>
+              </div>
+              <button onClick={()=>setDark(d=>!d)}
+                style={{width:"48px",height:"28px",borderRadius:"99px",border:"none",cursor:"pointer",background:dark?t.accent:t.cardBorder,position:"relative",transition:"background 0.2s",flexShrink:0}}>
+                <span style={{position:"absolute",top:"3px",left:dark?"23px":"3px",width:"22px",height:"22px",borderRadius:"50%",background:"#fff",transition:"left 0.2s",boxShadow:"0 1px 4px rgba(0,0,0,0.3)"}}/>
+              </button>
+            </div>
+
+            {/* Backup */}
+            <div style={{padding:"16px 18px",borderBottom:`1px solid ${t.cardBorder}`}}>
+              <div style={{fontSize:"11px",fontWeight:700,color:t.muted,letterSpacing:"1px",textTransform:"uppercase" as const,marginBottom:"10px"}}>Данные</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
+                <button onClick={exportBackup} style={{padding:"10px",fontSize:"12px",fontWeight:700,borderRadius:"10px",border:"none",background:t.accent,color:"#fff",cursor:"pointer"}}>⬇ Резервная копия</button>
+                <label style={{padding:"10px",fontSize:"12px",fontWeight:700,borderRadius:"10px",background:t.cardBorder,color:t.text,cursor:"pointer",textAlign:"center"}}>
+                  ⬆ Восстановить
+                  <input type="file" accept=".json" onChange={importBackup} style={{display:"none"}}/>
+                </label>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div style={{padding:"14px 18px"}}>
+              <div style={{textAlign:"center",fontSize:"10px",color:t.muted,letterSpacing:"0.5px"}}>
+                NAVIGATOR v{APP_VERSION} · SAYAMA TRAVEL · Phuket
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       <header style={{background:dark?"#080f1e":"#ffffff",borderBottom:`1px solid ${t.cardBorder}`,position:"sticky",top:0,zIndex:50,backdropFilter:"blur(12px)",boxShadow:dark?"0 2px 20px rgba(0,0,0,0.4)":"0 2px 12px rgba(0,0,0,0.08)"}}>
@@ -5031,10 +5119,15 @@ export default function Page() {
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 16px 0"}}>
             {/* Logo */}
             <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
-              <div style={{width:"36px",height:"36px",borderRadius:"10px",background:"linear-gradient(135deg,#38bdf8,#0369a1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"18px",flexShrink:0,boxShadow:"0 2px 8px rgba(56,189,248,0.4)"}}>🚐</div>
+              <div style={{width:"36px",height:"36px",borderRadius:"10px",background:"linear-gradient(135deg,#38bdf8,#0369a1)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:"0 2px 8px rgba(56,189,248,0.4)"}}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="#fff" stroke="none"/>
+                </svg>
+              </div>
               <div>
                 <div style={{fontSize:"15px",fontWeight:800,letterSpacing:"-0.3px",color:t.text,lineHeight:1.1}}>Navigator</div>
-                <div style={{fontSize:"10px",fontWeight:600,color:t.muted,letterSpacing:"0.3px"}}>SAYAMA TRAVEL</div>
+                <div style={{fontSize:"10px",fontWeight:600,color:t.muted,letterSpacing:"0.3px"}}>{guideName?`${guideName} · SAYAMA`:"SAYAMA TRAVEL"}</div>
               </div>
             </div>
 
@@ -5055,6 +5148,13 @@ export default function Page() {
               <button onClick={()=>setDark(d=>!d)} title={dark?"Светлая тема":"Тёмная тема"}
                 style={{width:"36px",height:"36px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"18px",background:t.cardBorder,border:"none",borderRadius:"10px",cursor:"pointer",flexShrink:0}}>
                 {dark?"◑":"◐"}
+              </button>
+              <button onClick={()=>setShowSettings(true)} title="Настройки"
+                style={{width:"36px",height:"36px",display:"flex",alignItems:"center",justifyContent:"center",background:t.cardBorder,border:"none",borderRadius:"10px",cursor:"pointer",flexShrink:0}}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={dark?"#7a9abf":"#5a7a9a"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
               </button>
               <WeatherButton dark={dark}/>
               <CurrencyButton dark={dark}/>
@@ -5091,12 +5191,12 @@ export default function Page() {
             {[
               {key:"transfers",    label:"Трансферы", icon:"✈️", color:"#06b6d4"},
               {key:"excursions",   label:"Экскурсии",  icon:"🗺️", color:"#a855f7"},
-              {key:"log",          label:"Журнал",     icon:"📋", color:"#64748b"},
               {key:"methodichka",  label:"Методичка",  icon:"📚", color:"#0d9488"},
               {key:"boats",        label:"Лодки",      icon:"🚢", color:"#0891b2"},
               {key:"boatsummer",   label:"Summer",     icon:"🚤", color:"#0e7490"},
               {key:"vipcalc",      label:"VIP",        icon:"👑", color:"#d97706"},
               {key:"private",      label:"Приватные",  icon:"🏝", color:"#7c3aed"},
+              {key:"log",          label:"Журнал",     icon:"📋", color:"#64748b"},
             ].map(({key,label,icon,color})=>{
               const active = tab===key
               const badge = key==="transfers"
@@ -5163,7 +5263,7 @@ export default function Page() {
               </div>
             </div>
           </div>
-          {transferData.length===0&&<div style={{textAlign:"center",padding:"80px 20px",color:t.muted}}><div style={{fontSize:"48px",marginBottom:"12px"}}>📋</div><div style={{fontSize:"16px",fontWeight:600,marginBottom:"4px"}}>Файл не загружен</div><div style={{fontSize:"13px"}}>Нажмите «Загрузить» и выберите Excel-файл с трансферами</div></div>}
+          {transferData.length===0&&<div style={{textAlign:"center",padding:"80px 20px",color:t.muted}}><div style={{width:"80px",height:"80px",borderRadius:"24px",background:dark?"rgba(56,189,248,0.08)":"rgba(3,105,161,0.06)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:"36px"}}>✈️</div><div style={{fontSize:"17px",fontWeight:700,marginBottom:"6px",color:t.text}}>Начните рабочий день</div><div style={{fontSize:"13px",lineHeight:1.6,maxWidth:"280px",margin:"0 auto"}}>Загрузите Excel-файл с депарами от операционного отдела — кнопка «Загрузить» в шапке</div></div>}
           {transferData.length>0&&dataAge(transferLoadTime).stale&&(
             <div style={{margin:"0 16px 12px",padding:"10px 14px",borderRadius:"12px",background:dark?"#2d2408":"#fefce8",border:"1.5px solid #eab308",display:"flex",alignItems:"center",gap:"10px"}}>
               <span style={{fontSize:"20px"}}>⏰</span>
@@ -5228,7 +5328,7 @@ export default function Page() {
                       {vouchers.map((v,i)=>{
                         const isDone=!!notifiedVouchers[v.vId],isProblem=v.pickup==="—",b=transferBadge(v)
                         return(
-                          <div key={i} style={{background:t.card,borderRadius:"18px",border:`1.5px solid ${b.border}`,overflow:"hidden",opacity:isDone?0.6:1,transition:"all 0.3s",display:"flex",flexDirection:"column",boxShadow:dark?"0 4px 24px rgba(0,0,0,0.35)":"0 4px 16px rgba(0,0,0,0.08)"}}>
+                          <div key={i} className="nav-card" style={{background:t.card,borderRadius:"18px",border:`1.5px solid ${b.border}`,overflow:"hidden",opacity:isDone?0.6:1,transition:"all 0.3s",display:"flex",flexDirection:"column",boxShadow:dark?"0 4px 24px rgba(0,0,0,0.35)":"0 4px 16px rgba(0,0,0,0.08)",animationDelay:`${Math.min(i*40,300)}ms`}}>
                             {/* ── BOARDING PASS TOP ── */}
                             <div style={{background:`linear-gradient(135deg,${b.bg},${b.bg}ee)`,padding:"14px 14px 0"}}>
                               <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:"8px",marginBottom:"10px"}}>
@@ -5248,8 +5348,8 @@ export default function Page() {
                               </div>
                               {/* Badges row */}
                               <div style={{display:"flex",alignItems:"center",gap:"5px",paddingBottom:"10px",flexWrap:"wrap"}}>
-                                {v.touroperator&&<span style={{fontSize:"9px",fontWeight:800,background:v.touroperator==="BIG"?"#1e3f6a":"#2d1b0e",color:v.touroperator==="BIG"?"#38bdf8":"#fb923c",borderRadius:"5px",padding:"2px 7px",letterSpacing:"0.5px"}}>{v.touroperator}</span>}
-                                {v.transferType&&<span style={{fontSize:"9px",fontWeight:700,background:v.transferType.startsWith("G")?"#0d2010":"#1e1040",color:v.transferType.startsWith("G")?"#4ade80":"#c084fc",borderRadius:"5px",padding:"2px 7px"}}>{v.transferType.startsWith("G")?"🚌 Группа":"👤 Инд."}</span>}
+                                {v.touroperator&&<span style={{fontSize:"9px",fontWeight:800,background:v.touroperator==="BIG"?"#1e3f6a":"#2d1b0e",color:v.touroperator==="BIG"?"#38bdf8":"#fb923c",borderRadius:"6px",padding:"2px 7px",letterSpacing:"0.5px"}}>{v.touroperator}</span>}
+                                {v.transferType&&<span style={{fontSize:"9px",fontWeight:700,background:v.transferType.startsWith("G")?"#0d2010":"#1e1040",color:v.transferType.startsWith("G")?"#4ade80":"#c084fc",borderRadius:"6px",padding:"2px 7px"}}>{v.transferType.startsWith("G")?"🚌 Группа":"👤 Инд."}</span>}
                                 <span style={{marginLeft:"auto",fontSize:"9px",color:b.color,opacity:0.55,fontFamily:"monospace",fontWeight:700}}>{v.vId}</span>
                                 {!isProblem&&<input type="checkbox" checked={isDone} onChange={()=>setNotifiedVouchers(prev=>({...prev,[v.vId]:!prev[v.vId]}))} style={{width:"18px",height:"18px",cursor:"pointer",accentColor:b.color,flexShrink:0}}/>}
                               </div>
@@ -5341,7 +5441,7 @@ export default function Page() {
               </div>
             </div>
           )}
-          {excursionData.length===0&&<div style={{textAlign:"center",padding:"80px 20px",color:t.muted}}><div style={{fontSize:"48px",marginBottom:"12px"}}>🗺️</div><div style={{fontSize:"16px",fontWeight:600,marginBottom:"4px"}}>Файл не загружен</div><div style={{fontSize:"13px"}}>Нажмите «Загрузить» и выберите Excel-файл с экскурсиями</div></div>}
+          {excursionData.length===0&&<div style={{textAlign:"center",padding:"80px 20px",color:t.muted}}><div style={{width:"80px",height:"80px",borderRadius:"24px",background:dark?"rgba(168,85,247,0.08)":"rgba(124,58,237,0.06)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:"36px"}}>🗺️</div><div style={{fontSize:"17px",fontWeight:700,marginBottom:"6px",color:t.text}}>Экскурсии не загружены</div><div style={{fontSize:"13px",lineHeight:1.6,maxWidth:"280px",margin:"0 auto"}}>Загрузите файл экскурсионной программы от оперейшна — кнопка «Загрузить» в шапке</div></div>}
           <main style={{maxWidth:"1200px",margin:"0 auto",padding:"16px"}}>
             {groupedExcursions.map(([type,excursions])=>{
               const meta=TYPE_META[type],isCollapsed=collapsedTypes[type]
@@ -5368,7 +5468,7 @@ export default function Page() {
                       {excursions.map(e=>{
                         const isDone=!!notifiedExcursions[e.key],hasPhones=e.tourists.some(tt=>tt.phone)
                         return(
-                          <div key={e.key} style={{background:t.card,borderRadius:"18px",border:`1.5px solid ${meta.border}`,overflow:"hidden",opacity:isDone?0.6:1,transition:"all 0.3s",display:"flex",flexDirection:"column",boxShadow:dark?"0 4px 24px rgba(0,0,0,0.35)":"0 4px 16px rgba(0,0,0,0.08)"}}>
+                          <div key={e.key} className="nav-card" style={{background:t.card,borderRadius:"18px",border:`1.5px solid ${meta.border}`,overflow:"hidden",opacity:isDone?0.6:1,transition:"all 0.3s",display:"flex",flexDirection:"column",boxShadow:dark?"0 4px 24px rgba(0,0,0,0.35)":"0 4px 16px rgba(0,0,0,0.08)"}}>
                             <div style={{background:`linear-gradient(135deg,${meta.bg},${meta.bg}ee)`,padding:"14px 14px 0"}}>
                               <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:"8px",marginBottom:"10px"}}>
                                 <div>
@@ -5384,8 +5484,8 @@ export default function Page() {
                                 </div>
                               </div>
                               <div style={{display:"flex",alignItems:"center",gap:"5px",paddingBottom:"10px",flexWrap:"wrap"}}>
-                                {e.touroperator&&<span style={{fontSize:"9px",fontWeight:800,background:(e.touroperator||"").toLowerCase().includes("bg asia")?"#1e3f6a":"#2d1b0e",color:(e.touroperator||"").toLowerCase().includes("bg asia")?"#38bdf8":"#fb923c",borderRadius:"5px",padding:"2px 7px",letterSpacing:"0.5px"}}>{(e.touroperator||"").toLowerCase().includes("bg asia")?"BIG":e.touroperator.split(" ")[0]}</span>}
-                                {e.cooperateStaff&&<span style={{fontSize:"9px",fontWeight:700,background:"#1a2e0a",color:"#a3e635",borderRadius:"5px",padding:"2px 7px"}}>🤝 {e.cooperateStaff}</span>}
+                                {e.touroperator&&<span style={{fontSize:"9px",fontWeight:800,background:(e.touroperator||"").toLowerCase().includes("bg asia")?"#1e3f6a":"#2d1b0e",color:(e.touroperator||"").toLowerCase().includes("bg asia")?"#38bdf8":"#fb923c",borderRadius:"6px",padding:"2px 7px",letterSpacing:"0.5px"}}>{(e.touroperator||"").toLowerCase().includes("bg asia")?"BIG":e.touroperator.split(" ")[0]}</span>}
+                                {e.cooperateStaff&&<span style={{fontSize:"9px",fontWeight:700,background:"#1a2e0a",color:"#a3e635",borderRadius:"6px",padding:"2px 7px"}}>🤝 {e.cooperateStaff}</span>}
                                 <span style={{marginLeft:"auto",fontSize:"9px",color:meta.color,opacity:0.55,fontFamily:"monospace",fontWeight:700}}>{e.vId}</span>
                                 <input type="checkbox" checked={isDone} onChange={()=>setNotifiedExcursions(prev=>({...prev,[e.key]:!prev[e.key]}))} style={{width:"18px",height:"18px",cursor:"pointer",accentColor:meta.color,flexShrink:0}}/>
                               </div>
