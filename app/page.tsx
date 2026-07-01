@@ -1670,6 +1670,7 @@ function MethodichkaTab({dark}:{dark:boolean}) {
   }
   const [search, setSearch] = useState("")
   const [activeCat, setActiveCat] = useState("all")
+  const [activeOp, setActiveOp] = useState("all")
   const [expandedTour, setExpandedTour] = useState<string|null>(null)
   const [openCats, setOpenCats] = useState<Record<string,boolean>>(
     Object.fromEntries(MCAT_ORDER.map(c=>[c,true]))
@@ -1790,15 +1791,22 @@ function MethodichkaTab({dark}:{dark:boolean}) {
     })
   }
 
+  const ALL_OPS = useMemo(()=>{
+    const ops = new Set<string>()
+    liveTours.forEach(t=>{ if(t.operator) ops.add(t.operator) })
+    return ["all",...Array.from(ops).sort()]
+  },[liveTours])
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim()
     return liveTours.filter(tour => {
       if (activeCat !== "all" && tour.cat !== activeCat) return false
+      if (activeOp !== "all" && (tour.operator||"") !== activeOp) return false
       if (!q) return true
       return tour.name.toLowerCase().includes(q) || tour.nameEn.toLowerCase().includes(q) ||
         tour.tags.some(g => g.toLowerCase().includes(q)) || (tour.operator||"").toLowerCase().includes(q)
     })
-  }, [search, activeCat, liveTours])
+  }, [search, activeCat, activeOp, liveTours])
 
   const grouped = MCAT_ORDER.map(cat => ({
     cat, meta: MCAT_META[cat],
@@ -1919,6 +1927,34 @@ function MethodichkaTab({dark}:{dark:boolean}) {
             )
           })}
         </div>
+      </div>
+
+        {/* Row 4: operator filter pills */}
+        {ALL_OPS.length > 2 && (
+          <div
+            onTouchStart={e=>e.stopPropagation()}
+            onTouchMove={e=>e.stopPropagation()}
+            onTouchEnd={e=>e.stopPropagation()}
+            style={{display:"flex", gap:"4px", overflowX:"auto", paddingBottom:"4px", WebkitOverflowScrolling:"touch", scrollbarWidth:"none", msOverflowStyle:"none", alignItems:"center"}}>
+            <span style={{fontSize:"9px", fontWeight:700, color:dark?"#38bdf8":"#0369a1", letterSpacing:"1px", textTransform:"uppercase" as const, flexShrink:0, paddingRight:"2px"}}>Оператор:</span>
+            {ALL_OPS.map(op => {
+              const active = activeOp === op
+              const opColors: Record<string,string> = {"SAWANU":"#0d9488","Love Andaman":"#0891b2","Dolce Vita":"#db2777","Dolce":"#db2777","BG Asia":"#7c3aed","BG":"#7c3aed"}
+              const col = opColors[op] ?? "#64748b"
+              const opCount = op==="all" ? filtered.length : filtered.filter(t=>t.operator===op).length
+              return (
+                <button key={op} onClick={()=>setActiveOp(op)}
+                  style={{...pill, flexShrink:0, whiteSpace:"nowrap" as const, padding:"4px 9px", fontSize:"10px",
+                    background:active?col:(dark?"#1a2e46":"#dce7f0"),
+                    color:active?"#fff":(dark?"#7dd3fc":"#374151"),
+                    border:active?"1px solid transparent":`1px solid ${dark?"#2a3f5a":"#c5d5e5"}`}}>
+                  {op==="all"?"🌐 Все":op}
+                  <span style={{marginLeft:"3px", fontSize:"9px", opacity:0.75}}>({opCount})</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* ── INFO PANELS ── */}
@@ -4582,7 +4618,26 @@ export default function Page() {
   const [selectedGuide,setSelectedGuide]=useState("")
   const [selectedOperator,setSelectedOperator]=useState("")
   const [collapsedDates,setCollapsedDates]=useState<Record<string,boolean>>({})
+  const [voucherNotes,setVoucherNotes]=useState<Record<string,string>>(()=>{
+    try{const s=localStorage.getItem("navNotes");return s?JSON.parse(s):{}}catch{return{}}
+  })
+  function saveNote(id:string,text:string){
+    setVoucherNotes(prev=>{const n={...prev,[id]:text};localStorage.setItem("navNotes",JSON.stringify(n));return n})
+  }
   const [transferFileName,setTransferFileName]=useState("")
+  const [transferLoadTime,setTransferLoadTime]=useState<number>(()=>{
+    try{return Number(localStorage.getItem("navTransferTime"))||0}catch{return 0}
+  })
+  const [excLoadTime,setExcLoadTime]=useState<number>(()=>{
+    try{return Number(localStorage.getItem("navExcTime"))||0}catch{return 0}
+  })
+  function markTransferLoaded(){const now=Date.now();setTransferLoadTime(now);localStorage.setItem("navTransferTime",String(now))}
+  function markExcLoaded(){const now=Date.now();setExcLoadTime(now);localStorage.setItem("navExcTime",String(now))}
+  function dataAge(ts:number):{hours:number;stale:boolean}{
+    if(!ts)return{hours:0,stale:false}
+    const h=(Date.now()-ts)/3600000
+    return{hours:Math.floor(h),stale:h>=20}
+  }
 
   const [excursionData,setExcursionData]=useState<Excursion[]>([])
   const [notifiedExcursions,setNotifiedExcursions]=useState<Record<string,boolean>>({})
@@ -4592,6 +4647,47 @@ export default function Page() {
   const [collapsedTypes,setCollapsedTypes]=useState<Record<string,boolean>>({})
 
   const [dark,setDark]=useState(true)
+  const [showTop,setShowTop]=useState(false)
+  const [copiedMsg,setCopiedMsg]=useState("")
+  function copyMessage(text:string,id:string){
+    navigator.clipboard?.writeText(decodeURIComponent(text)).then(()=>{
+      setCopiedMsg(id);setTimeout(()=>setCopiedMsg(""),1500)
+    })
+  }
+  function exportBackup(){
+    const KEYS=["transferData","excursionData","notifiedVouchers","notifiedExcursions","navLog","navNotes","nav_mtours_data","nav_boats_data","nav_boats_pinned","nav_summer_data","navDark","navTransferTime","navExcTime"]
+    const backup:Record<string,any>={_meta:{app:"Navigator",version:1,date:new Date().toISOString()}}
+    KEYS.forEach(k=>{const val=localStorage.getItem(k);if(val!==null)backup[k]=val})
+    const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"})
+    const url=URL.createObjectURL(blob)
+    const a=document.createElement("a")
+    const d=new Date()
+    a.href=url;a.download=`navigator-backup-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}.json`
+    a.click();URL.revokeObjectURL(url)
+  }
+  function importBackup(ev:React.ChangeEvent<HTMLInputElement>){
+    const file=ev.target.files?.[0];if(!file)return
+    const reader=new FileReader()
+    reader.onload=()=>{
+      try{
+        const data=JSON.parse(String(reader.result))
+        if(!data._meta||data._meta.app!=="Navigator"){alert("Это не файл бэкапа Navigator");return}
+        Object.entries(data).forEach(([k,val])=>{
+          if(k==="_meta")return
+          localStorage.setItem(k,String(val))
+        })
+        alert("✅ Данные восстановлены! Страница перезагрузится.")
+        location.reload()
+      }catch{alert("Ошибка чтения файла")}
+    }
+    reader.readAsText(file)
+    ev.target.value=""
+  }
+  useEffect(()=>{
+    const fn=()=>setShowTop(window.scrollY>300)
+    window.addEventListener("scroll",fn,{passive:true})
+    return()=>window.removeEventListener("scroll",fn)
+  },[])
 
   // Dark mode schedule: auto-switch after 20:00 and before 07:00
   useEffect(()=>{
@@ -4670,7 +4766,7 @@ export default function Page() {
 
   function handleTransferFile(e:any) {
     const file=e.target.files[0];if(!file)return
-    setTransferFileName(file.name)
+    setTransferFileName(file.name);markTransferLoaded()
     const reader=new FileReader()
     reader.onload=(evt:any)=>{
       try{
@@ -4765,7 +4861,7 @@ export default function Page() {
 
   function handleExcursionFile(e:any) {
     const file=e.target.files[0];if(!file)return
-    setExcFileName(file.name)
+    setExcFileName(file.name);markExcLoaded()
     const reader=new FileReader()
     reader.onload=(evt:any)=>{
       try{
@@ -4919,7 +5015,13 @@ export default function Page() {
   }
 
   return (
-    <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} style={{minHeight:"100vh",background:t.bg,color:t.text,fontFamily:"'IBM Plex Sans','Segoe UI',sans-serif",transition:"background 0.3s,color 0.3s"}}>
+    <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} style={{minHeight:"100vh",background:t.bg,color:t.text,fontFamily:"'IBM Plex Sans','Segoe UI',sans-serif",transition:"background 0.3s,color 0.3s",position:"relative"}}>
+      {showTop&&(
+        <button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})}
+          style={{position:"fixed",bottom:"80px",right:"16px",zIndex:200,width:"40px",height:"40px",borderRadius:"50%",background:t.accent,border:"none",cursor:"pointer",fontSize:"20px",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,0.35)",color:"#fff"}}>
+          ↑
+        </button>
+      )}
 
       <header style={{background:dark?"#080f1e":"#ffffff",borderBottom:`1px solid ${t.cardBorder}`,position:"sticky",top:0,zIndex:50,backdropFilter:"blur(12px)",boxShadow:dark?"0 2px 20px rgba(0,0,0,0.4)":"0 2px 12px rgba(0,0,0,0.08)"}}>
         <div style={{maxWidth:"1200px",margin:"0 auto"}}>
@@ -4996,10 +5098,15 @@ export default function Page() {
               {key:"private",      label:"Приватные",  icon:"🏝", color:"#7c3aed"},
             ].map(({key,label,icon,color})=>{
               const active = tab===key
+              const badge = key==="transfers"
+                ? (transferData.length>0 ? filteredTransfers.length-tDone : 0)
+                : key==="excursions"
+                ? (excursionData.length>0 ? filteredExcursions.length-eDone : 0)
+                : key==="log" ? log.length : 0
               return (
                 <button key={key} onClick={()=>setTab(key as any)}
                   style={{
-                    display:"flex",alignItems:"center",gap:"5px",
+                    display:"flex",alignItems:"center",gap:"5px",position:"relative",
                     padding:"6px 11px",fontSize:"11px",fontWeight:700,
                     borderRadius:"99px",border:"none",cursor:"pointer",flexShrink:0,
                     whiteSpace:"nowrap",transition:"all 0.2s",
@@ -5010,6 +5117,11 @@ export default function Page() {
                   }}>
                   <span style={{fontSize:"14px",lineHeight:1}}>{icon}</span>
                   <span>{label}</span>
+                  {badge>0 && (
+                    <span style={{position:"absolute",top:"-4px",right:"-2px",minWidth:"16px",height:"16px",borderRadius:"99px",background:key==="log"?"#64748b":"#f87171",color:"#fff",fontSize:"9px",fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 3px",lineHeight:1,boxShadow:`0 0 0 2px ${active?color:(dark?"#080f1e":"#fff")}`}}>
+                      {badge>99?"99+":badge}
+                    </span>
+                  )}
                 </button>
               )
             })}
@@ -5051,17 +5163,65 @@ export default function Page() {
             </div>
           </div>
           {transferData.length===0&&<div style={{textAlign:"center",padding:"80px 20px",color:t.muted}}><div style={{fontSize:"48px",marginBottom:"12px"}}>📋</div><div style={{fontSize:"16px",fontWeight:600,marginBottom:"4px"}}>Файл не загружен</div><div style={{fontSize:"13px"}}>Нажмите «Загрузить» и выберите Excel-файл с трансферами</div></div>}
+          {transferData.length>0&&dataAge(transferLoadTime).stale&&(
+            <div style={{margin:"0 16px 12px",padding:"10px 14px",borderRadius:"12px",background:dark?"#2d2408":"#fefce8",border:"1.5px solid #eab308",display:"flex",alignItems:"center",gap:"10px"}}>
+              <span style={{fontSize:"20px"}}>⏰</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:"12px",fontWeight:800,color:"#eab308"}}>Данные загружены {dataAge(transferLoadTime).hours} ч назад</div>
+                <div style={{fontSize:"11px",color:dark?"#fde68a":"#92400e"}}>Проверь, нет ли свежего файла от оперейшна</div>
+              </div>
+            </div>
+          )}
+          {filteredTransfers.length>0&&(()=>{
+            const totalTourists=filteredTransfers.reduce((s,v)=>s+v.tourists.length,0)
+            const problems=filteredTransfers.filter(v=>v.pickup==="—").length
+            const allDone=tPct===100
+            return(
+              <div style={{margin:"0 16px 16px",padding:"14px 16px",borderRadius:"16px",background:allDone?"linear-gradient(135deg,rgba(34,197,94,0.12),rgba(16,185,129,0.08))":dark?"rgba(255,255,255,0.03)":"rgba(0,0,0,0.02)",border:`1.5px solid ${allDone?"rgba(34,197,94,0.4)":t.cardBorder}`}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:allDone?0:"10px"}}>
+                  <div style={{fontSize:"13px",fontWeight:800,color:allDone?"#22c55e":t.text}}>
+                    {allDone?"🎉 Все уведомлены!":"📊 Сводка дня"}
+                  </div>
+                  {allDone&&<span style={{fontSize:"12px",color:"#22c55e",fontWeight:700}}>Отличная работа ✓</span>}
+                </div>
+                {!allDone&&<div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"8px"}}>
+                  {[
+                    {icon:"👥",val:totalTourists,lbl:"Туристов"},
+                    {icon:"✈️",val:filteredTransfers.length,lbl:"Ваучеров"},
+                    {icon:"✅",val:tDone,lbl:"Готово"},
+                    {icon:"⚠️",val:problems,lbl:"Проблемы",red:problems>0},
+                  ].map(({icon,val,lbl,red})=>(
+                    <div key={lbl} style={{textAlign:"center",padding:"8px 4px",borderRadius:"10px",background:dark?"rgba(255,255,255,0.04)":"rgba(0,0,0,0.03)"}}>
+                      <div style={{fontSize:"18px",marginBottom:"2px"}}>{icon}</div>
+                      <div style={{fontSize:"18px",fontWeight:900,color:red?"#f87171":t.text,lineHeight:1}}>{val}</div>
+                      <div style={{fontSize:"9px",color:t.muted,marginTop:"2px"}}>{lbl}</div>
+                    </div>
+                  ))}
+                </div>}
+              </div>
+            )
+          })()}
           <main style={{maxWidth:"1200px",margin:"0 auto",padding:"16px"}}>
             {groupedTransfers.map(([dateLabel,vouchers])=>{
               const isCollapsed=collapsedDates[dateLabel]
               const groupDone=vouchers.filter(v=>notifiedVouchers[v.vId]).length
               return(
                 <div key={dateLabel} style={{marginBottom:"24px"}}>
-                  <button onClick={()=>setCollapsedDates(prev=>({...prev,[dateLabel]:!prev[dateLabel]}))} style={{display:"flex",alignItems:"center",gap:"10px",width:"100%",background:"transparent",border:"none",cursor:"pointer",marginBottom:"10px",padding:"4px 0",color:t.text}}>
-                    <span style={{fontSize:"15px",fontWeight:700}}>{dateLabel}</span>
-                    <span style={{fontSize:"12px",color:t.muted,background:t.cardBorder,borderRadius:"99px",padding:"2px 8px"}}>{groupDone}/{vouchers.length} уведомлено</span>
-                    <span style={{marginLeft:"auto",fontSize:"12px",color:t.muted,transform:isCollapsed?"rotate(-90deg)":"rotate(0)",transition:"transform 0.2s"}}>▼</span>
-                  </button>
+                  <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"10px"}}>
+                    <button onClick={()=>setCollapsedDates(prev=>({...prev,[dateLabel]:!prev[dateLabel]}))} style={{display:"flex",alignItems:"center",gap:"10px",flex:1,background:"transparent",border:"none",cursor:"pointer",padding:"4px 0",color:t.text,minWidth:0}}>
+                      <span style={{fontSize:"15px",fontWeight:700,whiteSpace:"nowrap"}}>{dateLabel}</span>
+                      <span style={{fontSize:"12px",color:groupDone===vouchers.length?"#4ade80":t.muted,background:t.cardBorder,borderRadius:"99px",padding:"2px 8px",flexShrink:0}}>
+                        {groupDone===vouchers.length?"✓ Все":groupDone}/{vouchers.length}
+                      </span>
+                      <span style={{marginLeft:"auto",fontSize:"12px",color:t.muted,transform:isCollapsed?"rotate(-90deg)":"rotate(0)",transition:"transform 0.2s",flexShrink:0}}>▼</span>
+                    </button>
+                    {groupDone<vouchers.length&&(
+                      <button onClick={()=>setNotifiedVouchers(prev=>{const n={...prev};vouchers.forEach(v=>{n[v.vId]=true});return n})}
+                        style={{fontSize:"10px",fontWeight:800,background:"rgba(74,222,128,0.12)",color:"#4ade80",border:"1px solid rgba(74,222,128,0.3)",borderRadius:"8px",padding:"5px 10px",cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+                        ✓ Все
+                      </button>
+                    )}
+                  </div>
                   {!isCollapsed&&(
                     <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:"10px"}}>
                       {vouchers.map((v,i)=>{
@@ -5117,16 +5277,29 @@ export default function Page() {
                                 ))}
                               </div>
                             </div>
+                            {/* ── NOTES ── */}
+                            <div style={{padding:"6px 14px 2px"}}>
+                              <textarea
+                                value={voucherNotes[v.vId]??""}
+                                onChange={e=>saveNote(v.vId,e.target.value)}
+                                placeholder="📝 Заметка (номер комнаты, особые пожелания...)"
+                                rows={1}
+                                style={{width:"100%",background:"transparent",border:"none",borderBottom:`1px dashed ${t.cardBorder}`,color:t.muted,fontSize:"11px",resize:"none",outline:"none",padding:"2px 0 4px",fontFamily:"inherit",lineHeight:1.4}}
+                                onFocus={e=>{e.target.rows=3;e.target.style.color=t.text}}
+                                onBlur={e=>{if(!e.target.value)e.target.rows=1;e.target.style.color=t.muted}}
+                              />
+                            </div>
                             {/* ── ACTION BUTTONS ── */}
                             <div style={{padding:"10px 14px 14px",borderTop:`1px solid ${t.cardBorder}`}}>
                               {v.phones.length===0&&<div style={{fontSize:"12px",color:t.muted,textAlign:"center",padding:"6px 0"}}>📵 Телефон не указан</div>}
                               {v.phones.map((ph,idx)=>(
                                 <div key={idx} style={{marginBottom:idx<v.phones.length-1?"10px":0}}>
                                   <div style={{fontSize:"11px",color:t.muted,marginBottom:"7px",fontFamily:"monospace",fontWeight:600,letterSpacing:"0.3px"}}>📱 {ph}</div>
-                                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 44px",gap:"6px"}}>
+                                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 44px 44px",gap:"6px"}}>
                                     <a href={isProblem?undefined:`https://wa.me/${ph.replace(/\D/g,"")}?text=${generateTransferMessage(v)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isProblem){if(!isDone)setNotifiedVouchers(prev=>({...prev,[v.vId]:true}));addLog("transfer",v.tourists[0]||"",ph,v.hotel,v.vId)}}} style={{background:isProblem?t.cardBorder:"linear-gradient(135deg,#16a34a,#15803d)",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,pointerEvents:isProblem?"none":"auto",display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>💬 WA</a>
                                     <a href={isProblem?undefined:`https://t.me/+${ph.replace(/[^\d]/g,"")}`} target="_blank" rel="noreferrer" style={{background:isProblem?t.cardBorder:"linear-gradient(135deg,#0088cc,#006aaa)",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,pointerEvents:isProblem?"none":"auto",display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>✈ TG</a>
                                     <a href={`tel:${ph}`} style={{background:t.cardBorder,color:t.text,textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"18px",display:"flex",alignItems:"center",justifyContent:"center"}}>📞</a>
+                                    <button onClick={()=>copyMessage(generateTransferMessage(v),v.vId+ph)} title="Скопировать текст сообщения" style={{background:copiedMsg===v.vId+ph?"#16a34a":t.cardBorder,color:copiedMsg===v.vId+ph?"#fff":t.text,border:"none",padding:"10px 4px",borderRadius:"10px",fontSize:"16px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s"}}>{copiedMsg===v.vId+ph?"✓":"📋"}</button>
                                   </div>
                                 </div>
                               ))}
@@ -5158,6 +5331,15 @@ export default function Page() {
               </div>
             </div>
           </div>
+          {excursionData.length>0&&dataAge(excLoadTime).stale&&(
+            <div style={{margin:"0 16px 12px",padding:"10px 14px",borderRadius:"12px",background:dark?"#2d2408":"#fefce8",border:"1.5px solid #eab308",display:"flex",alignItems:"center",gap:"10px"}}>
+              <span style={{fontSize:"20px"}}>⏰</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:"12px",fontWeight:800,color:"#eab308"}}>Данные загружены {dataAge(excLoadTime).hours} ч назад</div>
+                <div style={{fontSize:"11px",color:dark?"#fde68a":"#92400e"}}>Проверь, нет ли свежего файла от оперейшна</div>
+              </div>
+            </div>
+          )}
           {excursionData.length===0&&<div style={{textAlign:"center",padding:"80px 20px",color:t.muted}}><div style={{fontSize:"48px",marginBottom:"12px"}}>🗺️</div><div style={{fontSize:"16px",fontWeight:600,marginBottom:"4px"}}>Файл не загружен</div><div style={{fontSize:"13px"}}>Нажмите «Загрузить» и выберите Excel-файл с экскурсиями</div></div>}
           <main style={{maxWidth:"1200px",margin:"0 auto",padding:"16px"}}>
             {groupedExcursions.map(([type,excursions])=>{
@@ -5165,11 +5347,21 @@ export default function Page() {
               const groupDone=excursions.filter(e=>notifiedExcursions[e.key]).length
               return(
                 <div key={type} style={{marginBottom:"24px"}}>
-                  <button onClick={()=>setCollapsedTypes(prev=>({...prev,[type]:!prev[type]}))} style={{display:"flex",alignItems:"center",gap:"10px",width:"100%",background:"transparent",border:"none",cursor:"pointer",marginBottom:"10px",padding:"4px 0",color:t.text}}>
-                    <span style={{fontSize:"15px",fontWeight:700}}>{meta.icon} {meta.label}</span>
-                    <span style={{fontSize:"12px",color:t.muted,background:t.cardBorder,borderRadius:"99px",padding:"2px 8px"}}>{groupDone}/{excursions.length} уведомлено</span>
-                    <span style={{marginLeft:"auto",fontSize:"12px",color:t.muted,transform:isCollapsed?"rotate(-90deg)":"rotate(0)",transition:"transform 0.2s"}}>▼</span>
-                  </button>
+                  <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"10px"}}>
+                    <button onClick={()=>setCollapsedTypes(prev=>({...prev,[type]:!prev[type]}))} style={{display:"flex",alignItems:"center",gap:"10px",flex:1,background:"transparent",border:"none",cursor:"pointer",padding:"4px 0",color:t.text,minWidth:0}}>
+                      <span style={{fontSize:"15px",fontWeight:700,whiteSpace:"nowrap"}}>{meta.icon} {meta.label}</span>
+                      <span style={{fontSize:"12px",color:groupDone===excursions.length?"#a855f7":t.muted,background:t.cardBorder,borderRadius:"99px",padding:"2px 8px",flexShrink:0}}>
+                        {groupDone===excursions.length?"✓ Все":groupDone}/{excursions.length}
+                      </span>
+                      <span style={{marginLeft:"auto",fontSize:"12px",color:t.muted,transform:isCollapsed?"rotate(-90deg)":"rotate(0)",transition:"transform 0.2s",flexShrink:0}}>▼</span>
+                    </button>
+                    {groupDone<excursions.length&&(
+                      <button onClick={()=>setNotifiedExcursions(prev=>{const n={...prev};excursions.forEach(e=>{n[e.key]=true});return n})}
+                        style={{fontSize:"10px",fontWeight:800,background:"rgba(168,85,247,0.12)",color:"#a855f7",border:"1px solid rgba(168,85,247,0.3)",borderRadius:"8px",padding:"5px 10px",cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+                        ✓ Все
+                      </button>
+                    )}
+                  </div>
                   {!isCollapsed&&(
                     <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:"10px"}}>
                       {excursions.map(e=>{
@@ -5220,15 +5412,27 @@ export default function Page() {
                                 ))}
                               </div>
                             </div>
+                            <div style={{padding:"6px 14px 2px"}}>
+                              <textarea
+                                value={voucherNotes[e.key]??""}
+                                onChange={ev=>saveNote(e.key,ev.target.value)}
+                                placeholder="📝 Заметка (номер комнаты, особые пожелания...)"
+                                rows={1}
+                                style={{width:"100%",background:"transparent",border:"none",borderBottom:`1px dashed ${t.cardBorder}`,color:t.muted,fontSize:"11px",resize:"none",outline:"none",padding:"2px 0 4px",fontFamily:"inherit",lineHeight:1.4}}
+                                onFocus={e=>{e.target.rows=3;e.target.style.color=t.text}}
+                                onBlur={e=>{if(!e.target.value)e.target.rows=1;e.target.style.color=t.muted}}
+                              />
+                            </div>
                             <div style={{padding:"10px 14px 14px",borderTop:`1px solid ${t.cardBorder}`}}>
                               {!hasPhones&&<div style={{fontSize:"12px",color:t.muted,textAlign:"center",padding:"6px 0"}}>📵 Телефон не указан</div>}
                               {e.tourists.filter(tt=>tt.phone).map((tt,idx)=>(
                                 <div key={idx} style={{marginBottom:"8px"}}>
                                   <div style={{fontSize:"11px",color:t.muted,marginBottom:"7px",fontFamily:"monospace",fontWeight:600}}>📱 {tt.phone}</div>
-                                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 44px",gap:"6px"}}>
+                                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 44px 44px",gap:"6px"}}>
                                     <a href={`https://wa.me/${tt.phone.replace(/\D/g,"")}?text=${generateExcursionMessage(e)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isDone)setNotifiedExcursions(prev=>({...prev,[e.key]:true}));addLog("excursion",tt.name,tt.phone,e.hotel,e.vId)}} style={{background:"linear-gradient(135deg,#16a34a,#15803d)",color:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>💬 WA</a>
                                     <a href={`https://t.me/+${tt.phone.replace(/[^\d]/g,"")}`} target="_blank" rel="noreferrer" style={{background:"linear-gradient(135deg,#0088cc,#006aaa)",color:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>✈ TG</a>
                                     <a href={`tel:${tt.phone}`} style={{background:t.cardBorder,color:t.text,textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"18px",display:"flex",alignItems:"center",justifyContent:"center"}}>📞</a>
+                                    <button onClick={()=>copyMessage(generateExcursionMessage(e),e.key+tt.phone)} title="Скопировать текст сообщения" style={{background:copiedMsg===e.key+tt.phone?"#16a34a":t.cardBorder,color:copiedMsg===e.key+tt.phone?"#fff":t.text,border:"none",padding:"10px 4px",borderRadius:"10px",fontSize:"16px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s"}}>{copiedMsg===e.key+tt.phone?"✓":"📋"}</button>
                                   </div>
                                 </div>
                               ))}
@@ -5270,20 +5474,49 @@ export default function Page() {
       {/* ── LOG TAB ──────────────────────────────────────────────────────────── */}
       {tab==="log" && (
         <>
-          <div style={{maxWidth:"1200px",margin:"0 auto",padding:"12px 16px 0",display:"flex",justifyContent:"space-between",alignItems:"center",gap:"8px"}}>
-            <div style={{fontSize:"14px",color:t.muted}}>{log.length > 0 ? `Записей: ${log.length}` : "Журнал пуст"}</div>
-            <div style={{display:"flex",gap:"8px"}}>
-              {log.length > 0 && (
-                <button onClick={exportReport} style={{fontSize:"12px",background:"#16a34a",color:"#fff",padding:"7px 14px",border:"none",borderRadius:"8px",cursor:"pointer",fontWeight:600}}>
-                  ⬇ Экспорт
-                </button>
-              )}
-              {log.length > 0 && (
-                <button onClick={()=>{if(confirm("Очистить журнал?")){setLog([]);localStorage.removeItem("navLog")}}} style={{fontSize:"12px",background:t.cardBorder,color:t.muted,padding:"7px 14px",border:"none",borderRadius:"8px",cursor:"pointer",fontWeight:600}}>
-                  🗑 Очистить
-                </button>
-              )}
+          {(()=>{
+            const [logSearch,setLogSearch_]=React.useState("")
+            const [logType,setLogType_]=React.useState<"all"|"transfer"|"excursion">("all")
+            const logFiltered=log.filter(e=>{
+              if(logType!=="all"&&e.type!==logType)return false
+              if(!logSearch.trim())return true
+              const q=logSearch.toLowerCase()
+              return (e.name||"").toLowerCase().includes(q)||(e.hotel||"").toLowerCase().includes(q)||(e.voucherId||"").toLowerCase().includes(q)||(e.phone||"").includes(q)
+            })
+            const inp2:React.CSSProperties={fontSize:"12px",padding:"7px 10px",borderRadius:"8px",border:`1px solid ${t.cardBorder}`,background:t.card,color:t.text,outline:"none",width:"100%"}
+            return(<>
+          <div style={{maxWidth:"1200px",margin:"0 auto",padding:"12px 16px 8px",display:"flex",flexDirection:"column",gap:"8px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:"8px"}}>
+              <div style={{fontSize:"13px",color:t.muted,fontWeight:600}}>{log.length > 0 ? `Записей: ${log.length}${logFiltered.length!==log.length?` · показано: ${logFiltered.length}`:""}` : "Журнал пуст"}</div>
+              <div style={{display:"flex",gap:"6px"}}>
+                {log.length > 0 && <button onClick={exportReport} style={{fontSize:"12px",background:"#16a34a",color:"#fff",padding:"7px 12px",border:"none",borderRadius:"8px",cursor:"pointer",fontWeight:600}}>⬇ Экспорт</button>}
+                {log.length > 0 && <button onClick={()=>{if(confirm("Очистить журнал?")){setLog([]);localStorage.removeItem("navLog")}}} style={{fontSize:"12px",background:t.cardBorder,color:t.muted,padding:"7px 12px",border:"none",borderRadius:"8px",cursor:"pointer",fontWeight:600}}>🗑</button>}
+              </div>
             </div>
+            {/* Backup / Restore */}
+            <div style={{display:"flex",gap:"6px",alignItems:"center",background:dark?"rgba(255,255,255,0.03)":"rgba(0,0,0,0.02)",border:`1px solid ${t.cardBorder}`,borderRadius:"10px",padding:"8px 12px"}}>
+              <span style={{fontSize:"16px"}}>💾</span>
+              <div style={{flex:1,fontSize:"11px",color:t.muted,lineHeight:1.4}}>
+                <b style={{color:t.text}}>Резервная копия</b> — все данные, заметки, журнал
+              </div>
+              <button onClick={exportBackup} style={{fontSize:"11px",fontWeight:700,background:t.accent,color:"#fff",padding:"6px 12px",border:"none",borderRadius:"8px",cursor:"pointer",whiteSpace:"nowrap"}}>⬇ Сохранить</button>
+              <label style={{fontSize:"11px",fontWeight:700,background:t.cardBorder,color:t.text,padding:"6px 12px",borderRadius:"8px",cursor:"pointer",whiteSpace:"nowrap"}}>
+                ⬆ Восстановить
+                <input type="file" accept=".json" onChange={importBackup} style={{display:"none"}}/>
+              </label>
+            </div>
+            {log.length>0&&<div style={{display:"flex",gap:"6px",alignItems:"center"}}>
+              <input placeholder="🔍 Турист, отель, ваучер, телефон..." value={logSearch} onChange={e=>setLogSearch_(e.target.value)} style={{...inp2,flex:1}}/>
+              <div style={{display:"flex",gap:"4px",flexShrink:0}}>
+                {(["all","transfer","excursion"] as const).map(tp=>(
+                  <button key={tp} onClick={()=>setLogType_(tp)} style={{fontSize:"10px",fontWeight:700,padding:"6px 10px",borderRadius:"8px",border:"none",cursor:"pointer",
+                    background:logType===tp?(tp==="transfer"?"#0369a1":tp==="excursion"?"#7c3aed":t.accent):t.cardBorder,
+                    color:logType===tp?"#fff":t.muted,whiteSpace:"nowrap"}}>
+                    {tp==="all"?"Все":tp==="transfer"?"✈ Трансфер":"🗺 Экскурсия"}
+                  </button>
+                ))}
+              </div>
+            </div>}
           </div>
 
           {log.length === 0 && (
@@ -5295,7 +5528,8 @@ export default function Page() {
           )}
 
           <main style={{maxWidth:"1200px",margin:"0 auto",padding:"16px"}}>
-            {log.map((entry) => (
+            {logFiltered.length===0&&log.length>0&&<div style={{textAlign:"center",padding:"40px 20px",color:t.muted,fontSize:"13px"}}>🔍 Ничего не найдено</div>}
+            {logFiltered.map((entry) => (
               <div key={entry.id} style={{background:t.card,borderRadius:"12px",border:`1px solid ${t.cardBorder}`,padding:"12px",marginBottom:"8px",display:"flex",alignItems:"center",gap:"12px"}}>
                 <div style={{background:entry.type==="transfer"?"#0c2340":"#1e1040",borderRadius:"8px",padding:"8px 10px",textAlign:"center",flexShrink:0}}>
                   <div style={{fontSize:"18px"}}>{entry.type==="transfer"?"✈️":"🗺️"}</div>
@@ -5313,6 +5547,8 @@ export default function Page() {
               </div>
             ))}
           </main>
+          </>)
+          })()}
         </>
       )}
 
