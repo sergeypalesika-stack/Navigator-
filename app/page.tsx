@@ -4648,6 +4648,8 @@ export default function Page() {
   const [dark,setDark]=useState(true)
   const [showTop,setShowTop]=useState(false)
   const [copiedMsg,setCopiedMsg]=useState("")
+  const [logSearch,setLogSearch]=useState("")
+  const [logType,setLogType]=useState<"all"|"transfer"|"excursion">("all")
   function copyMessage(text:string,id:string){
     navigator.clipboard?.writeText(decodeURIComponent(text)).then(()=>{
       setCopiedMsg(id);setTimeout(()=>setCopiedMsg(""),1500)
@@ -5474,8 +5476,6 @@ export default function Page() {
       {tab==="log" && (
         <>
           {(()=>{
-            const [logSearch,setLogSearch_]=React.useState("")
-            const [logType,setLogType_]=React.useState<"all"|"transfer"|"excursion">("all")
             const logFiltered=log.filter(e=>{
               if(logType!=="all"&&e.type!==logType)return false
               if(!logSearch.trim())return true
@@ -5505,10 +5505,10 @@ export default function Page() {
               </label>
             </div>
             {log.length>0&&<div style={{display:"flex",gap:"6px",alignItems:"center"}}>
-              <input placeholder="🔍 Турист, отель, ваучер, телефон..." value={logSearch} onChange={e=>setLogSearch_(e.target.value)} style={{...inp2,flex:1}}/>
+              <input placeholder="🔍 Турист, отель, ваучер, телефон..." value={logSearch} onChange={e=>setLogSearch(e.target.value)} style={{...inp2,flex:1}}/>
               <div style={{display:"flex",gap:"4px",flexShrink:0}}>
                 {(["all","transfer","excursion"] as const).map(tp=>(
-                  <button key={tp} onClick={()=>setLogType_(tp)} style={{fontSize:"10px",fontWeight:700,padding:"6px 10px",borderRadius:"8px",border:"none",cursor:"pointer",
+                  <button key={tp} onClick={()=>setLogType(tp)} style={{fontSize:"10px",fontWeight:700,padding:"6px 10px",borderRadius:"8px",border:"none",cursor:"pointer",
                     background:logType===tp?(tp==="transfer"?"#0369a1":tp==="excursion"?"#7c3aed":t.accent):t.cardBorder,
                     color:logType===tp?"#fff":t.muted,whiteSpace:"nowrap"}}>
                     {tp==="all"?"Все":tp==="transfer"?"✈ Трансфер":"🗺 Экскурсия"}
