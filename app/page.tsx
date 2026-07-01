@@ -4618,12 +4618,6 @@ export default function Page() {
   const [selectedGuide,setSelectedGuide]=useState("")
   const [selectedOperator,setSelectedOperator]=useState("")
   const [collapsedDates,setCollapsedDates]=useState<Record<string,boolean>>({})
-  const [voucherNotes,setVoucherNotes]=useState<Record<string,string>>(()=>{
-    try{const s=localStorage.getItem("navNotes");return s?JSON.parse(s):{}}catch{return{}}
-  })
-  function saveNote(id:string,text:string){
-    setVoucherNotes(prev=>{const n={...prev,[id]:text};localStorage.setItem("navNotes",JSON.stringify(n));return n})
-  }
   const [transferFileName,setTransferFileName]=useState("")
   const [transferLoadTime,setTransferLoadTime]=useState<number>(()=>{
     try{return Number(localStorage.getItem("navTransferTime"))||0}catch{return 0}
@@ -4665,7 +4659,7 @@ export default function Page() {
     })
   }
   function exportBackup(){
-    const KEYS=["transferData","excursionData","notifiedVouchers","notifiedExcursions","navLog","navNotes","nav_mtours_data","nav_boats_data","nav_boats_pinned","nav_summer_data","navDark","navTransferTime","navExcTime"]
+    const KEYS=["transferData","excursionData","notifiedVouchers","notifiedExcursions","navLog","nav_mtours_data","nav_boats_data","nav_boats_pinned","nav_summer_data","navDark","navTransferTime","navExcTime"]
     const backup:Record<string,any>={_meta:{app:"Navigator",version:1,date:new Date().toISOString()}}
     KEYS.forEach(k=>{const val=localStorage.getItem(k);if(val!==null)backup[k]=val})
     const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"})
@@ -5378,18 +5372,6 @@ export default function Page() {
                                 ))}
                               </div>
                             </div>
-                            {/* ── NOTES ── */}
-                            <div style={{padding:"6px 14px 2px"}}>
-                              <textarea
-                                value={voucherNotes[v.vId]??""}
-                                onChange={e=>saveNote(v.vId,e.target.value)}
-                                placeholder="📝 Заметка (номер комнаты, особые пожелания...)"
-                                rows={1}
-                                style={{width:"100%",background:"transparent",border:"none",borderBottom:`1px dashed ${t.cardBorder}`,color:t.muted,fontSize:"11px",resize:"none",outline:"none",padding:"2px 0 4px",fontFamily:"inherit",lineHeight:1.4}}
-                                onFocus={e=>{e.target.rows=3;e.target.style.color=t.text}}
-                                onBlur={e=>{if(!e.target.value)e.target.rows=1;e.target.style.color=t.muted}}
-                              />
-                            </div>
                             {/* ── ACTION BUTTONS ── */}
                             <div style={{padding:"10px 14px 14px",borderTop:`1px solid ${t.cardBorder}`}}>
                               {v.phones.length===0&&<div style={{fontSize:"12px",color:t.muted,textAlign:"center",padding:"6px 0"}}>📵 Телефон не указан</div>}
@@ -5513,18 +5495,6 @@ export default function Page() {
                                 ))}
                               </div>
                             </div>
-                            <div style={{padding:"6px 14px 2px"}}>
-                              <textarea
-                                value={voucherNotes[e.key]??""}
-                                onChange={ev=>saveNote(e.key,ev.target.value)}
-                                placeholder="📝 Заметка (номер комнаты, особые пожелания...)"
-                                rows={1}
-                                style={{width:"100%",background:"transparent",border:"none",borderBottom:`1px dashed ${t.cardBorder}`,color:t.muted,fontSize:"11px",resize:"none",outline:"none",padding:"2px 0 4px",fontFamily:"inherit",lineHeight:1.4}}
-                                onFocus={e=>{e.target.rows=3;e.target.style.color=t.text}}
-                                onBlur={e=>{if(!e.target.value)e.target.rows=1;e.target.style.color=t.muted}}
-                              />
-                            </div>
-                            <div style={{padding:"10px 14px 14px",borderTop:`1px solid ${t.cardBorder}`}}>
                               {!hasPhones&&<div style={{fontSize:"12px",color:t.muted,textAlign:"center",padding:"6px 0"}}>📵 Телефон не указан</div>}
                               {e.tourists.filter(tt=>tt.phone).map((tt,idx)=>(
                                 <div key={idx} style={{marginBottom:"8px"}}>
