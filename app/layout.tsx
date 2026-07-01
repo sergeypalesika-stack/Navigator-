@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next"
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
   title: "Navigator – Sayama Travel",
@@ -37,6 +38,7 @@ export default function RootLayout({
     <html lang="ru">
       <body style={{margin:0, padding:0, background:"#0b1120"}}>
         {children}
+        <Analytics />
       </body>
     </html>
   )
