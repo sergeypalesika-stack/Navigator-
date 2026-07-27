@@ -37,6 +37,12 @@ export default function RootLayout({
     <html lang="ru">
       <body style={{margin:0, padding:0, background:"#0b1120"}}>
         {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})}",
+          }}
+        />
       </body>
     </html>
   )

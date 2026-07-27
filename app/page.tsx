@@ -599,6 +599,14 @@ function formatExcelValue(v: any): string {
   return s
 }
 
+// Приводит телефон к цифрам в международном формате (для wa.me / t.me):
+// убирает всё нецифровое и срезает международный префикс 00 (напр. 0066… → 66…)
+function intlDigits(ph: string): string {
+  let d = (ph || "").replace(/\D/g, "")
+  if (d.startsWith("00")) d = d.slice(2)
+  return d
+}
+
 function generateTransferMessage(v: Voucher): string {
   const isBIG = v.touroperator === "BIG"
   const contacts = isBIG
@@ -4051,6 +4059,14 @@ function WeatherButton({dark}:{dark:boolean}) {
   const [loading, setLoading] = useState(false)
   const [updated, setUpdated] = useState("")
 
+  // показать последнюю погоду сразу (в т.ч. офлайн), пока грузится свежая
+  useEffect(()=>{
+    try {
+      const c = JSON.parse(localStorage.getItem("nav_weather") || "null")
+      if (c) { setWeather(c.weather); setMarine(c.marine); setUpdated(c.updated || "") }
+    } catch {}
+  }, [])
+
   const WMO: Record<number,{label:string;icon:string}> = {
     0:{label:"Ясно",icon:"☀️"},1:{label:"Почти ясно",icon:"🌤"},2:{label:"Переменная облачность",icon:"⛅"},3:{label:"Пасмурно",icon:"☁️"},
     45:{label:"Туман",icon:"🌫"},48:{label:"Туман",icon:"🌫"},51:{label:"Морось",icon:"🌦"},53:{label:"Морось",icon:"🌦"},55:{label:"Дождь",icon:"🌧"},
@@ -4067,11 +4083,13 @@ function WeatherButton({dark}:{dark:boolean}) {
       .then(([wd,md])=>{
         setWeather(wd.current); setMarine(md.current)
         const now = new Date()
-        setUpdated(`${now.getHours().toString().padStart(2,"0")}:${now.getMinutes().toString().padStart(2,"0")}`)
+        const upd = `${now.getHours().toString().padStart(2,"0")}:${now.getMinutes().toString().padStart(2,"0")}`
+        setUpdated(upd)
+        try { localStorage.setItem("nav_weather", JSON.stringify({weather:wd.current, marine:md.current, updated:upd})) } catch {}
       }).finally(()=>setLoading(false))
   }
 
-  function handleOpen() { setOpen(true); if(!weather) fetchData() }
+  function handleOpen() { setOpen(true); fetchData() }
 
   const wInfo = weather ? (WMO[weather.weather_code]??{label:"—",icon:"🌡"}) : null
   const wave = marine?.wave_height ?? null
@@ -5386,8 +5404,8 @@ export default function Page() {
                                 <div key={idx} style={{marginBottom:idx<v.phones.length-1?"10px":0}}>
                                   <div style={{fontSize:"11px",color:t.muted,marginBottom:"7px",fontFamily:"monospace",fontWeight:600,letterSpacing:"0.3px"}}>📱 {ph}</div>
                                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 44px 44px",gap:"6px"}}>
-                                    <a href={isProblem?undefined:`https://wa.me/${ph.replace(/\D/g,"")}?text=${generateTransferMessage(v)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isProblem){if(!isDone)setNotifiedVouchers(prev=>({...prev,[v.vId]:true}));addLog("transfer",v.tourists[0]||"",ph,v.hotel,v.vId)}}} style={{background:isProblem?t.cardBorder:"linear-gradient(135deg,#16a34a,#15803d)",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,pointerEvents:isProblem?"none":"auto",display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>💬 WA</a>
-                                    <a href={isProblem?undefined:`https://t.me/+${ph.replace(/[^\d]/g,"")}`} target="_blank" rel="noreferrer" style={{background:isProblem?t.cardBorder:"linear-gradient(135deg,#0088cc,#006aaa)",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,pointerEvents:isProblem?"none":"auto",display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>✈ TG</a>
+                                    <a href={isProblem?undefined:`https://wa.me/${intlDigits(ph)}?text=${generateTransferMessage(v)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isProblem){if(!isDone)setNotifiedVouchers(prev=>({...prev,[v.vId]:true}));addLog("transfer",v.tourists[0]||"",ph,v.hotel,v.vId)}}} style={{background:isProblem?t.cardBorder:"linear-gradient(135deg,#16a34a,#15803d)",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,pointerEvents:isProblem?"none":"auto",display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>💬 WA</a>
+                                    <a href={isProblem?undefined:`https://t.me/+${intlDigits(ph)}`} target="_blank" rel="noreferrer" style={{background:isProblem?t.cardBorder:"linear-gradient(135deg,#0088cc,#006aaa)",color:isProblem?t.muted:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,pointerEvents:isProblem?"none":"auto",display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>✈ TG</a>
                                     <a href={`tel:${ph}`} style={{background:t.cardBorder,color:t.text,textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"18px",display:"flex",alignItems:"center",justifyContent:"center"}}>📞</a>
                                     <button onClick={()=>copyMessage(generateTransferMessage(v),v.vId+ph)} title="Скопировать текст сообщения" style={{background:copiedMsg===v.vId+ph?"#16a34a":t.cardBorder,color:copiedMsg===v.vId+ph?"#fff":t.text,border:"none",padding:"10px 4px",borderRadius:"10px",fontSize:"16px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s"}}>{copiedMsg===v.vId+ph?"✓":"📋"}</button>
                                   </div>
@@ -5508,8 +5526,8 @@ export default function Page() {
                                 <div key={idx} style={{marginBottom:"8px"}}>
                                   <div style={{fontSize:"11px",color:t.muted,marginBottom:"7px",fontFamily:"monospace",fontWeight:600}}>📱 {tt.phone}</div>
                                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 44px 44px",gap:"6px"}}>
-                                    <a href={`https://wa.me/${tt.phone.replace(/\D/g,"")}?text=${generateExcursionMessage(e)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isDone)setNotifiedExcursions(prev=>({...prev,[e.key]:true}));addLog("excursion",tt.name,tt.phone,e.hotel,e.vId)}} style={{background:"linear-gradient(135deg,#16a34a,#15803d)",color:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>💬 WA</a>
-                                    <a href={`https://t.me/+${tt.phone.replace(/[^\d]/g,"")}`} target="_blank" rel="noreferrer" style={{background:"linear-gradient(135deg,#0088cc,#006aaa)",color:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>✈ TG</a>
+                                    <a href={`https://wa.me/${intlDigits(tt.phone)}?text=${generateExcursionMessage(e)}`} target="_blank" rel="noreferrer" onClick={()=>{if(!isDone)setNotifiedExcursions(prev=>({...prev,[e.key]:true}));addLog("excursion",tt.name,tt.phone,e.hotel,e.vId)}} style={{background:"linear-gradient(135deg,#16a34a,#15803d)",color:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>💬 WA</a>
+                                    <a href={`https://t.me/+${intlDigits(tt.phone)}`} target="_blank" rel="noreferrer" style={{background:"linear-gradient(135deg,#0088cc,#006aaa)",color:"#fff",textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"12px",fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",gap:"4px"}}>✈ TG</a>
                                     <a href={`tel:${tt.phone}`} style={{background:t.cardBorder,color:t.text,textAlign:"center",padding:"10px 4px",borderRadius:"10px",textDecoration:"none",fontSize:"18px",display:"flex",alignItems:"center",justifyContent:"center"}}>📞</a>
                                     <button onClick={()=>copyMessage(generateExcursionMessage(e),e.key+tt.phone)} title="Скопировать текст сообщения" style={{background:copiedMsg===e.key+tt.phone?"#16a34a":t.cardBorder,color:copiedMsg===e.key+tt.phone?"#fff":t.text,border:"none",padding:"10px 4px",borderRadius:"10px",fontSize:"16px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s"}}>{copiedMsg===e.key+tt.phone?"✓":"📋"}</button>
                                   </div>
