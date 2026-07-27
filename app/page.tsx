@@ -3958,7 +3958,7 @@ function CurrencyButton({dark}:{dark:boolean}) {
         title="Курс валют"
         style={{
           display:"flex",alignItems:"center",gap:"6px",
-          height:"36px",padding:"0 12px",
+          height:"32px",padding:"0 9px",
           borderRadius:"10px",border:`1px solid ${t.border}`,
           background:t.card,cursor:"pointer",flexShrink:0,
           boxShadow:state.error?"0 0 0 2px #f87171":open?`0 0 0 2px ${t.accent}`:"none",
@@ -4080,8 +4080,8 @@ function WeatherButton({dark}:{dark:boolean}) {
   return (
     <>
       <button onClick={handleOpen} title="Погода Пхукет"
-        style={{height:"36px",padding:"0 10px",borderRadius:"10px",border:`1px solid ${t.border}`,
-          background:t.card,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",gap:"5px",
+        style={{height:"32px",padding:"0 8px",borderRadius:"10px",border:`1px solid ${t.border}`,
+          background:t.card,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",gap:"4px",
           boxShadow:open?`0 0 0 2px ${t.accent}`:"none",transition:"all 0.2s"}}>
         <span style={{fontSize:"16px",lineHeight:1}}>{wInfo?.icon??"🌤"}</span>
         {weather && <span style={{fontSize:"13px",fontWeight:800,color:dark?"#7dd3fc":"#0369a1",fontFamily:"monospace"}}>{Math.round(weather.temperature_2m)}°</span>}
@@ -5119,39 +5119,39 @@ export default function Page() {
           {/* ── Top bar ── */}
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 16px 0"}}>
             {/* Logo */}
-            <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+            <div style={{display:"flex",alignItems:"center",gap:"10px",minWidth:0,flexShrink:1,overflow:"hidden"}}>
               <div style={{width:"36px",height:"36px",borderRadius:"10px",background:"linear-gradient(135deg,#38bdf8,#0369a1)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:"0 2px 8px rgba(56,189,248,0.4)"}}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"/>
                   <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="#fff" stroke="none"/>
                 </svg>
               </div>
-              <div>
-                <div style={{fontSize:"15px",fontWeight:800,letterSpacing:"-0.3px",color:t.text,lineHeight:1.1}}>Navigator</div>
-                <div style={{fontSize:"10px",fontWeight:600,color:t.muted,letterSpacing:"0.3px"}}>{guideName?`${guideName} · SAYAMA`:"SAYAMA TRAVEL"}</div>
+              <div style={{minWidth:0,overflow:"hidden"}}>
+                <div style={{fontSize:"15px",fontWeight:800,letterSpacing:"-0.3px",color:t.text,lineHeight:1.1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>Navigator</div>
+                <div style={{fontSize:"10px",fontWeight:600,color:t.muted,letterSpacing:"0.3px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{guideName?`${guideName} · SAYAMA`:"SAYAMA TRAVEL"}</div>
               </div>
             </div>
 
             {/* Right controls */}
-            <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+            <div style={{display:"flex",alignItems:"center",gap:"4px",flexShrink:0}}>
               {tab==="transfers"&&(
-                <label style={{display:"flex",alignItems:"center",gap:"6px",fontSize:"12px",background:t.accent,color:"#fff",padding:"7px 12px",borderRadius:"10px",cursor:"pointer",fontWeight:700,boxShadow:"0 2px 8px rgba(56,189,248,0.3)"}}>
+                <label style={{display:"flex",alignItems:"center",gap:"5px",fontSize:"11px",background:t.accent,color:"#fff",padding:"7px 9px",borderRadius:"10px",cursor:"pointer",fontWeight:700,boxShadow:"0 2px 8px rgba(56,189,248,0.3)",flexShrink:0,whiteSpace:"nowrap"}}>
                   📂 <span>{transferFileName ? transferFileName.slice(0,12)+"…" : "Загрузить"}</span>
                   <input type="file" onChange={handleTransferFile} accept=".xlsx,.xls" style={{display:"none"}}/>
                 </label>
               )}
               {tab==="excursions"&&(
-                <label style={{display:"flex",alignItems:"center",gap:"6px",fontSize:"12px",background:"#7c3aed",color:"#fff",padding:"7px 12px",borderRadius:"10px",cursor:"pointer",fontWeight:700,boxShadow:"0 2px 8px rgba(124,58,237,0.3)"}}>
+                <label style={{display:"flex",alignItems:"center",gap:"5px",fontSize:"11px",background:"#7c3aed",color:"#fff",padding:"7px 9px",borderRadius:"10px",cursor:"pointer",fontWeight:700,boxShadow:"0 2px 8px rgba(124,58,237,0.3)",flexShrink:0,whiteSpace:"nowrap"}}>
                   📂 <span>{excFileName ? excFileName.slice(0,12)+"…" : "Загрузить"}</span>
                   <input type="file" onChange={handleExcursionFile} accept=".xlsx,.xls" style={{display:"none"}}/>
                 </label>
               )}
               <button onClick={()=>setDark(d=>!d)} title={dark?"Светлая тема":"Тёмная тема"}
-                style={{width:"36px",height:"36px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"18px",background:t.cardBorder,border:"none",borderRadius:"10px",cursor:"pointer",flexShrink:0}}>
+                style={{width:"32px",height:"32px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"16px",background:t.cardBorder,border:"none",borderRadius:"10px",cursor:"pointer",flexShrink:0}}>
                 {dark?"◑":"◐"}
               </button>
               <button onClick={()=>setShowSettings(true)} title="Настройки"
-                style={{width:"36px",height:"36px",display:"flex",alignItems:"center",justifyContent:"center",background:t.cardBorder,border:"none",borderRadius:"10px",cursor:"pointer",flexShrink:0}}>
+                style={{width:"32px",height:"32px",display:"flex",alignItems:"center",justifyContent:"center",background:t.cardBorder,border:"none",borderRadius:"10px",cursor:"pointer",flexShrink:0}}>
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={dark?"#7a9abf":"#5a7a9a"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="3"/>
                   <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
