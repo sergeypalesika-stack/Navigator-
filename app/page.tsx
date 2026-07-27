@@ -78,6 +78,9 @@ const TYPE_META: Record<ExcursionType,{label:string;icon:string;color:string;bor
 
 function generateExcursionMessage(e: Excursion): string {
   const p = e.pickup && e.pickup !== "—" ? e.pickup : "уточните у гида"
+  // Ранний выезд (до 08:00)? При позднем (≈8:00–8:30 и позже) Breakfast box не нужен — успевают позавтракать в отеле.
+  const pickHour = parseInt(String(e.pickup || "").match(/\d{1,2}/)?.[0] || "", 10)
+  const earlyStart = Number.isNaN(pickHour) ? true : pickHour < 8
   const isBIG = (e.touroperator||"").toLowerCase().includes("bg asia") || (e.touroperator||"").toLowerCase().includes("big")
   const hotlineMain = isBIG
     ? ["📞 Для звонков: +66 92 249 49 49", "💬 WhatsApp / Telegram: +66 92 279 09 90"]
@@ -90,8 +93,7 @@ function generateExcursionMessage(e: Excursion): string {
       "",
       "⏰ Пожалуйста, будьте готовы в " + p + " — ожидайте трансфер в лобби отеля.",
       "",
-      "📦 Совет: закажите Breakfast box на ресепшене сегодня — лёгкий завтрак в порту будет кстати.",
-      "",
+      ...(earlyStart ? ["📦 Совет: закажите Breakfast box на ресепшене сегодня — лёгкий завтрак в порту будет кстати.", ""] : []),
       "🎒 Что взять с собой:",
       "• купальник / плавки",
       "• полотенце",
