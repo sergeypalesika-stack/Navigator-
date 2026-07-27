@@ -83,8 +83,8 @@ function generateExcursionMessage(e: Excursion): string {
   const earlyStart = Number.isNaN(pickHour) ? true : pickHour < 8
   const isBIG = (e.touroperator||"").toLowerCase().includes("bg asia") || (e.touroperator||"").toLowerCase().includes("big")
   const hotlineMain = isBIG
-    ? ["📞 Для звонков: 0066 92 249 49 49", "💬 WhatsApp / Telegram: 0066 92 279 09 90"]
-    : ["📞 0066 89 009 50 00 (для звонков с местных телефонов)", "💬 0066 92 279 11 99 (WhatsApp, Telegram)"]
+    ? ["📞 Для звонков: +66 92 249 49 49", "💬 WhatsApp / Telegram: +66 92 279 09 90"]
+    : ["📞 +66 89 009 50 00 (для звонков с местных телефонов)", "💬 +66 92 279 11 99 (WhatsApp, Telegram)"]
   const msgs: Record<ExcursionType, string[]> = {
     sea: [
       "Добрый вечер!",
@@ -612,8 +612,8 @@ function intlDigits(ph: string): string {
 function generateTransferMessage(v: Voucher): string {
   const isBIG = v.touroperator === "BIG"
   const contacts = isBIG
-    ? ["📞 Для звонков: 0066 92 249 49 49", "💬 WhatsApp / Telegram: 0066 92 279 09 90"]
-    : ["📞 Для звонков: 0066 89 009 50 00", "💬 WhatsApp / Telegram: 0066 92 279 11 99"]
+    ? ["📞 Для звонков: +66 92 249 49 49", "💬 WhatsApp / Telegram: +66 92 279 09 90"]
+    : ["📞 Для звонков: +66 89 009 50 00", "💬 WhatsApp / Telegram: +66 92 279 11 99"]
   const lines = [
     "Здравствуйте!",
     "",
