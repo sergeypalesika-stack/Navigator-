@@ -2203,13 +2203,13 @@ const BOATS_DATA = [
     {name:"Andaman Treasure 2/1",price:86500,extra:4600,paxIncl:"1–2"},
   ]},
   { id:3, name:"Sofia", size:"45ft", pier:"Bang Rong Pier", type:"speedboat", maxPax:20, tours:[
-    {name:"Phi Phi + Bamboo",price:38000,extra:1500,paxIncl:"1–2"},
-    {name:"James Bond + Naka Island",price:39000,extra:1500,paxIncl:"1–2"},
-    {name:"Krabi",price:38000,extra:1500,paxIncl:"1–2"},
-    {name:"Phi Phi + Krabi",price:50500,extra:2500,paxIncl:"1–2"},
-    {name:"James Bond + Krabi",price:50500,extra:2500,paxIncl:"1–2"},
-    {name:"James Bond + Phi Phi",price:50500,extra:2500,paxIncl:"1–2"},
-    {name:"James Bond + Krabi + Phi Phi",price:62150,extra:2500,paxIncl:"1–2"},
+    {name:"Phi Phi + Bamboo",price:42300,extra:1500,paxIncl:"1–2"},
+    {name:"James Bond + Naka Island",price:43300,extra:1500,paxIncl:"1–2"},
+    {name:"Krabi",price:42300,extra:1500,paxIncl:"1–2"},
+    {name:"Phi Phi + Krabi",price:54800,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Krabi",price:54800,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Phi Phi",price:54800,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Krabi + Phi Phi",price:66450,extra:2500,paxIncl:"1–2"},
   ]},
   { id:4, name:"Thaimarine", size:"47ft", pier:"Royal Phuket Marina", type:"speedboat", maxPax:20, tours:[
     {name:"Phi Phi + Bamboo",price:72400,extra:1500,paxIncl:"1–2"},
@@ -2226,13 +2226,13 @@ const BOATS_DATA = [
   ]},
   { id:7, name:"Lexi", size:"45ft", pier:"Royal Phuket Marina", type:"speedboat", maxPax:30, tours:[
     {name:"Phi Phi + Bamboo",price:49300,extra:1600,paxIncl:"1–2"},
-    {name:"James Bond + Naka Island",price:47900,extra:1600,paxIncl:"1–2"},
-    {name:"Phi Phi + Krabi",price:62150,extra:2500,paxIncl:"1–2"},
-    {name:"James Bond + Krabi",price:77150,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Naka Island",price:49300,extra:1860,paxIncl:"1–2"},
+    {name:"Phi Phi + Krabi",price:64300,extra:2500,paxIncl:"1–2"},
+    {name:"James Bond + Krabi",price:62150,extra:2500,paxIncl:"1–2"},
     {name:"James Bond + Phi Phi",price:77150,extra:2500,paxIncl:"1–2"},
-    {name:"Similan (RPM)",price:96400,extra:1700,paxIncl:"1–2"},
-    {name:"Similan (Taplamu)",price:68600,extra:2150,paxIncl:"1–2"},
-    {name:"Surin Islands",price:80000,extra:2500,paxIncl:"1–2"},
+    {name:"Similan (RPM)",price:90700,extra:2500,paxIncl:"1–2"},
+    {name:"Similan (Taplamu)",price:70700,extra:2500,paxIncl:"1–2"},
+    {name:"Surin Islands",price:82150,extra:2500,paxIncl:"1–2"},
     {name:"Koh Rok Ko Ha",price:97000,extra:1800,paxIncl:"1–2"},
   ]},
   { id:8, name:"Verona", size:"46ft", pier:"Taplamu Pier", type:"speedboat", maxPax:30, tours:[
@@ -2246,29 +2246,29 @@ const BOATS_DATA = [
   { id:10, name:"Randezvous", size:"44ft", pier:"Chalong Pier", type:"catamaran", maxPax:10,
     note:"Обед включён. Seafood +650 ฿/чел, рус. гид +3500 ฿",
     tours:[
-      {name:"Maithon + Racha Yai",price:68800,extra:null,paxIncl:"10"},
-      {name:"Racha Yai Fishing",price:68800,extra:null,paxIncl:"10"},
-      {name:"Phi Phi",price:76500,extra:800,paxIncl:"1–2"},
-      {name:"Phi Phi Bamboo",price:83500,extra:800,paxIncl:"1–2"},
-      {name:"Krabi-Koh Hong",price:83500,extra:800,paxIncl:"1–2"},
+      {name:"Maithon + Racha Yai",price:67800,extra:null,paxIncl:"10"},
+      {name:"Racha Yai Fishing",price:67800,extra:null,paxIncl:"10"},
+      {name:"Phi Phi",price:76150,extra:800,paxIncl:"1–2"},
+      {name:"Phi Phi Bamboo",price:83300,extra:800,paxIncl:"1–2"},
+      {name:"Krabi-Koh Hong",price:83300,extra:800,paxIncl:"1–2"},
   ]},
   { id:11, name:"Zoe", size:"46ft", pier:"Chalong Pier", type:"catamaran", maxPax:15,
     note:"Обед (seafood) включён. Рус. гид +3500 ฿. Бассейн +3500 ฿, горка +3500 ฿",
     tours:[
-      {name:"Racha Yai + Coral",price:40000,extra:1500,paxIncl:"1–2"},
-      {name:"Racha Noi",price:46500,extra:1500,paxIncl:"1–2"},
+      {name:"Racha Yai + Coral",price:42500,extra:1500,paxIncl:"1–2"},
+      {name:"Racha Noi",price:48500,extra:1500,paxIncl:"1–2"},
   ]},
   { id:12, name:"Sunny", size:"38ft", pier:"Chalong Pier", type:"catamaran", maxPax:10,
     note:"Обед (seafood) включён. Рус. гид +3500 ฿. Бассейн +3500 ฿, горка +3500 ฿",
     tours:[
-      {name:"Racha Yai + Coral",price:37500,extra:1500,paxIncl:"1–2"},
-      {name:"Racha Noi",price:44500,extra:1500,paxIncl:"1–2"},
+      {name:"Racha Yai + Coral",price:38500,extra:1500,paxIncl:"1–2"},
+      {name:"Racha Noi",price:46710,extra:1500,paxIncl:"1–2"},
   ]},
   { id:13, name:"Oceanland", size:"45ft", pier:"Chalong Pier", type:"catamaran", maxPax:20,
     note:"Обед (seafood) включён. Рус. гид +3500 ฿. Бассейн +3500 ฿, горка +3500 ฿",
     tours:[
-      {name:"Racha Yai + Coral",price:51500,extra:1500,paxIncl:"1–2"},
-      {name:"Racha Noi",price:57500,extra:1500,paxIncl:"1–2"},
+      {name:"Racha Yai + Coral",price:58000,extra:1500,paxIncl:"1–2"},
+      {name:"Racha Noi",price:64700,extra:1500,paxIncl:"1–2"},
   ]},
   { id:14, name:"Pepper", size:"47ft", pier:"Chalong Pier", type:"catamaran", maxPax:30,
     note:"Обед не включён (640–920 ฿/чел). Рус. гид +3500 ฿. 1–15 чел в базе.",
@@ -2314,30 +2314,29 @@ const BOATS_DATA = [
   { id:20, name:"Ocean Dream", size:"40ft", pier:"Chalong Pier", type:"catamaran", maxPax:15,
     note:"Обед включён. Рус. гид +3500 ฿. Бассейн +4500 ฿, горка +3600 ฿. 1–6 чел в базе.",
     tours:[
-      {name:"Racha Yai + Coral (9:00–16:00)",price:38000,extra:2500,paxIncl:"1–6"},
-      {name:"Khai Island (9:00–18:00)",price:45000,extra:2500,paxIncl:"1–6"},
-      {name:"Racha Yai + Coral + Sunset (10:30–19:00)",price:42000,extra:2500,paxIncl:"1–6"},
+      {name:"Maithon + Coral (9:00–16:00)",price:40000,extra:2500,paxIncl:"1–6"},
+      {name:"Maithon + Coral + Sunset (10:30–19:00)",price:44000,extra:2500,paxIncl:"1–6"},
   ]},
   { id:21, name:"Ameray", size:"37ft", pier:"Chalong Pier", type:"catamaran", maxPax:15,
     note:"Обед включён. Рус. гид +3500 ฿. Бассейн +4500 ฿, горка +3600 ฿. 1–6 чел в базе.",
     tours:[
-      {name:"Racha Yai + Coral (9:00–16:00)",price:38000,extra:2500,paxIncl:"1–6"},
-      {name:"Khai Island (9:00–18:00)",price:45000,extra:2500,paxIncl:"1–6"},
-      {name:"Racha Yai + Coral + Sunset (10:30–19:00)",price:42000,extra:2500,paxIncl:"1–6"},
+      {name:"Racha Yai + Coral (9:00–16:00)",price:40000,extra:2500,paxIncl:"1–6"},
+      {name:"Khai Island (9:00–18:00)",price:47000,extra:2500,paxIncl:"1–6"},
+      {name:"Racha Yai + Coral + Sunset (10:30–19:00)",price:44000,extra:2500,paxIncl:"1–6"},
   ]},
   { id:22, name:"Wildcat", size:"44ft", pier:"Chalong Pier", type:"catamaran", maxPax:15,
     note:"Обед включён. Рус. гид +3500 ฿. Бассейн +4500 ฿, горка +3600 ฿. 1–6 чел в базе.",
     tours:[
-      {name:"Racha Yai + Coral (9:00–16:00)",price:38000,extra:2500,paxIncl:"1–6"},
-      {name:"Khai Island (9:00–18:00)",price:45000,extra:2500,paxIncl:"1–6"},
-      {name:"Racha Yai + Coral + Sunset (10:30–19:00)",price:42000,extra:2500,paxIncl:"1–6"},
+      {name:"Racha Yai + Coral (9:00–16:00)",price:40000,extra:2500,paxIncl:"1–6"},
+      {name:"Khai Island (9:00–18:00)",price:47000,extra:2500,paxIncl:"1–6"},
+      {name:"Racha Yai + Coral + Sunset (10:30–19:00)",price:44000,extra:2500,paxIncl:"1–6"},
   ]},
   { id:23, name:"White Corn", size:"38ft", pier:"Chalong Pier", type:"catamaran", maxPax:15,
     note:"Обед BBQ+Seafood включён. Рус. гид +3500 ฿. 1–5 чел в базе.",
-    tours:[{name:"Racha Yai + Coral",price:40000,extra:1500,paxIncl:"1–5"}]},
+    tours:[{name:"Racha Yai + Coral",price:41500,extra:1500,paxIncl:"1–5"}]},
   { id:24, name:"Black Pearl", size:"40ft", pier:"Chalong Pier", type:"catamaran", maxPax:15,
     note:"Обед BBQ+Seafood включён. Рус. гид +3500 ฿. 1–5 чел в базе.",
-    tours:[{name:"Racha Yai + Coral",price:40000,extra:1500,paxIncl:"1–5"}]},
+    tours:[{name:"Racha Yai + Coral",price:41500,extra:1500,paxIncl:"1–5"}]},
   { id:25, name:"Ella", size:"53ft", pier:"Chalong Pier", type:"catamaran", maxPax:20,
     note:"Обед +500 ฿/чел. Рус. гид +3500 ฿. Бассейн +3500 ฿. 1–10 чел в базе. Цена выше 20/12–01/03.",
     tours:[
@@ -2348,7 +2347,7 @@ const BOATS_DATA = [
     note:"Обед +500 ฿/чел. Рус. гид +3500 ฿. Бассейн +3500 ฿. 1–10 чел в базе. Цена выше 20/12–01/03.",
     tours:[
       {name:"Racha Yai + Coral",price:44500,extra:"1500+lunch",paxIncl:"1–10"},
-      {name:"Racha + Coral + Promthep",price:46500,extra:"1500+lunch",paxIncl:"1–10"},
+      {name:"Racha + Coral + Promthep",price:56500,extra:"1500+lunch",paxIncl:"1–10"},
   ]},
   { id:27, name:"Bohemian", size:"50ft", pier:"Chalong Pier", type:"catamaran", maxPax:25,
     note:"Обед +500 ฿/чел. Рус. гид +3500 ฿. Бассейн +3500 ฿. 1–10 чел в базе. Цена выше 20/12–01/03.",
@@ -2424,6 +2423,39 @@ const BOATS_DATA = [
   { id:37, name:"Solita", size:"48ft", pier:"Chalong Pier", type:"speedboat", maxPax:10,
     note:"Обед включён. Рус. гид +3500 ฿.",
     tours:[{name:"Racha Yai",price:31500,extra:null,paxIncl:"1–10"}]},
+  { id:38, name:"Sea Explorer", size:"—", pier:"Chalong Pier", type:"speedboat", maxPax:25,
+    note:"Обед включён (A/B/C на выбор). Рус. гид +3500฿. Бассейн +3500฿, горка +3600฿. Удочки +1000฿. Доп. к 8 чел: +1000 (Phi Phi), от 8 чел +3000. BBQ Combo +1500. Если больше 11 чел — +3500 за экстра вэн",
+    tours:[
+      {name:"Racha + Coral + Promthep",price:73900,extra:2200,paxIncl:"1–2"},
+      {name:"Racha Yai + Maithon",price:73900,extra:2200,paxIncl:"1–2"},
+      {name:"Racha Noi + Racha Yai",price:78740,extra:2200,paxIncl:"1–2"},
+      {name:"Phi Phi (No Bamboo)",price:79800,extra:1000,paxIncl:"1–2"},
+      {name:"Phi Phi + Bamboo",price:92100,extra:1000,paxIncl:"1–2"},
+    ]},
+  { id:39, name:"Blue Metis", size:"—", pier:"Chalong Pier", type:"speedboat", maxPax:15,
+    note:"Включены: трансфер, обед, спиннинги (троллинга нет). Рус. гид +3500฿. Если больше 11 чел — +3500 за экстра вэн",
+    tours:[
+      {name:"Racha + Coral",price:50500,extra:1000,paxIncl:"1–2"},
+      {name:"Khai + Maithon",price:53300,extra:1000,paxIncl:"1–2"},
+    ]},
+  { id:40, name:"Blue Wings", size:"—", pier:"Chalong Pier", type:"speedboat", maxPax:15,
+    note:"Включены: трансфер, обед, спиннинги (троллинга нет). Рус. гид +3500฿. Если больше 11 чел — +3500 за экстра вэн",
+    tours:[
+      {name:"Racha + Coral",price:48500,extra:1000,paxIncl:"1–2"},
+      {name:"Khai + Maithon",price:50500,extra:1000,paxIncl:"1–2"},
+    ]},
+  { id:41, name:"Blue Castle", size:"—", pier:"Chalong Pier", type:"speedboat", maxPax:15,
+    note:"Включены: трансфер, обед, спиннинги (троллинга нет). Рус. гид +3500฿. Если больше 11 чел — +3500 за экстра вэн",
+    tours:[
+      {name:"Racha + Coral",price:45300,extra:1000,paxIncl:"1–2"},
+      {name:"Khai + Maithon",price:47150,extra:1000,paxIncl:"1–2"},
+    ]},
+  { id:42, name:"Bon Voyage", size:"—", pier:"Chalong Pier", type:"speedboat", maxPax:15,
+    note:"Включены: трансфер, обед, спиннинги (троллинга нет). Рус. гид +3500฿. Если больше 11 чел — +3500 за экстра вэн",
+    tours:[
+      {name:"Racha + Coral",price:43300,extra:1000,paxIncl:"1–2"},
+      {name:"Khai + Maithon",price:47150,extra:1000,paxIncl:"1–2"},
+    ]},
 ]
 
 const BOAT_TYPE_META: Record<string,{label:string;color:string;border:string;bg:string}> = {
@@ -2441,6 +2473,11 @@ function fmtPrice(n: number|string|null): string {
 }
 
 const BOATS_DRIVE_LINKS: Record<string,string> = {
+  "Sea Explorer": "https://drive.google.com/drive/folders/1zTFSgDNNigVjUUIWdd3naFWx6ikcuxBU",
+  "Blue Metis": "https://drive.google.com/drive/folders/1CJnrexdYXEN4tmcMO0lqoCR_hODQnSjd",
+  "Blue Wings": "https://drive.google.com/drive/folders/1vv_Wq9_a4uf3TJyTksOPE9yxRyu0JiaM",
+  "Blue Castle": "https://drive.google.com/drive/folders/1TNr2z9KjVpnwdfSaYg4Yk4pavybkjAxJ",
+  "Bon Voyage": "https://drive.google.com/drive/folders/1-1jyRh1h-1wwYf6e25ieE0zOJecKUjmR",
   "Bowie 1":    "https://drive.google.com/drive/folders/1DMstt7CMkXog7yp0LCpvxedzSuNXblrG",
   "Bowie 2":    "https://drive.google.com/drive/folders/1soiMLhTVqupUqYL7TuE1Ln7RERkiw5XV",
   "Thaimarine": "https://drive.google.com/drive/folders/1jEEnwwBajxtSO5I0vGUfdXlolOtgcY3q",
@@ -2701,7 +2738,7 @@ function BoatsTab({dark}:{dark:boolean}) {
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px",flexWrap:"wrap",gap:"6px"}}>
           <div>
             <div style={{fontSize:"14px",fontWeight:800,color:t.accent}}>🚢 Лодки и яхты</div>
-            <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {liveBoats.length} судов · сезон 2025–2026 · все цены ฿</div>
+            <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {liveBoats.length} судов · сезон 2026–2027 · все цены ฿</div>
           </div>
           <div style={{display:"flex",gap:"5px",alignItems:"center",flexWrap:"wrap"}}>
             <input ref={excelInputRef} type="file" accept=".xlsx,.xls" style={{display:"none"}}
@@ -2933,7 +2970,7 @@ function BoatsTab({dark}:{dark:boolean}) {
               <div style={{padding:"18px 20px 14px",borderBottom:`1px solid ${t.cardBorder}`,flexShrink:0,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div>
                   <div style={{fontSize:"16px",fontWeight:800,color:t.text}}>🧮 Калькулятор лодки</div>
-                  <div style={{fontSize:"10px",color:t.muted,marginTop:"1px"}}>Лодки и яхты · сезон 2025–2026</div>
+                  <div style={{fontSize:"10px",color:t.muted,marginTop:"1px"}}>Лодки и яхты · сезон 2026–2027</div>
                 </div>
                 <button onClick={()=>setCalcOpen(false)} style={{background:t.cardBorder,border:"none",borderRadius:"8px",width:"30px",height:"30px",cursor:"pointer",fontSize:"14px",color:t.text,flexShrink:0}}>✕</button>
               </div>
@@ -3106,45 +3143,45 @@ const BOATS_SUMMER_DATA = [
     drive:"https://drive.google.com/drive/folders/1XBSdmfPFk1LXadlJ4qAIU0QsdczFGUOj",
     tours:[
       {name:"Phi Phi + Bamboo",price:49300,extra:1600,incl:"1–2"},
-      {name:"James Bond + Naka Island",price:47900,extra:1600,incl:"1–2"},
-      {name:"Phi Phi + Krabi",price:62150,extra:2500,incl:"1–2"},
-      {name:"James Bond + Krabi",price:77150,extra:2500,incl:"1–2"},
+      {name:"James Bond + Naka Island",price:49300,extra:1860,incl:"1–2"},
+      {name:"Phi Phi + Krabi",price:64300,extra:2500,incl:"1–2"},
+      {name:"James Bond + Krabi",price:62150,extra:2500,incl:"1–2"},
       {name:"James Bond + Phi Phi",price:77150,extra:2500,incl:"1–2"},
-      {name:"Similan (RPM)",price:96400,extra:1700,incl:"1–2"},
-      {name:"Similan (Taplamu)",price:68600,extra:2150,incl:"1–2"},
-      {name:"Surin Islands",price:80000,extra:2500,incl:"1–2"},
+      {name:"Similan (RPM)",price:90700,extra:2500,incl:"1–2"},
+      {name:"Similan (Taplamu)",price:70700,extra:2500,incl:"1–2"},
+      {name:"Surin Islands",price:82150,extra:2500,incl:"1–2"},
       {name:"Koh Rok Ko Ha",price:97000,extra:1800,incl:"1–2"},
     ]},
   { id:"bs10", name:"Randezvous", size:"44ft", pier:"Chalong Pier", type:"catamaran", maxPax:10,
     note:"Обед включён. Seafood +650฿/чел, рус. гид +3500฿",
     drive:"https://drive.google.com/drive/folders/1ILUqV3U8VJq-gA3cBEIczFy86qArFSD-",
     tours:[
-      {name:"Maithon + Racha Yai",price:50000,extra:null,incl:"10 PAX"},
-      {name:"Racha Yai Fishing",price:50000,extra:null,incl:"10 PAX"},
-      {name:"Phi Phi",price:56800,extra:800,incl:"1–2"},
-      {name:"Phi Phi Bamboo",price:64800,extra:800,incl:"1–2"},
-      {name:"Krabi-Koh Hong",price:64800,extra:800,incl:"1–2"},
+      {name:"Maithon + Racha Yai",price:67800,extra:null,incl:"10 PAX"},
+      {name:"Racha Yai Fishing",price:67800,extra:null,incl:"10 PAX"},
+      {name:"Phi Phi",price:76150,extra:800,incl:"1–2"},
+      {name:"Phi Phi Bamboo",price:83300,extra:800,incl:"1–2"},
+      {name:"Krabi-Koh Hong",price:83300,extra:800,incl:"1–2"},
     ]},
   { id:"bs11", name:"Zoe", size:"46ft", pier:"Chalong Pier", type:"sailboat", maxPax:15,
     note:"Обед (seafood) включён. >11 чел +3500฿ доп. вэн. Бассейн/горка/рус. гид — доп.",
     drive:"https://drive.google.com/drive/folders/1PUVoPqbYKkYnZqjMiN5zyVypphtNZj3h",
     tours:[
-      {name:"Racha Yai + Coral",price:40000,extra:1500,incl:"1–2"},
-      {name:"Racha Noi",price:46500,extra:1500,incl:"1–2"},
+      {name:"Racha Yai + Coral",price:42500,extra:1500,incl:"1–2"},
+      {name:"Racha Noi",price:48500,extra:1500,incl:"1–2"},
     ]},
   { id:"bs12", name:"Sunny", size:"38ft", pier:"Chalong Pier", type:"sailboat", maxPax:10,
     note:"Обед (seafood) включён. Бассейн/горка/рус. гид — доп.",
     drive:"https://drive.google.com/drive/folders/1jfPZgXfTy58EfSvG3wR7znvR8lCalzHX",
     tours:[
-      {name:"Racha Yai + Coral",price:37500,extra:1500,incl:"1–2"},
-      {name:"Racha Noi",price:44500,extra:1500,incl:"1–2"},
+      {name:"Racha Yai + Coral",price:38500,extra:1500,incl:"1–2"},
+      {name:"Racha Noi",price:46710,extra:1500,incl:"1–2"},
     ]},
   { id:"bs13", name:"Oceanland", size:"45ft", pier:"Chalong Pier", type:"sailboat", maxPax:20,
     note:"Обед (seafood) включён. >11 чел +3500฿ доп. вэн.",
     drive:"https://drive.google.com/drive/folders/1--7mTJnU-FfdGaPT8BdIcGBc1QlBgmr3",
     tours:[
-      {name:"Racha Yai + Coral",price:51500,extra:1500,incl:"1–2"},
-      {name:"Racha Noi",price:57500,extra:1500,incl:"1–2"},
+      {name:"Racha Yai + Coral",price:58000,extra:1500,incl:"1–2"},
+      {name:"Racha Noi",price:64700,extra:1500,incl:"1–2"},
     ]},
   { id:"bs14", name:"Pepper", size:"47ft", pier:"Chalong Pier", type:"sailboat", maxPax:30,
     note:"Обед НЕ включён (оплач. отдельно). База 1–15 чел. >11 чел +3500฿ доп. вэн.",
@@ -3197,34 +3234,33 @@ const BOATS_SUMMER_DATA = [
     note:"Обед (seafood) включён. >11 чел +3500฿ доп. вэн. Бассейн +4500฿, горка +3600฿, рус. гид +3500฿",
     drive:"https://drive.google.com/drive/u/0/folders/1dIqceqeU4jpv0_8Jb722pxOrV2sW63Z",
     tours:[
-      {name:"Racha Yai + Coral (9:00–16:00)",price:38000,extra:2500,incl:"1–6"},
-      {name:"Khai Island (9:00–18:00)",price:45000,extra:2500,incl:"1–6"},
-      {name:"Racha Yai + Coral + Sunset (10:30–19:00)",price:42000,extra:2500,incl:"1–6"},
+      {name:"Maithon + Coral (9:00–16:00)",price:40000,extra:2500,incl:"1–6"},
+      {name:"Maithon + Coral + Sunset (10:30–19:00)",price:44000,extra:2500,incl:"1–6"},
     ]},
   { id:"bs21", name:"Ameray", size:"37ft", pier:"Chalong Pier", type:"sailboat", maxPax:15,
     note:"Обед (seafood) включён. >11 чел +3500฿ доп. вэн. Бассейн +4500฿, горка +3600฿, рус. гид +3500฿",
     drive:"https://drive.google.com/drive/folders/1RvMJgxFDf-2QWPqX2eGoqwC99VDGXF1w",
     tours:[
-      {name:"Racha Yai + Coral (9:00–16:00)",price:38000,extra:2500,incl:"1–6"},
-      {name:"Khai Island (9:00–18:00)",price:45000,extra:2500,incl:"1–6"},
-      {name:"Racha Yai + Coral + Sunset (10:30–19:00)",price:42000,extra:2500,incl:"1–6"},
+      {name:"Racha Yai + Coral (9:00–16:00)",price:40000,extra:2500,incl:"1–6"},
+      {name:"Khai Island (9:00–18:00)",price:47000,extra:2500,incl:"1–6"},
+      {name:"Racha Yai + Coral + Sunset (10:30–19:00)",price:44000,extra:2500,incl:"1–6"},
     ]},
   { id:"bs22", name:"Wildcat", size:"44ft", pier:"Chalong Pier", type:"catamaran", maxPax:15,
     note:"Обед (seafood) включён. >11 чел +3500฿ доп. вэн. Бассейн +4500฿, горка +3600฿, рус. гид +3500฿",
     drive:"https://drive.google.com/drive/folders/1FzZp3QV2x8wWhQY23bDmJTEMvKRIajqC",
     tours:[
-      {name:"Racha Yai + Coral (9:00–16:00)",price:38000,extra:2500,incl:"1–6"},
-      {name:"Khai Island (9:00–18:00)",price:45000,extra:2500,incl:"1–6"},
-      {name:"Racha Yai + Coral + Sunset (10:30–19:00)",price:42000,extra:2500,incl:"1–6"},
+      {name:"Racha Yai + Coral (9:00–16:00)",price:40000,extra:2500,incl:"1–6"},
+      {name:"Khai Island (9:00–18:00)",price:47000,extra:2500,incl:"1–6"},
+      {name:"Racha Yai + Coral + Sunset (10:30–19:00)",price:44000,extra:2500,incl:"1–6"},
     ]},
   { id:"bs23", name:"White Corn", size:"38ft", pier:"Chalong Pier", type:"sailboat", maxPax:15,
     note:"Обед BBQ + Seafood включён. >11 чел +3500฿ доп. вэн. Рус. гид +3500฿",
     drive:"https://drive.google.com/drive/folders/1-_WwAhjkyJACcXK0uW9dF5K7pUugVD7H",
-    tours:[{name:"Racha Yai + Coral",price:40000,extra:1500,incl:"1–5"}]},
+    tours:[{name:"Racha Yai + Coral",price:41500,extra:1500,incl:"1–5"}]},
   { id:"bs24", name:"Black Pearl", size:"40ft", pier:"Chalong Pier", type:"sailboat", maxPax:15,
     note:"Обед BBQ + Seafood включён. >11 чел +3500฿ доп. вэн. Рус. гид +3500฿",
     drive:"https://drive.google.com/drive/folders/1-MNse3i6r3OHoxtR2gukV5lKWQFBkU2j",
-    tours:[{name:"Racha Yai + Coral",price:40000,extra:1500,incl:"1–5"}]},
+    tours:[{name:"Racha Yai + Coral",price:41500,extra:1500,incl:"1–5"}]},
   { id:"bs25", name:"Ella", size:"53ft", pier:"Chalong Pier", type:"catamaran", maxPax:20,
     note:"Обед +500฿/чел доп. >11 чел +3500฿ доп. вэн. Бассейн 3500฿, горка 3600฿, удочки 1000฿, BBQ 1500฿, рус. гид +3500฿. Выше цена 20/12–01/03.",
     drive:"https://drive.google.com/drive/folders/1GaJbjLCzLO7clwYJNC6Ewiw1JWjeNHij",
@@ -3302,6 +3338,44 @@ const BOATS_SUMMER_DATA = [
     note:"Обед включён. Рус. гид +3500฿",
     drive:"https://drive.google.com/drive/folders/182eRIu9f4Eh9QTKZr37VDdoW23gKBphx",
     tours:[{name:"Racha Yai",price:31500,extra:null,incl:"1–10"}]},
+  { id:"bs36", name:"Sea Explorer", size:"—", pier:"Chalong Pier", type:"speedboat", maxPax:25,
+    note:"Обед включён (A/B/C на выбор). Рус. гид +3500฿. Бассейн +3500฿, горка +3600฿. Удочки +1000฿. Доп. к 8 чел: +1000 (Phi Phi), от 8 чел +3000. BBQ Combo +1500. Если больше 11 чел — +3500 за экстра вэн",
+    drive:"https://drive.google.com/drive/folders/1zTFSgDNNigVjUUIWdd3naFWx6ikcuxBU",
+    tours:[
+      {name:"Racha + Coral + Promthep",price:73900,extra:2200,incl:"1–2"},
+      {name:"Racha Yai + Maithon",price:73900,extra:2200,incl:"1–2"},
+      {name:"Racha Noi + Racha Yai",price:78740,extra:2200,incl:"1–2"},
+      {name:"Phi Phi (No Bamboo)",price:79800,extra:1000,incl:"1–2"},
+      {name:"Phi Phi + Bamboo",price:92100,extra:1000,incl:"1–2"},
+    ]},
+  { id:"bs37", name:"Blue Metis", size:"—", pier:"Chalong Pier", type:"speedboat", maxPax:15,
+    note:"Включены: трансфер, обед, спиннинги (троллинга нет). Рус. гид +3500฿. Если больше 11 чел — +3500 за экстра вэн",
+    drive:"https://drive.google.com/drive/folders/1CJnrexdYXEN4tmcMO0lqoCR_hODQnSjd",
+    tours:[
+      {name:"Racha + Coral",price:50500,extra:1000,incl:"1–2"},
+      {name:"Khai + Maithon",price:53300,extra:1000,incl:"1–2"},
+    ]},
+  { id:"bs38", name:"Blue Wings", size:"—", pier:"Chalong Pier", type:"speedboat", maxPax:15,
+    note:"Включены: трансфер, обед, спиннинги (троллинга нет). Рус. гид +3500฿. Если больше 11 чел — +3500 за экстра вэн",
+    drive:"https://drive.google.com/drive/folders/1vv_Wq9_a4uf3TJyTksOPE9yxRyu0JiaM",
+    tours:[
+      {name:"Racha + Coral",price:48500,extra:1000,incl:"1–2"},
+      {name:"Khai + Maithon",price:50500,extra:1000,incl:"1–2"},
+    ]},
+  { id:"bs39", name:"Blue Castle", size:"—", pier:"Chalong Pier", type:"speedboat", maxPax:15,
+    note:"Включены: трансфер, обед, спиннинги (троллинга нет). Рус. гид +3500฿. Если больше 11 чел — +3500 за экстра вэн",
+    drive:"https://drive.google.com/drive/folders/1TNr2z9KjVpnwdfSaYg4Yk4pavybkjAxJ",
+    tours:[
+      {name:"Racha + Coral",price:45300,extra:1000,incl:"1–2"},
+      {name:"Khai + Maithon",price:47150,extra:1000,incl:"1–2"},
+    ]},
+  { id:"bs40", name:"Bon Voyage", size:"—", pier:"Chalong Pier", type:"speedboat", maxPax:15,
+    note:"Включены: трансфер, обед, спиннинги (троллинга нет). Рус. гид +3500฿. Если больше 11 чел — +3500 за экстра вэн",
+    drive:"https://drive.google.com/drive/folders/1-1jyRh1h-1wwYf6e25ieE0zOJecKUjmR",
+    tours:[
+      {name:"Racha + Coral",price:43300,extra:1000,incl:"1–2"},
+      {name:"Khai + Maithon",price:47150,extra:1000,incl:"1–2"},
+    ]},
 ]
 
 const BS_TYPE_META: Record<string,{label:string;color:string;border:string;bg:string}> = {
@@ -3544,7 +3618,7 @@ function BoatSummerTab({dark}: {dark: boolean}) {
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px",flexWrap:"wrap",gap:"6px"}}>
           <div>
             <div style={{fontSize:"14px",fontWeight:800,color:t.accent}}>🚤 Boat Summer Update 1.05.26</div>
-            <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {liveBoatsSummer.length} судов · сезон 2025–2026 · все цены ฿</div>
+            <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {liveBoatsSummer.length} судов · сезон 2026–2027 · все цены ฿</div>
           </div>
           <div style={{display:"flex",gap:"6px",alignItems:"center",flexWrap:"wrap"}}>
             <input ref={excelInputRef} type="file" accept=".xlsx,.xls" style={{display:"none"}}
