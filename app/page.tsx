@@ -2094,7 +2094,7 @@ function MethodichkaTab({dark}:{dark:boolean}) {
   }
 
   return (
-    <div style={{display:"flex", flexDirection:"column", height:"calc(100vh - 110px)", overflow:"hidden", position:"relative"}}>
+    <div style={{display:"flex", flexDirection:"column", height:"calc(100vh - var(--navh, 110px))", overflow:"hidden", position:"relative"}}>
 
       {/* ── TOOLBAR ── */}
       <div style={{background:t.header, borderBottom:`1px solid ${t.cardBorder}`, padding: (isPhone && hideBar) ? "0 12px" : "10px 12px", flexShrink:0, maxHeight: (isPhone && hideBar) ? 0 : (isPhone ? "70vh" : undefined), overflow: (isPhone && hideBar) ? "hidden" : (isPhone && (filtersOpen||refOpen) ? "auto" : undefined), transition:"max-height 0.2s, padding 0.2s", borderBottomWidth:(isPhone && hideBar) ? 0 : 1}}>
@@ -2913,7 +2913,32 @@ const BOATS_DRIVE_LINKS: Record<string,string> = {
   "Solita":     "https://drive.google.com/drive/folders/182eRIu9f4Eh9QTKZr37VDdoW23gKBphx",
 }
 
+function usePhoneBar() {
+  const [isPhone, setIsPhone] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [hide, setHide] = useState(false)
+  const lastTop = useRef(0)
+  useEffect(() => {
+    const f = () => setIsPhone(window.innerWidth < 640)
+    f(); window.addEventListener("resize", f)
+    return () => window.removeEventListener("resize", f)
+  }, [])
+  function onScroll(e: React.UIEvent<HTMLDivElement>) {
+    if (!isPhone) return
+    const y = e.currentTarget.scrollTop, d = y - lastTop.current
+    if (Math.abs(d) < 10) return
+    setHide(d > 0 && y > 80)
+    lastTop.current = y
+  }
+  const hidden = isPhone && hide
+  const barStyle: React.CSSProperties = isPhone
+    ? {maxHeight: hidden ? 0 : "75vh", overflow: hidden ? "hidden" : (open ? "auto" : undefined), padding: hidden ? "0 12px" : "10px 12px", borderBottomWidth: hidden ? 0 : 1, transition:"max-height 0.2s, padding 0.2s"}
+    : {}
+  return {isPhone, open, setOpen, hide, onScroll, barStyle, collapsed: isPhone && !open}
+}
+
 function BoatsTab({dark}:{dark:boolean}) {
+  const bar = usePhoneBar()
   const t = {
     bg:dark?"#0b1120":"#f0f4f8", card:dark?"#131d2e":"#ffffff",
     cardBorder:dark?"#1e2f45":"#d1dce8", text:dark?"#e2eaf4":"#1a2636",
@@ -3128,21 +3153,21 @@ function BoatsTab({dark}:{dark:boolean}) {
   const inputSt:React.CSSProperties={width:"100%",padding:"9px 12px",borderRadius:"10px",border:`1px solid ${t.inputBdr}`,background:t.inputBg,color:t.text,fontSize:"13px",fontWeight:600,outline:"none",boxSizing:"border-box"}
 
   return (
-    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 110px)",overflow:"hidden"}}>
+    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - var(--navh, 110px))",overflow:"hidden"}}>
 
       {/* ── Toolbar ── */}
-      <div style={{background:t.header,borderBottom:`1px solid ${t.cardBorder}`,padding:"10px 12px",flexShrink:0}}>
+      <div style={{background:t.header,borderBottom:`1px solid ${t.cardBorder}`,padding:"10px 12px",flexShrink:0,...bar.barStyle}}>
 
         {/* Title row */}
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px",flexWrap:"wrap",gap:"6px"}}>
           <div>
             <div style={{fontSize:"14px",fontWeight:800,color:t.accent}}>🚢 Лодки и яхты</div>
-            <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {liveBoats.length} судов · сезон 2026–2027 · все цены ฿</div>
+            {!bar.isPhone && <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {liveBoats.length} судов · сезон 2026–2027 · все цены ฿</div>}
           </div>
           <div style={{display:"flex",gap:"5px",alignItems:"center",flexWrap:"wrap"}}>
             <input ref={excelInputRef} type="file" accept=".xlsx,.xls" style={{display:"none"}}
               onChange={e=>{const f=e.target.files?.[0];if(f)handleExcelUpload(f);e.target.value=""}}/>
-            <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"2px"}}>
+            <div style={{display:bar.collapsed?"none":"flex",flexDirection:"column",alignItems:"flex-end",gap:"2px"}}>
               <button onClick={()=>excelInputRef.current?.click()}
                 style={{padding:"6px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#fff",boxShadow:"0 2px 8px rgba(245,158,11,0.3)"}}>
                 📂 Загрузить прайс (Excel)
@@ -3153,7 +3178,7 @@ function BoatsTab({dark}:{dark:boolean}) {
               style={{padding:"6px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#fff",boxShadow:"0 2px 8px rgba(245,158,11,0.3)"}}>
               🧮 Калькулятор
             </button>
-            {typeStats.map(s=>(
+            {!bar.collapsed && typeStats.map(s=>(
               <span key={s.tp} style={{fontSize:"10px",padding:"2px 7px",borderRadius:"99px",background:`${s.color}22`,color:s.color,fontWeight:700,border:`1px solid ${s.color}44`}}>
                 {s.label}: {s.count}
               </span>
@@ -3166,17 +3191,18 @@ function BoatsTab({dark}:{dark:boolean}) {
           <input value={search} onChange={e=>setSearch(e.target.value)}
             placeholder="🔍 Поиск по названию, маршруту, пирсу..."
             style={{...inputSt,flex:"1 1 160px",padding:"8px 12px"}}/>
-          <select value={pierF} onChange={e=>setPierF(e.target.value)} style={{...inputSt,flex:"0 0 auto"}}>
+          {bar.isPhone && <button onClick={()=>bar.setOpen(v=>!v)} style={{padding:"8px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:bar.open?"#0369a1":t.cardBorder,color:bar.open?"#fff":t.muted}}>🎛 {bar.open?"▲":"▼"}</button>}
+          <select value={pierF} onChange={e=>setPierF(e.target.value)} style={{...inputSt,flex:"0 0 auto",display:bar.collapsed?"none":undefined}}>
             <option value="all">Все пирсы</option>
             {allPiers.map(p=><option key={p} value={p}>{p}</option>)}
           </select>
-          <select value={typeF} onChange={e=>setTypeF(e.target.value)} style={{...inputSt,flex:"0 0 auto"}}>
+          <select value={typeF} onChange={e=>setTypeF(e.target.value)} style={{...inputSt,flex:"0 0 auto",display:bar.collapsed?"none":undefined}}>
             <option value="all">Все типы</option>
             {["speedboat","catamaran","powercat","yacht"].map(tp=>(
               <option key={tp} value={tp}>{BOAT_TYPE_META[tp]?.label||tp}</option>
             ))}
           </select>
-          <select value={sortBy} onChange={e=>setSortBy(e.target.value as typeof sortBy)} style={{...inputSt,flex:"0 0 auto"}}>
+          <select value={sortBy} onChange={e=>setSortBy(e.target.value as typeof sortBy)} style={{...inputSt,flex:"0 0 auto",display:bar.collapsed?"none":undefined}}>
             <option value="name">По имени</option>
             <option value="price">По цене ↑</option>
             <option value="size">По размеру ↓</option>
@@ -3187,7 +3213,7 @@ function BoatsTab({dark}:{dark:boolean}) {
       </div>
 
       {/* ── Boat list ── */}
-      <div style={{overflowY:"auto",flex:1,padding:"12px 14px"}}>
+      <div style={{overflowY:"auto",flex:1,padding:"12px 14px"}} onScroll={bar.onScroll}>
         {filtered.length===0 && (
           <div style={{textAlign:"center",padding:"60px 20px",color:t.muted}}>
             <div style={{fontSize:"36px",marginBottom:"10px"}}>🚢</div>
@@ -3804,6 +3830,7 @@ function buildBoatSummerWA(boat: Record<string, any>): string {
 }
 
 function BoatSummerTab({dark}: {dark: boolean}) {
+  const bar = usePhoneBar()
   const t = {
     bg:dark?"#0b1120":"#f0f4f8", card:dark?"#131d2e":"#ffffff",
     cardBorder:dark?"#1e2f45":"#d1dce8", text:dark?"#e2eaf4":"#1a2636",
@@ -4008,21 +4035,21 @@ function BoatSummerTab({dark}: {dark: boolean}) {
   const selStyle = {padding:"8px 10px",fontSize:"12px",borderRadius:"8px",border:`1px solid ${t.inputBdr}`,background:t.inputBg,color:t.text,outline:"none",cursor:"pointer"}
 
   return (
-    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 110px)",overflow:"hidden"}}>
+    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - var(--navh, 110px))",overflow:"hidden"}}>
 
       {/* ── Toolbar ── */}
-      <div style={{background:t.header,borderBottom:`1px solid ${t.cardBorder}`,padding:"10px 12px",flexShrink:0}}>
+      <div style={{background:t.header,borderBottom:`1px solid ${t.cardBorder}`,padding:"10px 12px",flexShrink:0,...bar.barStyle}}>
 
         {/* Title row */}
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px",flexWrap:"wrap",gap:"6px"}}>
           <div>
             <div style={{fontSize:"14px",fontWeight:800,color:t.accent}}>🚤 Boat Summer Update 1.05.26</div>
-            <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {liveBoatsSummer.length} судов · сезон 2026–2027 · все цены ฿</div>
+            {!bar.isPhone && <div style={{fontSize:"11px",color:t.muted}}>Прайс-лист · {liveBoatsSummer.length} судов · сезон 2026–2027 · все цены ฿</div>}
           </div>
           <div style={{display:"flex",gap:"6px",alignItems:"center",flexWrap:"wrap"}}>
             <input ref={excelInputRef} type="file" accept=".xlsx,.xls" style={{display:"none"}}
               onChange={e=>{const f=e.target.files?.[0];if(f)handleExcelUpload(f);e.target.value=""}}/>
-            <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"2px"}}>
+            <div style={{display:bar.collapsed?"none":"flex",flexDirection:"column",alignItems:"flex-end",gap:"2px"}}>
               <button onClick={()=>excelInputRef.current?.click()}
                 style={{padding:"6px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#fff",boxShadow:"0 2px 8px rgba(245,158,11,0.3)"}}>
                 📂 Загрузить прайс (Excel)
@@ -4033,7 +4060,7 @@ function BoatSummerTab({dark}: {dark: boolean}) {
               style={{padding:"6px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#fff",boxShadow:"0 2px 8px rgba(245,158,11,0.35)"}}>
               🧮 Калькулятор
             </button>
-            <div style={{display:"flex",gap:"5px",flexWrap:"wrap"}}>
+            <div style={{display:bar.collapsed?"none":"flex",gap:"5px",flexWrap:"wrap"}}>
               {typeStats.map(s=>(
                 <span key={s.tp} style={{fontSize:"10px",padding:"2px 7px",borderRadius:"99px",background:`${s.color}22`,color:s.color,fontWeight:700,border:`1px solid ${s.color}44`}}>
                   {s.label}: {s.count}
@@ -4048,17 +4075,18 @@ function BoatSummerTab({dark}: {dark: boolean}) {
           <input value={search} onChange={e=>setSearch(e.target.value)}
             placeholder="🔍 Поиск по названию, туру, пирсу..."
             style={{...selStyle,flex:"1 1 180px",padding:"8px 12px"}}/>
-          <select value={pierFilter} onChange={e=>setPierFilter(e.target.value)} style={{...selStyle,flex:"0 0 auto"}}>
+          {bar.isPhone && <button onClick={()=>bar.setOpen(v=>!v)} style={{padding:"8px 12px",fontSize:"12px",fontWeight:700,borderRadius:"8px",border:"none",cursor:"pointer",background:bar.open?"#0369a1":t.cardBorder,color:bar.open?"#fff":t.muted}}>🎛 {bar.open?"▲":"▼"}</button>}
+          <select value={pierFilter} onChange={e=>setPierFilter(e.target.value)} style={{...selStyle,flex:"0 0 auto",display:bar.collapsed?"none":undefined}}>
             <option value="all">Все пирсы</option>
             {allPiers.map(p=><option key={p} value={p}>{p}</option>)}
           </select>
-          <select value={typeFilter} onChange={e=>setTypeFilter(e.target.value)} style={{...selStyle,flex:"0 0 auto"}}>
+          <select value={typeFilter} onChange={e=>setTypeFilter(e.target.value)} style={{...selStyle,flex:"0 0 auto",display:bar.collapsed?"none":undefined}}>
             <option value="all">Все типы</option>
             {["speedboat","sailboat","catamaran","powercat","yacht"].map(tp=>(
               <option key={tp} value={tp}>{BS_TYPE_META[tp].label}</option>
             ))}
           </select>
-          <select value={sortBy} onChange={e=>setSortBy(e.target.value as typeof sortBy)} style={{...selStyle,flex:"0 0 auto"}}>
+          <select value={sortBy} onChange={e=>setSortBy(e.target.value as typeof sortBy)} style={{...selStyle,flex:"0 0 auto",display:bar.collapsed?"none":undefined}}>
             <option value="name">По имени</option>
             <option value="price">По цене ↑</option>
             <option value="size">По размеру ↓</option>
@@ -4070,7 +4098,7 @@ function BoatSummerTab({dark}: {dark: boolean}) {
       </div>
 
       {/* ── Boat list ── */}
-      <div style={{overflowY:"auto",flex:1,padding:"12px 14px"}}>
+      <div style={{overflowY:"auto",flex:1,padding:"12px 14px"}} onScroll={bar.onScroll}>
         {filtered.length===0 && (
           <div style={{textAlign:"center",padding:"60px 20px",color:t.muted}}>
             <div style={{fontSize:"36px",marginBottom:"10px"}}>🚤</div>
@@ -4771,7 +4799,7 @@ function PrivateTab({dark}:{dark:boolean}) {
   const accentColor = "#a78bfa"
 
   return (
-    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 110px)",overflow:"hidden"}}>
+    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - var(--navh, 110px))",overflow:"hidden"}}>
 
       {/* Toolbar */}
       <div style={{background:t.header,borderBottom:`1px solid ${t.cardBorder}`,padding:"10px 12px",flexShrink:0}}>
@@ -4972,7 +5000,7 @@ function VIPCalcTab({dark}: {dark:boolean}) {
   }
 
   return (
-    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 110px)",overflow:"hidden"}}>
+    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - var(--navh, 110px))",overflow:"hidden"}}>
 
       {/* Header */}
       <div style={{background:dark?"#1a1000":"#fefce8",borderBottom:`1px solid #d9770644`,padding:"12px 16px",flexShrink:0}}>
@@ -5216,22 +5244,28 @@ export default function Page() {
     setDark(h>=20||h<7)
   },[])
 
-  // Swipe gesture between tabs
+  // Прятать верхнюю шапку при прокрутке вниз (телефон)
+  const [navHidden,setNavHidden]=useState(false)
+  useEffect(()=>{
+    const last=new WeakMap<EventTarget,number>()
+    function h(e:Event){
+      if(window.innerWidth>=640)return
+      const el=(e.target===document?document.scrollingElement:e.target) as HTMLElement|null
+      if(!el||typeof el.scrollTop!=="number")return
+      const y=el.scrollTop,prev=last.get(el)??0,d=y-prev
+      if(Math.abs(d)<10)return
+      last.set(el,y)
+      setNavHidden(d>0&&y>80)
+    }
+    document.addEventListener("scroll",h,true)
+    return()=>document.removeEventListener("scroll",h,true)
+  },[])
+  // Tab order (свайп между вкладками отключён — мешал при прокрутке и касаниях)
   const TAB_ORDER: Array<"transfers"|"excursions"|"log"|"methodichka"|"boats"|"boatsummer"|"vipcalc"|"private"> =
     ["transfers","excursions","methodichka","boats","boatsummer","vipcalc","private","log"]
-  const swipeRef = useRef<{x:number;y:number}|null>(null)
-  function onTouchStart(e:React.TouchEvent){ swipeRef.current={x:e.touches[0].clientX,y:e.touches[0].clientY} }
-  function onTouchEnd(e:React.TouchEvent){
-    if(!swipeRef.current)return
-    const dx=e.changedTouches[0].clientX-swipeRef.current.x
-    const dy=e.changedTouches[0].clientY-swipeRef.current.y
-    if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5){
-      const idx=TAB_ORDER.indexOf(tab)
-      if(dx<0&&idx<TAB_ORDER.length-1)setTab(TAB_ORDER[idx+1])
-      if(dx>0&&idx>0)setTab(TAB_ORDER[idx-1])
-    }
-    swipeRef.current=null
-  }
+  useEffect(()=>{ setNavHidden(false) },[tab])
+  const internalScroll = tab==='methodichka'||tab==='boats'||tab==='boatsummer'||tab==='vipcalc'||tab==='private'
+  const collapseNav = navHidden && internalScroll
 
   useEffect(() => {
     if (localStorage.getItem("navAuth") === APP_PASSWORD) setUnlocked(true)
@@ -5543,7 +5577,7 @@ export default function Page() {
   }
 
   return (
-    <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} style={{minHeight:"100vh",background:t.bg,color:t.text,fontFamily:"'IBM Plex Sans','Segoe UI',sans-serif",transition:"background 0.3s,color 0.3s",position:"relative"}}>
+    <div style={{["--navh" as any]: collapseNav ? "0px" : "110px", minHeight:"100vh",background:t.bg,color:t.text,fontFamily:"'IBM Plex Sans','Segoe UI',sans-serif",transition:"background 0.3s,color 0.3s",position:"relative"}}>
       <style>{`
         @keyframes navFadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
         @keyframes navFadeIn { from { opacity:0; } to { opacity:1; } }
@@ -5621,7 +5655,7 @@ export default function Page() {
         </div>
       )}
 
-      <header style={{background:dark?"#080f1e":"#ffffff",borderBottom:`1px solid ${t.cardBorder}`,position:"sticky",top:0,zIndex:50,backdropFilter:"blur(12px)",boxShadow:dark?"0 2px 20px rgba(0,0,0,0.4)":"0 2px 12px rgba(0,0,0,0.08)"}}>
+      <header style={{transform:(navHidden&&!internalScroll)?"translateY(-100%)":"none",transition:"transform 0.2s, max-height 0.2s",maxHeight:collapseNav?0:400,overflow:collapseNav?"hidden":"visible",background:dark?"#080f1e":"#ffffff",borderBottom:collapseNav?"none":`1px solid ${t.cardBorder}`,position:"sticky",top:0,zIndex:50,backdropFilter:"blur(12px)",boxShadow:dark?"0 2px 20px rgba(0,0,0,0.4)":"0 2px 12px rgba(0,0,0,0.08)"}}>
         <div style={{maxWidth:"1200px",margin:"0 auto"}}>
 
           {/* ── Top bar ── */}
@@ -5740,8 +5774,8 @@ export default function Page() {
         </div>
       </header>
 
-      {/* swipe dots */}
-      <div style={{display:"flex",justifyContent:"center",gap:"5px",padding:"4px 0",background:t.header,borderBottom:`1px solid ${t.cardBorder}`}}>
+      {/* tab dots */}
+      <div style={{display:collapseNav?"none":"flex",justifyContent:"center",gap:"5px",padding:"4px 0",background:t.header,borderBottom:`1px solid ${t.cardBorder}`}}>
         {TAB_ORDER.map(key=>(
           <div key={key} onClick={()=>setTab(key)}
             style={{width:tab===key?"18px":"6px",height:"6px",borderRadius:"99px",background:tab===key?t.accent:t.muted,opacity:tab===key?1:0.4,cursor:"pointer",transition:"all 0.25s"}}/>
