@@ -1,7 +1,7 @@
 "use client"
 
 
-import { useState, useMemo, useEffect, useRef } from "react"
+import { useState, useMemo, useEffect, useRef, useId } from "react"
 import * as XLSX from "xlsx"
 
 interface Voucher {
@@ -646,6 +646,57 @@ function generateTransferMessage(v: Voucher): string {
     "✨ Желаем вам приятного полёта и надеемся вновь увидеть вас в Таиланде!",
   ]
   return encodeURIComponent(lines.join("\n"))
+}
+
+// Новогодняя шапочка на логотипе: показывается с 15 декабря по 9 января.
+// Для проверки в любое время добавьте к адресу ?ny=1 (или ?ny=0, чтобы выключить)
+function isNewYearSeason(): boolean {
+  if (typeof window === "undefined") return false
+  const q = new URLSearchParams(window.location.search).get("ny")
+  if (q === "1") return true
+  if (q === "0") return false
+  const d = new Date(), m = d.getMonth() + 1, day = d.getDate()
+  return (m === 12 && day >= 15) || (m === 1 && day <= 9)
+}
+function NYHat({size}:{size:number}) {
+  const [on, setOn] = useState(false)
+  const uid = useId().replace(/:/g, "")
+  useEffect(() => { setOn(isNewYearSeason()) }, [])
+  if (!on) return null
+  const w = size * 1.0
+  return (
+    <svg width={w} height={w * 0.8} viewBox="0 0 80 64" aria-hidden="true"
+      style={{position:"absolute", top: -size * 0.34, left: -size * 0.16, transform:"rotate(-13deg)", transformOrigin:"center bottom", pointerEvents:"none", filter:"drop-shadow(0 2px 3px rgba(0,0,0,0.35))", zIndex:2, overflow:"visible"}}>
+      <defs>
+        <linearGradient id={"r"+uid} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#ff5a76"/><stop offset="0.55" stopColor="#e11d48"/><stop offset="1" stopColor="#9f1239"/>
+        </linearGradient>
+        <linearGradient id={"f"+uid} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#ffffff"/><stop offset="1" stopColor="#dbe6f4"/>
+        </linearGradient>
+        <radialGradient id={"p"+uid} cx="0.35" cy="0.3" r="0.8">
+          <stop offset="0" stopColor="#ffffff"/><stop offset="1" stopColor="#cfdcee"/>
+        </radialGradient>
+      </defs>
+      {/* колпак */}
+      <path d="M9 48 C11 26 27 9 50 9 C60 9 68 15 71 24 C58 21 52 33 68 48 Z" fill={`url(#r${uid})`}/>
+      {/* складка и блик */}
+      <path d="M22 47 C21 34 27 22 40 14" stroke="#9f1239" strokeWidth="2.2" strokeLinecap="round" fill="none" opacity="0.45"/>
+      <path d="M17 38 C20 27 28 19 38 15" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity="0.45"/>
+      {/* меховая опушка */}
+      <rect x="3" y="42" width="70" height="15" rx="7.5" fill={`url(#f${uid})`}/>
+      <circle cx="12" cy="46" r="2.2" fill="#c3d3e8" opacity="0.7"/>
+      <circle cx="29" cy="52" r="2" fill="#c3d3e8" opacity="0.7"/>
+      <circle cx="47" cy="47" r="2.3" fill="#c3d3e8" opacity="0.7"/>
+      <circle cx="63" cy="52" r="2" fill="#c3d3e8" opacity="0.7"/>
+      {/* помпон */}
+      <circle cx="69" cy="21" r="9" fill={`url(#p${uid})`}/>
+      <circle cx="66" cy="18" r="2.4" fill="#fff" opacity="0.85"/>
+      {/* искорки */}
+      <path d="M8 14 l1.6 3.8 3.8 1.6 -3.8 1.6 -1.6 3.8 -1.6 -3.8 -3.8 -1.6 3.8 -1.6z" fill="#fde68a"/>
+      <circle cx="22" cy="5" r="1.6" fill="#fff" opacity="0.9"/>
+    </svg>
+  )
 }
 
 const APP_PASSWORD = "8888"
@@ -5522,7 +5573,8 @@ export default function Page() {
 
           {/* Logo block */}
           <div style={{ textAlign: "center", marginBottom: "32px" }}>
-            <div style={{ width: "72px", height: "72px", borderRadius: "20px", background: "linear-gradient(135deg,#38bdf8,#0369a1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", boxShadow: "0 8px 32px rgba(56,189,248,0.35)" }}>
+            <div style={{ position: "relative", width: "72px", height: "72px", borderRadius: "20px", background: "linear-gradient(135deg,#38bdf8,#0369a1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", boxShadow: "0 8px 32px rgba(56,189,248,0.35)" }}>
+              <NYHat size={72}/>
               <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"/>
                 <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="#fff" stroke="none"/>
@@ -5583,6 +5635,7 @@ export default function Page() {
         @keyframes navFadeIn { from { opacity:0; } to { opacity:1; } }
         .nav-card { animation: navFadeUp 0.3s ease both; }
         .nav-fade { animation: navFadeIn 0.25s ease both; }
+        @media (max-width: 520px) { .nav-up-txt { display: none; } }
         input:focus, textarea:focus, select:focus { border-color: ${t.accent} !important; box-shadow: 0 0 0 3px ${t.accent}22; }
         button { -webkit-tap-highlight-color: transparent; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -5661,8 +5714,9 @@ export default function Page() {
           {/* ── Top bar ── */}
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 16px 0"}}>
             {/* Logo */}
-            <div style={{display:"flex",alignItems:"center",gap:"10px",minWidth:0,flexShrink:1,overflow:"hidden"}}>
-              <div style={{width:"36px",height:"36px",borderRadius:"10px",background:"linear-gradient(135deg,#38bdf8,#0369a1)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:"0 2px 8px rgba(56,189,248,0.4)"}}>
+            <div style={{display:"flex",alignItems:"center",gap:"10px",minWidth:0,flexShrink:1,overflow:"visible"}}>
+              <div style={{position:"relative",width:"36px",height:"36px",borderRadius:"10px",background:"linear-gradient(135deg,#38bdf8,#0369a1)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:"0 2px 8px rgba(56,189,248,0.4)"}}>
+                <NYHat size={36}/>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"/>
                   <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="#fff" stroke="none"/>
@@ -5678,13 +5732,13 @@ export default function Page() {
             <div style={{display:"flex",alignItems:"center",gap:"4px",flexShrink:0}}>
               {tab==="transfers"&&(
                 <label style={{display:"flex",alignItems:"center",gap:"5px",fontSize:"11px",background:t.accent,color:"#fff",padding:"7px 9px",borderRadius:"10px",cursor:"pointer",fontWeight:700,boxShadow:"0 2px 8px rgba(56,189,248,0.3)",flexShrink:0,whiteSpace:"nowrap"}}>
-                  📂 <span>{transferFileName ? transferFileName.slice(0,12)+"…" : "Загрузить"}</span>
+                  📂 <span className="nav-up-txt">{transferFileName ? transferFileName.slice(0,12)+"…" : "Загрузить"}</span>
                   <input type="file" onChange={handleTransferFile} accept=".xlsx,.xls" style={{display:"none"}}/>
                 </label>
               )}
               {tab==="excursions"&&(
                 <label style={{display:"flex",alignItems:"center",gap:"5px",fontSize:"11px",background:"#7c3aed",color:"#fff",padding:"7px 9px",borderRadius:"10px",cursor:"pointer",fontWeight:700,boxShadow:"0 2px 8px rgba(124,58,237,0.3)",flexShrink:0,whiteSpace:"nowrap"}}>
-                  📂 <span>{excFileName ? excFileName.slice(0,12)+"…" : "Загрузить"}</span>
+                  📂 <span className="nav-up-txt">{excFileName ? excFileName.slice(0,12)+"…" : "Загрузить"}</span>
                   <input type="file" onChange={handleExcursionFile} accept=".xlsx,.xls" style={{display:"none"}}/>
                 </label>
               )}
