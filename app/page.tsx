@@ -649,7 +649,7 @@ function generateTransferMessage(v: Voucher): string {
 }
 
 const APP_PASSWORD = "8888"
-const APP_VERSION = "2.3"
+const APP_VERSION = "2.4"
 
 // ══════════════════════════════════════════════
 // AI UPDATE PANEL — универсальный AI-парсер файлов
@@ -1847,6 +1847,44 @@ function WAShareModal({ dark, title, shortText, fullText, onClose }: WAModalProp
 // ══════════════════════════════════════════════
 // КОМПОНЕНТ
 // ══════════════════════════════════════════════
+
+// ── Дни выезда: разбор строки tour.days ──
+const DAY_ABBR = ["ВС","ПН","ВТ","СР","ЧТ","ПТ","СБ"]
+const DAY_FULL = ["Воскресенье","Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"]
+function tourRunsOn(days: string|undefined, d: number): boolean|null {
+  if (!days) return null
+  const up = days.toUpperCase()
+  const off = new Set<number>()
+  const re1 = /КРОМЕ\s+(ПН|ВТ|СР|ЧТ|ПТ|СБ|ВС)/g
+  const re2 = /(ПН|ВТ|СР|ЧТ|ПТ|СБ|ВС)\s*—\s*ВЫХОДНОЙ/g
+  let m: RegExpExecArray|null
+  while ((m = re1.exec(up))) off.add(DAY_ABBR.indexOf(m[1]))
+  while ((m = re2.exec(up))) off.add(DAY_ABBR.indexOf(m[1]))
+  if (off.size > 0) return !off.has(d)
+  if (/КАЖД|ЕЖЕДНЕВН/.test(up)) return true
+  const listed = up.match(/ПН|ВТ|СР|ЧТ|ПТ|СБ|ВС/g)
+  if (!listed) return null
+  return listed.includes(DAY_ABBR[d])
+}
+
+// ── Прайс для гида: разбор для калькулятора ──
+type GuideCalc = {adult:number; child:number; infant:number; single:number; discA:number; discC:number}
+function parseGuideCalc(tour: MTour): GuideCalc|null {
+  const g = tour.guide || ""
+  let adult=0, child=0
+  let m = g.match(/Взр\s*\/\s*Дет\s+(\d+)/)
+  if (m) { adult = +m[1]; child = +m[1] }
+  else {
+    m = g.match(/Взр\s+(\d+)\s*\/\s*Дет\s+(\d+)/)
+    if (m) { adult = +m[1]; child = +m[2] }
+  }
+  if (!adult) return null
+  const inf = g.match(/Инф\s+(\d+)/)
+  const sg = g.match(/single\s*\+?\s*(\d+)/i)
+  const dm = (tour.notes || "").match(/Скидка от двух туров:\s*взр\s*[−-]\s*(\d+),\s*дет\s*[−-]\s*(\d+)/)
+  return {adult, child, infant: inf ? +inf[1] : 0, single: sg ? +sg[1] : 0, discA: dm ? +dm[1] : 0, discC: dm ? +dm[2] : 0}
+}
+
 function MethodichkaTab({dark}:{dark:boolean}) {
   const t = {
     bg:dark?"#0b1120":"#f0f4f8", card:dark?"#131d2e":"#ffffff",
@@ -1871,6 +1909,34 @@ function MethodichkaTab({dark}:{dark:boolean}) {
   const [showVip, setShowVip] = useState(false)
   const [showShop, setShowShop] = useState(false)
   const [showDept, setShowDept] = useState(false)
+  const [activeDay, setActiveDay] = useState<number|null>(null)
+  const [isPhone, setIsPhone] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [refOpen, setRefOpen] = useState(false)
+  const [hideBar, setHideBar] = useState(false)
+  const lastTopRef = useRef(0)
+  useEffect(() => {
+    const f = () => setIsPhone(window.innerWidth < 640)
+    f(); window.addEventListener("resize", f)
+    return () => window.removeEventListener("resize", f)
+  }, [])
+  function onListScroll(e: React.UIEvent<HTMLDivElement>) {
+    if (!isPhone) return
+    const y = e.currentTarget.scrollTop, d = y - lastTopRef.current
+    if (Math.abs(d) < 10) return
+    setHideBar(d > 0 && y > 80)
+    lastTopRef.current = y
+  }
+  useEffect(() => { if (showRules||showRooms||showVip||showShop||showDept) setRefOpen(false) }, [showRules,showRooms,showVip,showShop,showDept])
+  useEffect(() => { setHideBar(false) }, [search, activeCat, activeOp, activeDay])
+  const nFilters = (activeDay !== null ? 1 : 0) + (activeCat !== "all" ? 1 : 0) + (activeOp !== "all" ? 1 : 0)
+  const [compare, setCompare] = useState<string[]>([])
+  const [showCompare, setShowCompare] = useState(false)
+  const [calcTour, setCalcTour] = useState<MTour|null>(null)
+  const [calcN, setCalcN] = useState({a:2, c:0, i:0, s:0, two:false})
+  function toggleCompare(slug: string) {
+    setCompare(prev => prev.includes(slug) ? prev.filter(x=>x!==slug) : (prev.length>=3 ? [...prev.slice(1), slug] : [...prev, slug]))
+  }
   const [tocOpen, setTocOpen] = useState(false)
   const tocRef = useRef<HTMLDivElement>(null)
   const [waModal, setWaModal] = useState<{title:string;short:string;full:string}|null>(null)
@@ -1991,11 +2057,12 @@ function MethodichkaTab({dark}:{dark:boolean}) {
     return liveTours.filter(tour => {
       if (activeCat !== "all" && tour.cat !== activeCat) return false
       if (activeOp !== "all" && (tour.operator||"") !== activeOp) return false
+      if (activeDay !== null && tourRunsOn(tour.days, activeDay) !== true) return false
       if (!q) return true
       return tour.name.toLowerCase().includes(q) || tour.nameEn.toLowerCase().includes(q) ||
         tour.tags.some(g => g.toLowerCase().includes(q)) || (tour.operator||"").toLowerCase().includes(q)
     })
-  }, [search, activeCat, activeOp, liveTours])
+  }, [search, activeCat, activeOp, activeDay, liveTours])
 
   const grouped = MCAT_ORDER.map(cat => ({
     cat, meta: MCAT_META[cat],
@@ -2030,7 +2097,7 @@ function MethodichkaTab({dark}:{dark:boolean}) {
     <div style={{display:"flex", flexDirection:"column", height:"calc(100vh - 110px)", overflow:"hidden", position:"relative"}}>
 
       {/* ── TOOLBAR ── */}
-      <div style={{background:t.header, borderBottom:`1px solid ${t.cardBorder}`, padding:"10px 12px", flexShrink:0}}>
+      <div style={{background:t.header, borderBottom:`1px solid ${t.cardBorder}`, padding: (isPhone && hideBar) ? "0 12px" : "10px 12px", flexShrink:0, maxHeight: (isPhone && hideBar) ? 0 : (isPhone ? "70vh" : undefined), overflow: (isPhone && hideBar) ? "hidden" : (isPhone && (filtersOpen||refOpen) ? "auto" : undefined), transition:"max-height 0.2s, padding 0.2s", borderBottomWidth:(isPhone && hideBar) ? 0 : 1}}>
 
         {/* Row 1: search + TOC dropdown button */}
         <div style={{display:"flex", gap:"8px", marginBottom:"8px", alignItems:"center"}}>
@@ -2071,7 +2138,41 @@ function MethodichkaTab({dark}:{dark:boolean}) {
           </div>
         </div>
 
+        {isPhone && (
+          <div style={{display:"flex", gap:"6px", marginBottom:"8px", alignItems:"center"}}>
+            <button onClick={() => setFiltersOpen(v => !v)}
+              style={{...pill, flex:1, padding:"8px 10px", background: filtersOpen || nFilters>0 ? "#0369a1" : (dark?"#1e2f45":"#dce7f0"), color: filtersOpen || nFilters>0 ? "#fff" : (dark?"#94a3b8":"#374151")}}>
+              🎛 Фильтры{nFilters>0 ? ` · ${nFilters}` : ""} {filtersOpen ? "▲" : "▼"}
+            </button>
+            <button onClick={() => setRefOpen(v => !v)}
+              style={{...pill, flex:1, padding:"8px 10px", background: refOpen || showRules||showRooms||showVip||showShop||showDept ? "#d97706" : (dark?"#1e2f45":"#dce7f0"), color: refOpen || showRules||showRooms||showVip||showShop||showDept ? "#fff" : (dark?"#94a3b8":"#374151")}}>
+              📚 Справочник {refOpen ? "▲" : "▼"}
+            </button>
+            {compare.length > 0 && (
+              <button onClick={() => setShowCompare(true)} style={{...pill, padding:"8px 10px", background:"#7c3aed", color:"#fff"}}>⚖ {compare.length}</button>
+            )}
+            {nFilters > 0 && (
+              <button onClick={() => {setActiveDay(null); setActiveCat("all"); setActiveOp("all")}} style={{...pill, padding:"8px 10px", background:"#dc2626", color:"#fff"}}>✕</button>
+            )}
+          </div>
+        )}
+
+        {/* Day filter */}
+        {(!isPhone || filtersOpen) && (
+        <div style={{display:"flex", gap:"4px", marginBottom:"8px", flexWrap:"nowrap", overflowX:"auto", alignItems:"center", WebkitOverflowScrolling:"touch"}}>
+          <span style={{fontSize:"11px", color:t.muted, fontWeight:600, marginRight:"2px", flexShrink:0, whiteSpace:"nowrap"}}>📅 День:</span>
+          <button onClick={() => setActiveDay(activeDay === new Date().getDay() ? null : new Date().getDay())}
+            style={{...pill, flexShrink:0, background: activeDay === new Date().getDay() ? "#16a34a" : (dark?"#1e2f45":"#dce7f0"), color: activeDay === new Date().getDay() ? "#fff" : (dark?"#94a3b8":"#374151")}}>Сегодня</button>
+          {[1,2,3,4,5,6,0].map(d => (
+            <button key={d} onClick={() => setActiveDay(activeDay === d ? null : d)}
+              style={{...pill, flexShrink:0, padding:"5px 9px", background: activeDay === d ? "#0369a1" : (dark?"#1e2f45":"#dce7f0"), color: activeDay === d ? "#fff" : (dark?"#94a3b8":"#374151")}}>{DAY_ABBR[d]}</button>
+          ))}
+          {activeDay !== null && <span style={{fontSize:"10px", color:t.muted, flexShrink:0, whiteSpace:"nowrap", marginLeft:"4px"}}>{filtered.length} туров · «по запросу» скрыты</span>}
+        </div>
+        )}
+
         {/* Row 2: quick-info buttons */}
+        {(!isPhone || refOpen) && (
         <div style={{display:"flex", gap:"5px", marginBottom:"8px", flexWrap:"wrap", alignItems:"flex-start"}}>
           {[
             {key:"rules", label:"📋 Правила бронирования", active:showRules, fn:() => {setShowRules(v=>!v);setShowRooms(false);setShowVip(false);setShowShop(false);setShowDept(false)}, color:"#d97706"},
@@ -2079,6 +2180,7 @@ function MethodichkaTab({dark}:{dark:boolean}) {
             {key:"vip",   label:"👑 VIP тарифы",  active:showVip,   fn:() => {setShowVip(v=>!v);setShowRules(false);setShowRooms(false);setShowShop(false);setShowDept(false)}, color:"#d97706"},
             {key:"shop",  label:"🛍 Шоппинг",     active:showShop,  fn:() => {setShowShop(v=>!v);setShowRules(false);setShowRooms(false);setShowVip(false);setShowDept(false)}, color:"#be185d"},
             {key:"dept",  label:"☎️ Отдел",        active:showDept,  fn:() => {setShowDept(v=>!v);setShowRules(false);setShowRooms(false);setShowVip(false);setShowShop(false)}, color:"#0d9488"},
+            ...(compare.length > 0 && !isPhone ? [{key:"cmp", label:`⚖ Сравнить (${compare.length})`, active:showCompare, fn:() => setShowCompare(true), color:"#7c3aed"}] : []),
           ].map(b => (
             <button key={b.key} onClick={b.fn}
               style={{...pill, background:b.active ? b.color : (dark?"#1e2f45":"#dce7f0"), color:b.active?"#fff":(dark?"#94a3b8":"#374151")}}>
@@ -2095,8 +2197,10 @@ function MethodichkaTab({dark}:{dark:boolean}) {
             {excelStatus && <div style={{fontSize:"10px",color:excelStatus.startsWith("✅")?"#4ade80":excelStatus.startsWith("❌")?"#f87171":"#fbbf24",fontWeight:600,paddingLeft:"4px"}}>{excelStatus}</div>}
           </div>
         </div>
+        )}
 
         {/* Row 3: category filter pills — horizontal scroll, compact */}
+        {(!isPhone || filtersOpen) && (
         <div
           onTouchStart={e=>e.stopPropagation()}
           onTouchMove={e=>e.stopPropagation()}
@@ -2119,8 +2223,10 @@ function MethodichkaTab({dark}:{dark:boolean}) {
           })}
         </div>
 
+        )}
+
         {/* Row 4: operator filter pills */}
-        {ALL_OPS.length > 2 && (
+        {(!isPhone || filtersOpen) && ALL_OPS.length > 2 && (
           <div
             onTouchStart={e=>e.stopPropagation()}
             onTouchMove={e=>e.stopPropagation()}
@@ -2149,7 +2255,7 @@ function MethodichkaTab({dark}:{dark:boolean}) {
 
       {/* ── INFO PANELS ── */}
       {showRules && (
-        <div style={{background:dark?"#1c1500":"#fffbeb", borderBottom:"1px solid #d97706", padding:"10px 14px", flexShrink:0}}>
+        <div style={{background:dark?"#1c1500":"#fffbeb", borderBottom:"1px solid #d97706", padding:"10px 14px", flexShrink:0, maxHeight:"40vh", overflowY:"auto"}}>
           <div style={{fontSize:"11px", fontWeight:700, color:"#d97706", marginBottom:"6px"}}>📋 Общие правила бронирования</div>
           <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4px 16px"}}>
             {GENERAL_RULES.map((r,i) => (
@@ -2161,7 +2267,7 @@ function MethodichkaTab({dark}:{dark:boolean}) {
         </div>
       )}
       {showRooms && (
-        <div style={{background:dark?"#0a1f2d":"#eff6ff", borderBottom:"1px solid #0891b2", padding:"10px 14px", flexShrink:0}}>
+        <div style={{background:dark?"#0a1f2d":"#eff6ff", borderBottom:"1px solid #0891b2", padding:"10px 14px", flexShrink:0, maxHeight:"40vh", overflowY:"auto"}}>
           <div style={{fontSize:"11px", fontWeight:700, color:"#0891b2", marginBottom:"6px"}}>🛏 Типы номеров</div>
           <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"3px 16px"}}>
             {ROOM_RULES.map((r,i) => (
@@ -2173,7 +2279,7 @@ function MethodichkaTab({dark}:{dark:boolean}) {
         </div>
       )}
       {showShop && (
-        <div style={{background:dark?"#2d0f1f":"#fdf2f8", borderBottom:"1px solid #be185d", padding:"10px 14px", flexShrink:0}}>
+        <div style={{background:dark?"#2d0f1f":"#fdf2f8", borderBottom:"1px solid #be185d", padding:"10px 14px", flexShrink:0, maxHeight:"40vh", overflowY:"auto"}}>
           <div style={{fontSize:"11px", fontWeight:700, color:"#be185d", marginBottom:"6px"}}>🛍 Шоппинг-туры: даты и время приёма заявок</div>
           <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4px 16px"}}>
             {SHOPS.map((x,i) => (
@@ -2183,7 +2289,7 @@ function MethodichkaTab({dark}:{dark:boolean}) {
         </div>
       )}
       {showDept && (
-        <div style={{background:dark?"#042f2e":"#f0fdfa", borderBottom:"1px solid #0d9488", padding:"10px 14px", flexShrink:0}}>
+        <div style={{background:dark?"#042f2e":"#f0fdfa", borderBottom:"1px solid #0d9488", padding:"10px 14px", flexShrink:0, maxHeight:"40vh", overflowY:"auto"}}>
           <div style={{fontSize:"11px", fontWeight:700, color:"#0d9488", marginBottom:"6px"}}>☎️ Экскурсионный отдел · 9:00–18:00 / 12:00–21:00 (в низкий сезон график может меняться)</div>
           <div style={{display:"grid", gridTemplateColumns:"1fr", gap:"4px"}}>
             {DEPT_STAFF.map((x,i) => (
@@ -2193,7 +2299,7 @@ function MethodichkaTab({dark}:{dark:boolean}) {
         </div>
       )}
       {showVip && (
-        <div style={{background:dark?"#1c1200":"#fffbeb", borderBottom:"1px solid #d97706", padding:"10px 14px", flexShrink:0}}>
+        <div style={{background:dark?"#1c1200":"#fffbeb", borderBottom:"1px solid #d97706", padding:"10px 14px", flexShrink:0, maxHeight:"40vh", overflowY:"auto"}}>
           <div style={{fontSize:"11px", fontWeight:700, color:"#d97706", marginBottom:"6px"}}>👑 VIP расчёт: база = минивэн 5000 + гид 1000 + бесплатные локации 1000</div>
           <div style={{display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"2px 10px"}}>
             {VIP_PRICES.map((v,i) => (
@@ -2204,7 +2310,7 @@ function MethodichkaTab({dark}:{dark:boolean}) {
       )}
 
       {/* ── TOUR LIST ── */}
-      <div style={{overflowY:"auto", flex:1, padding:"12px 14px"}}
+      <div style={{overflowY:"auto", flex:1, padding:"12px 14px"}} onScroll={onListScroll}
         onClick={() => { if(tocOpen) setTocOpen(false) }}>
         {filtered.length === 0 ? (
           <div style={{textAlign:"center", padding:"80px 20px", color:t.muted}}>
@@ -2338,6 +2444,18 @@ function MethodichkaTab({dark}:{dark:boolean}) {
                         </div>
                         <div style={{height:"10px"}}/>
                       </div>
+                      <div style={{display:"flex", gap:"6px"}}>
+                        <button onClick={e => { e.stopPropagation(); toggleCompare(tour.slug) }}
+                          style={{flex:1, padding:"8px", background: compare.includes(tour.slug) ? "#7c3aed" : "transparent", color: compare.includes(tour.slug) ? "#fff" : "#7c3aed", border:"1.5px solid #7c3aed", borderRadius:"8px", fontSize:"12px", fontWeight:700, cursor:"pointer"}}>
+                          {compare.includes(tour.slug) ? "✓ В сравнении" : "⚖ Сравнить"}
+                        </button>
+                        {parseGuideCalc(tour) && (
+                          <button onClick={e => { e.stopPropagation(); setCalcTour(tour); setCalcN({a:2, c:0, i:0, s:0, two:false}) }}
+                            style={{flex:1, padding:"8px", background:"transparent", color:"#d97706", border:"1.5px solid #d97706", borderRadius:"8px", fontSize:"12px", fontWeight:700, cursor:"pointer"}}>
+                            🧮 Расчёт семьи
+                          </button>
+                        )}
+                      </div>
                       <button onClick={e => { e.stopPropagation(); setWaModal({title:tour.name, short:buildTourWAShort(tour), full:buildTourWAFull(tour)}) }}
                         style={{width:"100%",padding:"9px",background:"#25d366",color:"#fff",border:"none",borderRadius:"8px",fontSize:"13px",fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"6px"}}>
                         <span>📤</span> Отправить в WhatsApp
@@ -2356,6 +2474,99 @@ function MethodichkaTab({dark}:{dark:boolean}) {
       </div>
 
       {/* WA Modal */}
+      {showCompare && (() => {
+        const list = compare.map(sl => liveTours.find(x => x.slug === sl)).filter(Boolean) as MTour[]
+        const rows: [string, (x:MTour)=>string][] = [
+          ["Длительность", x=>x.duration||"—"], ["Дни выезда", x=>x.days||"—"], ["Мин. человек", x=>x.minPax||"—"],
+          ["Прайс для гида", x=>x.guide||x.price||"—"], ["Отель", x=>x.hotel||"—"],
+          ["Включено", x=>x.includes||"—"], ["Ограничения", x=>x.restrictions||"—"],
+        ]
+        return (
+          <div onClick={() => setShowCompare(false)} style={{position:"fixed", inset:0, background:"rgba(0,0,0,0.6)", zIndex:1000, display:"flex", alignItems:"flex-end", justifyContent:"center"}}>
+            <div onClick={e => e.stopPropagation()} style={{background:t.card, color:t.text, width:"100%", maxWidth:"900px", maxHeight:"88vh", overflow:"auto", borderRadius:"16px 16px 0 0", padding:"14px"}}>
+              <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"10px"}}>
+                <div style={{fontSize:"15px", fontWeight:800}}>⚖ Сравнение туров</div>
+                <div style={{display:"flex", gap:"6px"}}>
+                  <button onClick={() => { setCompare([]); setShowCompare(false) }} style={{...pill, background:"#dc2626", color:"#fff"}}>Очистить</button>
+                  <button onClick={() => setShowCompare(false)} style={{...pill, background:dark?"#1e2f45":"#dce7f0", color:t.text}}>✕</button>
+                </div>
+              </div>
+              {typeof window !== "undefined" && window.innerWidth < 640 ? (
+                <div>
+                  {rows.map(([label, fn]) => (
+                    <div key={label} style={{padding:"8px 0", borderBottom:`1px solid ${t.cardBorder}`}}>
+                      <div style={{fontSize:"11px", fontWeight:800, color:t.muted, textTransform:"uppercase", letterSpacing:"0.5px", marginBottom:"4px"}}>{label}</div>
+                      {list.map(x => (
+                        <div key={x.slug} style={{fontSize:"12px", lineHeight:1.45, marginBottom:"5px"}}>
+                          <span style={{color:t.accent, fontWeight:700}}>{x.name}: </span>{fn(x)}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+              <div style={{overflowX:"auto"}}>
+                <table style={{borderCollapse:"collapse", width:"100%", minWidth: 120 + list.length*200, fontSize:"12px"}}>
+                  <thead><tr>
+                    <th style={{width:"100px"}}/>
+                    {list.map(x => <th key={x.slug} style={{textAlign:"left", padding:"6px", borderBottom:`2px solid ${t.cardBorder}`, color:t.accent, verticalAlign:"top"}}>{x.name}</th>)}
+                  </tr></thead>
+                  <tbody>
+                    {rows.map(([label, fn]) => (
+                      <tr key={label}>
+                        <td style={{padding:"6px", color:t.muted, fontWeight:700, verticalAlign:"top", borderBottom:`1px solid ${t.cardBorder}`}}>{label}</td>
+                        {list.map(x => <td key={x.slug} style={{padding:"6px", verticalAlign:"top", lineHeight:1.45, borderBottom:`1px solid ${t.cardBorder}`}}>{fn(x)}</td>)}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              )}
+            </div>
+          </div>
+        )
+      })()}
+      {calcTour && (() => {
+        const c = parseGuideCalc(calcTour)!
+        const dA = calcN.two ? c.discA : 0, dC = calcN.two ? c.discC : 0
+        const sumA = calcN.a * (c.adult - dA), sumC = calcN.c * (c.child - dC), sumI = calcN.i * c.infant, sumS = calcN.s * c.single
+        const total = sumA + sumC + sumI + sumS
+        const txt = `${calcTour.name}\n` + (calcN.a ? `Взрослые: ${calcN.a} × ${c.adult - dA} = ${sumA} бат\n` : "") + (calcN.c ? `Дети: ${calcN.c} × ${c.child - dC} = ${sumC} бат\n` : "") + (calcN.i ? `Инфанты: ${calcN.i} × ${c.infant} = ${sumI} бат\n` : "") + (calcN.s ? `Single: ${calcN.s} × ${c.single} = ${sumS} бат\n` : "") + `Итого: ${total} бат`
+        const row = (label:string, key:"a"|"c"|"i"|"s", price:number) => (
+          <div style={{display:"flex", alignItems:"center", justifyContent:"space-between", padding:"7px 0", borderBottom:`1px solid ${t.cardBorder}`}}>
+            <div><div style={{fontSize:"13px", fontWeight:700}}>{label}</div><div style={{fontSize:"11px", color:t.muted}}>{price} бат</div></div>
+            <div style={{display:"flex", alignItems:"center", gap:"10px"}}>
+              <button onClick={() => setCalcN(p => ({...p, [key]: Math.max(0, p[key]-1)}))} style={{...pill, padding:"6px 12px", background:dark?"#1e2f45":"#dce7f0", color:t.text}}>−</button>
+              <span style={{fontSize:"15px", fontWeight:800, minWidth:"18px", textAlign:"center"}}>{calcN[key]}</span>
+              <button onClick={() => setCalcN(p => ({...p, [key]: p[key]+1}))} style={{...pill, padding:"6px 12px", background:dark?"#1e2f45":"#dce7f0", color:t.text}}>+</button>
+            </div>
+          </div>
+        )
+        return (
+          <div onClick={() => setCalcTour(null)} style={{position:"fixed", inset:0, background:"rgba(0,0,0,0.6)", zIndex:1000, display:"flex", alignItems:"flex-end", justifyContent:"center"}}>
+            <div onClick={e => e.stopPropagation()} style={{background:t.card, color:t.text, width:"100%", maxWidth:"480px", maxHeight:"88vh", overflow:"auto", borderRadius:"16px 16px 0 0", padding:"14px"}}>
+              <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"6px"}}>
+                <div style={{fontSize:"14px", fontWeight:800}}>🧮 {calcTour.name}</div>
+                <button onClick={() => setCalcTour(null)} style={{...pill, background:dark?"#1e2f45":"#dce7f0", color:t.text}}>✕</button>
+              </div>
+              {row("Взрослые", "a", c.adult - dA)}
+              {row("Дети", "c", c.child - dC)}
+              {row("Инфанты", "i", c.infant)}
+              {c.single > 0 && row("Single (доплата)", "s", c.single)}
+              {c.discA > 0 && (
+                <label style={{display:"flex", alignItems:"center", gap:"8px", padding:"9px 0", fontSize:"12px", cursor:"pointer"}}>
+                  <input type="checkbox" checked={calcN.two} onChange={e => setCalcN(p => ({...p, two: e.target.checked}))}/>
+                  Гости берут 2+ тура (скидка: взр −{c.discA}, дет −{c.discC})
+                </label>
+              )}
+              <div style={{fontSize:"20px", fontWeight:900, color:"#16a34a", margin:"8px 0"}}>Итого: {total.toLocaleString("ru-RU")} бат</div>
+              <div style={{fontSize:"10px", color:t.muted, marginBottom:"8px"}}>Расчёт по прайсу для гида. Инфанты — по прайсу тура, обычно бесплатно. Проверяйте условия в карточке тура.</div>
+              <button onClick={() => { setWaModal({title:calcTour.name, short:txt, full:txt}); setCalcTour(null) }}
+                style={{width:"100%", padding:"10px", background:"#25d366", color:"#fff", border:"none", borderRadius:"8px", fontSize:"13px", fontWeight:700, cursor:"pointer"}}>📤 Отправить расчёт в WhatsApp</button>
+            </div>
+          </div>
+        )
+      })()}
       {waModal && <WAShareModal dark={dark} title={waModal.title} shortText={waModal.short} fullText={waModal.full} onClose={() => setWaModal(null)}/>}
       {aiOpen && <AIUpdatePanel dark={dark} mode="methodichka" onUpdate={handleAIUpdate} onClose={() => setAiOpen(false)}/>}
     </div>
